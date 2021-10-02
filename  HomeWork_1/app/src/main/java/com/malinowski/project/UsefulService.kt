@@ -3,9 +3,9 @@ package com.malinowski.project
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
+import android.provider.ContactsContract.Contacts
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlin.random.Random
+import kotlin.math.max
 
 class UsefulService : Service() {
 
@@ -19,15 +19,34 @@ class UsefulService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Thread {
-            for (i in 1..3) {
-                Thread.sleep(1000)
-                Log.i("RASP", "$i")
+            val result = mutableListOf<String>()
+
+            contentResolver.query(
+                Contacts.CONTENT_URI,
+                arrayOf(Contacts.DISPLAY_NAME, Contacts.CONTACT_LAST_UPDATED_TIMESTAMP),
+                null, null, null
+            )?.apply {
+                val name = getColumnIndex(Contacts.DISPLAY_NAME)
+                val status = getColumnIndex(Contacts.CONTACT_LAST_UPDATED_TIMESTAMP)
+                while (moveToNext())
+                    result.add(
+                        getString(name).let {
+                            it + ".".repeat(
+                                max(3.0, 60 - it.length * 2.15).toInt()
+                            )
+                        } + getString(status)
+                    )
+                close()
             }
+
             val data = Intent(TAG).putExtra(
                 getString(R.string.data),
-                "random result -> ${Random.nextInt()}"
+                result.toTypedArray()
             )
+
+            Thread.sleep(1000) // useful long task run
             LocalBroadcastManager.getInstance(this).sendBroadcast(data)
+
             stopSelf()
         }.start()
         return START_STICKY

@@ -3,6 +3,7 @@ package com.malinowski.project
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.method.ScrollingMovementMethod
 import android.view.View
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -15,10 +16,11 @@ class MainActivity : AppCompatActivity() {
     private val startForResult =
         registerForActivityResult(StartActivityForResult()) { result: ActivityResult ->
             if (result.resultCode == Activity.RESULT_OK) {
-                val intent = result.data
-                binding.txtResult.text = intent?.getStringExtra("data")
+                val data = result.data?.getStringArrayExtra("data")
+                binding.txtResult.text = data?.joinToString("\n")
                 binding.txtResult.visibility = View.VISIBLE
             }
+            else binding.txtResult.text = getString(R.string.error)
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
+        //binding.txtResult.movementMethod = ScrollingMovementMethod();
         binding.btnOpen2ndActivity.setOnClickListener {
             startForResult.launch(Intent(this, Activity2::class.java))
         }
