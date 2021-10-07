@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.IBinder
 import android.provider.ContactsContract.Contacts
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import kotlin.math.max
 
 class UsefulService : Service() {
 
