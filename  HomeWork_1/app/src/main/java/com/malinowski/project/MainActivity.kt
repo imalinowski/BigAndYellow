@@ -1,7 +1,6 @@
 package com.malinowski.project
 
 import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.result.ActivityResult
@@ -20,8 +19,7 @@ class MainActivity : AppCompatActivity() {
                     text = data?.joinToString("\n")
                     visibility = View.VISIBLE
                 }
-            }
-            else binding.txtResult.text = getString(R.string.error)
+            } else binding.txtResult.text = getString(R.string.error)
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(view)
 
         binding.btnOpen2ndActivity.setOnClickListener {
-            startForResult.launch(Intent(this, Activity2::class.java))
+            startForResult.launch(Activity2.createIntent(this))
         }
     }
 }

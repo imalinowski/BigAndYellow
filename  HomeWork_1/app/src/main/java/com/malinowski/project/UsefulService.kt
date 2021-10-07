@@ -1,6 +1,7 @@
 package com.malinowski.project
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.provider.ContactsContract.Contacts
@@ -49,5 +50,6 @@ class UsefulService : Service() {
     companion object {
         const val TAG = "UsefulServiceBroadcast"
         const val EXTRA_DATA = "data"
+        fun createIntent(context: Context): Intent = Intent(context, UsefulService::class.java)
     }
 }

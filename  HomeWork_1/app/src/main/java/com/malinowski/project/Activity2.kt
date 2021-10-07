@@ -29,7 +29,7 @@ class Activity2 : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_2)
 
-        launchService = createIntent(this)
+        launchService = UsefulService.createIntent(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && isContactsPermissionGranted())
             requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), READ_CONTACT_PERMISSION)
@@ -70,6 +70,6 @@ class Activity2 : AppCompatActivity() {
 
         private const val READ_CONTACT_PERMISSION = 0
 
-        fun createIntent(context: Context): Intent = Intent(context, UsefulService::class.java)
+        fun createIntent(context: Context): Intent = Intent(context, Activity2::class.java)
     }
 }
