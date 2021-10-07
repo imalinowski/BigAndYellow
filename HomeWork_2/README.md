@@ -22,6 +22,7 @@
 
 Ссылка на дизайн https://www.figma.com/file/cTA9Cy4ix1VjiW7MgYy5tL/TFS-ANDROID?node-id=141%3A408
 
+Ссылка на проект с кастомными view которые были сделаны на семинаре https://gitlab.com/android-tfs-mentors/tfs-fall-2021-view_viewgroup-seminar
 
 **Пожалуйста**:
 Это ваша первая домашка, которая будет частью курсовой, поэтому позаботьесь о следующем:
