@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Project</string>
     <string name="open_2nd_activity">open 2nd activity</string>
-    <string name="data">data</string>
     <string name="computing_result">computing result…</string>
     <string name="permissions_denied">Нет доступа к контактам</string>
     <string name="error">something went wrong :(</string>

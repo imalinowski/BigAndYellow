@@ -9,10 +9,6 @@ import kotlin.math.max
 
 class UsefulService : Service() {
 
-    companion object {
-        const val TAG = "UsefulServiceBroadcast"
-    }
-
     override fun onBind(p0: Intent?): IBinder? {
         return null
     }
@@ -25,22 +21,21 @@ class UsefulService : Service() {
                 Contacts.CONTENT_URI,
                 arrayOf(Contacts.DISPLAY_NAME, Contacts.CONTACT_LAST_UPDATED_TIMESTAMP),
                 null, null, null
-            )?.apply {
-                val name = getColumnIndex(Contacts.DISPLAY_NAME)
-                val status = getColumnIndex(Contacts.CONTACT_LAST_UPDATED_TIMESTAMP)
-                while (moveToNext())
+            )?.use { cursor ->
+                val name = cursor.getColumnIndex(Contacts.DISPLAY_NAME)
+                val status = cursor.getColumnIndex(Contacts.CONTACT_LAST_UPDATED_TIMESTAMP)
+                while (cursor.moveToNext())
                     result.add(
-                        getString(name).let {
+                        cursor.getString(name)?.let {
                             it + ".".repeat(
-                                max(3.0, 60 - it.length * 2.15).toInt()
+                                maxOf(3.0, 60 - it.length * 2.15).toInt()
                             )
-                        } + getString(status)
+                        } + cursor.getString(status)
                     )
-                close()
             }
 
             val data = Intent(TAG).putExtra(
-                getString(R.string.data),
+                EXTRA_DATA,
                 result.toTypedArray()
             )
 
@@ -50,5 +45,10 @@ class UsefulService : Service() {
             stopSelf()
         }.start()
         return START_STICKY
+    }
+
+    companion object {
+        const val TAG = "UsefulServiceBroadcast"
+        const val EXTRA_DATA = "data"
     }
 }
