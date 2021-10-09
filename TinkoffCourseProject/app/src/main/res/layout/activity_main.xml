@@ -4,15 +4,133 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="10dp"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <com.malinowski.bigandyellow.customview.FlexBoxLayout
+        android:layout_width="320dp"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="5"
+            app:customTextSize="40sp"
+            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="5"
+            app:customTextSize="40sp"
+            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="5"
+            app:customTextSize="40sp"
+            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="2"
+            app:customTextSize="40sp"
+            app:emoji="sad"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="5"
+            app:customTextSize="40sp"
+            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="5"
+            app:customTextSize="40sp"
+            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="5"
+            app:customTextSize="40sp"
+            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="5"
+            app:customTextSize="40sp"
+            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="5"
+            app:customTextSize="40sp"
+            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="4"
+            app:customTextSize="40sp"
+            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
+            android:padding="10dp"
+            app:customNum="5"
+            app:customTextSize="40sp"
+            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+    </com.malinowski.bigandyellow.customview.FlexBoxLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
