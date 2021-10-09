@@ -1,9 +1,11 @@
 package com.malinowski.bigandyellow.customview
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.ViewGroup
-import androidx.core.view.setPadding
+import android.widget.ImageButton
+import com.malinowski.bigandyellow.R
 
 class FlexBoxLayout @JvmOverloads constructor(
     context: Context,
@@ -11,6 +13,32 @@ class FlexBoxLayout @JvmOverloads constructor(
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : ViewGroup(context, attrs, defStyleAttr, defStyleRes) {
+
+    private var paddingRows: Int
+    private var paddingColumns: Int
+
+    init {
+        val typedArray: TypedArray = context.obtainStyledAttributes(
+            attrs,
+            R.styleable.FlexBoxLayout,
+            defStyleAttr,
+            defStyleRes
+        )
+        paddingRows = typedArray.getDimension(R.styleable.FlexBoxLayout_paddingRows, 50f).toInt()
+        paddingColumns =
+            typedArray.getDimension(R.styleable.FlexBoxLayout_paddingColumns, 50f).toInt()
+
+        typedArray.recycle()
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        ImageButton(context).apply {
+            setImageResource(R.drawable.ic_plus)
+            setBackgroundResource(R.drawable.bg_button_pls)
+            addView(this)
+        }
+    }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val availableWidth =
@@ -22,15 +50,17 @@ class FlexBoxLayout @JvmOverloads constructor(
         var totalWidth = availableWidth
         var totalHeight = 0
 
+        var lines = 0
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, totalHeight)
             if (widthLine + child.measuredWidth >= availableWidth) { // перенос детей на следующую строку
-                totalHeight += heightLine
+                totalHeight += heightLine + paddingRows
                 widthLine = 0
                 heightLine = 0
+                lines += 1
             }
-            widthLine += child.measuredWidth
+            widthLine += child.measuredWidth + paddingColumns
             heightLine = maxOf(heightLine, child.measuredHeight)
         }
 
@@ -42,6 +72,11 @@ class FlexBoxLayout @JvmOverloads constructor(
         val resultWidth = resolveSize(totalWidth, widthMeasureSpec)
         val resultHeight = resolveSize(totalHeight, heightMeasureSpec)
         setMeasuredDimension(resultWidth, resultHeight)
+
+        getChildAt(childCount - 1).layoutParams.apply {
+            height = (totalHeight - paddingRows * lines) / (lines + 1)
+            width = height
+        }
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
@@ -51,7 +86,7 @@ class FlexBoxLayout @JvmOverloads constructor(
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             if (currentStart + child.measuredWidth >= measuredWidth) { // перенос детей на следующую строку
-                currentTop += heightLine
+                currentTop += heightLine + paddingRows
                 heightLine = 0
                 currentStart = 0
             }
@@ -61,7 +96,7 @@ class FlexBoxLayout @JvmOverloads constructor(
                 currentStart + child.measuredWidth,
                 currentTop + child.measuredHeight
             )
-            currentStart += child.measuredWidth
+            currentStart += child.measuredWidth + paddingColumns
             heightLine = maxOf(heightLine, child.measuredHeight)
         }
     }

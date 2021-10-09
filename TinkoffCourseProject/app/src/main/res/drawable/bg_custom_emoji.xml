@@ -3,13 +3,13 @@
     <item android:state_selected="true">
         <shape android:shape="rectangle">
             <corners android:radius="10dp"/>
-            <solid android:color="@color/emoji_selected" />
+            <solid android:color="@color/item_selected" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="10dp"/>
-            <solid android:color="@color/emoji_unselected" />
+            <solid android:color="@color/item_unselected" />
         </shape>
     </item>
 </selector>
