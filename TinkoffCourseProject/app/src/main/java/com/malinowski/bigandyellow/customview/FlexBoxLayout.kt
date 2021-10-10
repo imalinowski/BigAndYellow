@@ -24,9 +24,16 @@ class FlexBoxLayout @JvmOverloads constructor(
             defStyleAttr,
             defStyleRes
         )
-        paddingRows = typedArray.getDimension(R.styleable.FlexBoxLayout_paddingRows, 50f).toInt()
+        paddingRows =
+            typedArray.getDimension(
+                R.styleable.FlexBoxLayout_paddingRows,
+                20f
+            ).toInt()
         paddingColumns =
-            typedArray.getDimension(R.styleable.FlexBoxLayout_paddingColumns, 50f).toInt()
+            typedArray.getDimension(
+                R.styleable.FlexBoxLayout_paddingColumns,
+                20f
+            ).toInt()
 
         typedArray.recycle()
     }

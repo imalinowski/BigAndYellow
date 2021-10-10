@@ -29,7 +29,7 @@ class CustomEmoji @JvmOverloads constructor(
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textSize = 50f
+        textSize = 40f
         textAlign = Paint.Align.CENTER
     }
 

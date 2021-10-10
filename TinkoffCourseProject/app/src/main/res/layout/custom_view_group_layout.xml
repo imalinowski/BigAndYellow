@@ -56,26 +56,56 @@
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:emoji="winking"
+            app:customNum="1"
             android:background="@drawable/bg_custom_emoji" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:emoji="heart"
+            app:customNum="2"
             android:background="@drawable/bg_custom_emoji" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:emoji="sad"
+            app:customNum="3"
             android:background="@drawable/bg_custom_emoji" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:emoji="cat_joy"
+            app:customNum="4"
             android:background="@drawable/bg_custom_emoji" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+
+            app:customNum="5"
+            android:background="@drawable/bg_custom_emoji" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:emoji="sad"
+            app:customNum="6"
+            android:background="@drawable/bg_custom_emoji" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:emoji="cat_joy"
+            app:customNum="7"
+            android:background="@drawable/bg_custom_emoji" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:customNum="8"
             android:background="@drawable/bg_custom_emoji" />
 
     </com.malinowski.bigandyellow.customview.FlexBoxLayout>
