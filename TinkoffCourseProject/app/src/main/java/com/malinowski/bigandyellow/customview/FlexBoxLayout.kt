@@ -5,7 +5,6 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageButton
-import androidx.core.view.setPadding
 import com.malinowski.bigandyellow.R
 
 class FlexBoxLayout @JvmOverloads constructor(
@@ -117,5 +116,4 @@ class FlexBoxLayout @JvmOverloads constructor(
     override fun generateLayoutParams(p: LayoutParams): LayoutParams {
         return MarginLayoutParams(p)
     }
-
 }

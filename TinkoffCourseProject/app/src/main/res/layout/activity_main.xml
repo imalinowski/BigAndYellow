@@ -4,58 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
     tools:context=".MainActivity">
 
-    <com.malinowski.bigandyellow.customview.FlexBoxLayout
-        android:layout_width="wrap_content"
+    <com.malinowski.bigandyellow.customview.CustomViewGroup
+        android:layout_width="325dp"
         android:layout_height="wrap_content"
-        android:padding="30dp"
+        android:layout_margin="10dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="275dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-    </com.malinowski.bigandyellow.customview.FlexBoxLayout>
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
