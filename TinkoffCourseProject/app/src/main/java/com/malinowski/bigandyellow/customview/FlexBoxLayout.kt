@@ -5,6 +5,7 @@ import android.content.res.TypedArray
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageButton
+import androidx.core.view.setPadding
 import com.malinowski.bigandyellow.R
 
 class FlexBoxLayout @JvmOverloads constructor(
@@ -44,51 +45,55 @@ class FlexBoxLayout @JvmOverloads constructor(
         val availableWidth =
             MeasureSpec.getSize(widthMeasureSpec) // максимальное доступное пространсвто px
 
-        var widthLine = 0
+        var widthLine = paddingRight + paddingLeft
         var heightLine = 0
 
         var totalWidth = availableWidth
-        var totalHeight = 0
+        var totalHeight = paddingTop + paddingBottom
 
-        var lines = 0
+        var sumHeight = 0
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, totalHeight)
-            if (widthLine + child.measuredWidth >= availableWidth) { // перенос детей на следующую строку
+            if (
+                widthLine + child.measuredWidth >= availableWidth
+            ) { // перенос детей на следующую строку
                 totalHeight += heightLine + paddingRows
-                widthLine = 0
+                widthLine = paddingRight + paddingLeft
                 heightLine = 0
-                lines += 1
             }
             widthLine += child.measuredWidth + paddingColumns
             heightLine = maxOf(heightLine, child.measuredHeight)
+            sumHeight += child.measuredHeight
         }
 
-        if (totalHeight == 0) // totalHeight == 0 если не было переноса по строке
+        if (totalHeight == paddingTop + paddingBottom) // нет переноса строки
             totalWidth = widthLine
-
         totalHeight += heightLine
+
+        getChildAt(childCount - 1).layoutParams.apply {
+            height = sumHeight / childCount // average height
+            width = height
+            totalHeight += height
+        }
 
         val resultWidth = resolveSize(totalWidth, widthMeasureSpec)
         val resultHeight = resolveSize(totalHeight, heightMeasureSpec)
         setMeasuredDimension(resultWidth, resultHeight)
-
-        getChildAt(childCount - 1).layoutParams.apply {
-            height = (totalHeight - paddingRows * lines) / (lines + 1)
-            width = height
-        }
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        var currentTop = 0
-        var currentStart = 0
+        var currentTop = paddingTop
+        var currentStart = paddingLeft
         var heightLine = 0
         for (i in 0 until childCount) {
             val child = getChildAt(i)
-            if (currentStart + child.measuredWidth >= measuredWidth) { // перенос детей на следующую строку
+            if (
+                currentStart + child.measuredWidth + paddingRight >= measuredWidth
+            ) { // перенос детей на следующую строку
                 currentTop += heightLine + paddingRows
                 heightLine = 0
-                currentStart = 0
+                currentStart = paddingLeft
             }
             child.layout(
                 currentStart,

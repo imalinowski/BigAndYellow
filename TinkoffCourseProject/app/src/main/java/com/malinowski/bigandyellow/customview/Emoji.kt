@@ -1,6 +1,6 @@
 package com.malinowski.bigandyellow.customview
 
-enum class Emoji(val unicode: String) {
+enum class Emoji(private val unicode: String) {
     SMILING("\uD83D\uDE0A"),
     WINKING("\uD83D\uDE09"),
     HEART("\uD83D\uDE0D"),

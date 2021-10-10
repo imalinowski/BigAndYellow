@@ -29,7 +29,7 @@ class CustomEmoji @JvmOverloads constructor(
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textSize = 70f
+        textSize = 50f
         textAlign = Paint.Align.CENTER
     }
 
@@ -61,8 +61,6 @@ class CustomEmoji @JvmOverloads constructor(
 
         setOnClickListener {
             isSelected = !isSelected
-            emoji = if(isSelected) Emoji.CAT_JOY else Emoji.HEART
-            num = if(isSelected) 2 else 1
         }
 
         typedArray.recycle()
@@ -74,8 +72,8 @@ class CustomEmoji @JvmOverloads constructor(
         val textHeight = textBounds.height()
         val textWidth = textBounds.width()
 
-        val totalWidth = textWidth + paddingRight + paddingLeft
-        val totalHeight = textHeight + paddingTop + paddingBottom
+        val totalWidth = textWidth + paddingRight + paddingLeft + 50
+        val totalHeight = textHeight + paddingTop + paddingBottom + 50
 
         val resultWidth = resolveSize(totalWidth, widthMeasureSpec)
         val resultHeight = resolveSize(totalHeight, heightMeasureSpec)

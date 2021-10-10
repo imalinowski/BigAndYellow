@@ -8,20 +8,17 @@
     tools:context=".MainActivity">
 
     <com.malinowski.bigandyellow.customview.FlexBoxLayout
-        android:layout_width="250dp"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
+            android:layout_width="275dp"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -29,10 +26,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -40,10 +39,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_custom_emoji"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -51,127 +52,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="2"
-            app:customTextSize="40sp"
-            app:emoji="sad"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="5"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:background="@drawable/bg_custom_emoji"
-            android:padding="10dp"
-            app:customNum="4"
-            app:customTextSize="40sp"
-            app:emoji="cat_joy"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
