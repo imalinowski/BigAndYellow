@@ -54,6 +54,7 @@ class CustomEmoji @JvmOverloads constructor(
             else -> Emoji.SMILING
         }
         num = typedArray.getInt(R.styleable.CustomEmoji_customNum, num)
+
         textPaint.color =
             typedArray.getColor(R.styleable.CustomEmoji_customTextColor, textPaint.color)
         textPaint.textSize =

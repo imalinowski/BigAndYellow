@@ -25,8 +25,13 @@ class CustomViewGroup @JvmOverloads constructor(
         var totalWidth = 0
         var totalHeight = 0
 
-        measureChildWithMargins(imageView, widthMeasureSpec, 0, heightMeasureSpec, 0)
-
+        measureChildWithMargins(
+            imageView,
+            widthMeasureSpec,
+            0,
+            heightMeasureSpec,
+            0
+        )
         val marginLeft = (imageView.layoutParams as MarginLayoutParams).leftMargin
         val marginRight = (imageView.layoutParams as MarginLayoutParams).rightMargin
         totalWidth += imageView.measuredWidth + marginLeft + marginRight
@@ -51,10 +56,10 @@ class CustomViewGroup @JvmOverloads constructor(
             heightMeasureSpec,
             totalHeight
         )
-
         val topMargin = (flexBoxView.layoutParams as MarginLayoutParams).topMargin
-        totalHeight += flexBoxView.measuredHeight + topMargin
+        totalHeight += flexBoxView.measuredHeight + topMargin // bottom of message - всегда FlexBox
         totalWidth += maxOf(flexBoxView.measuredWidth, textWidth)
+        // width of message - ширина текста или FlexBox
 
         val resultWidth = resolveSize(totalWidth + paddingRight + paddingLeft, widthMeasureSpec)
         val resultHeight = resolveSize(totalHeight + paddingTop + paddingBottom, heightMeasureSpec)
@@ -72,7 +77,6 @@ class CustomViewGroup @JvmOverloads constructor(
             paddingLeft + imageView.measuredWidth,
             paddingTop + imageView.measuredHeight
         )
-
         val marginRight = (imageView.layoutParams as MarginLayoutParams).rightMargin
 
         textView.layout(
@@ -81,7 +85,6 @@ class CustomViewGroup @JvmOverloads constructor(
             imageView.right + textView.measuredWidth,
             paddingTop + textView.measuredHeight
         )
-
         val topMargin = (flexBoxView.layoutParams as MarginLayoutParams).topMargin
 
         flexBoxView.layout(
@@ -103,6 +106,4 @@ class CustomViewGroup @JvmOverloads constructor(
     override fun generateLayoutParams(p: LayoutParams): LayoutParams {
         return MarginLayoutParams(p)
     }
-
-
 }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -38,8 +37,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/lorem_ipsum"
             android:maxWidth="175dp"
+            android:text="@string/lorem_ipsum"
             android:textColor="@color/white" />
     </LinearLayout>
 
@@ -56,57 +55,57 @@
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:emoji="winking"
+            android:background="@drawable/bg_custom_emoji"
             app:customNum="1"
-            android:background="@drawable/bg_custom_emoji" />
+            app:emoji="winking" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:emoji="heart"
+            android:background="@drawable/bg_custom_emoji"
             app:customNum="2"
-            android:background="@drawable/bg_custom_emoji" />
+            app:emoji="heart" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:emoji="sad"
+            android:background="@drawable/bg_custom_emoji"
             app:customNum="3"
-            android:background="@drawable/bg_custom_emoji" />
+            app:emoji="sad" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:emoji="cat_joy"
+            android:background="@drawable/bg_custom_emoji"
             app:customNum="4"
-            android:background="@drawable/bg_custom_emoji" />
+            app:emoji="cat_joy" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            app:customNum="5"
-            android:background="@drawable/bg_custom_emoji" />
+            android:background="@drawable/bg_custom_emoji"
+            app:customNum="5" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:emoji="sad"
+            android:background="@drawable/bg_custom_emoji"
             app:customNum="6"
-            android:background="@drawable/bg_custom_emoji" />
+            app:emoji="sad" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:emoji="cat_joy"
+            android:background="@drawable/bg_custom_emoji"
             app:customNum="7"
-            android:background="@drawable/bg_custom_emoji" />
+            app:emoji="cat_joy" />
 
         <com.malinowski.bigandyellow.customview.CustomEmoji
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:customNum="8"
-            android:background="@drawable/bg_custom_emoji" />
+            android:background="@drawable/bg_custom_emoji"
+            app:customNum="8" />
 
     </com.malinowski.bigandyellow.customview.FlexBoxLayout>
 

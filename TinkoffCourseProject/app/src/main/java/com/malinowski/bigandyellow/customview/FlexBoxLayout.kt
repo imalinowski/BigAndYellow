@@ -25,16 +25,9 @@ class FlexBoxLayout @JvmOverloads constructor(
             defStyleRes
         )
         paddingRows =
-            typedArray.getDimension(
-                R.styleable.FlexBoxLayout_paddingRows,
-                20f
-            ).toInt()
+            typedArray.getDimension(R.styleable.FlexBoxLayout_paddingRows, 20f).toInt()
         paddingColumns =
-            typedArray.getDimension(
-                R.styleable.FlexBoxLayout_paddingColumns,
-                20f
-            ).toInt()
-
+            typedArray.getDimension(R.styleable.FlexBoxLayout_paddingColumns, 20f).toInt()
         typedArray.recycle()
     }
 
@@ -61,9 +54,7 @@ class FlexBoxLayout @JvmOverloads constructor(
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, totalHeight)
-            if (
-                widthLine + child.measuredWidth >= availableWidth
-            ) { // перенос детей на следующую строку
+            if (widthLine + child.measuredWidth >= availableWidth) { // перенос детей на следующую строку
                 totalHeight += heightLine + paddingRows
                 widthLine = paddingRight + paddingLeft
                 heightLine = 0
@@ -94,9 +85,7 @@ class FlexBoxLayout @JvmOverloads constructor(
         var heightLine = 0
         for (i in 0 until childCount) {
             val child = getChildAt(i)
-            if (
-                currentStart + child.measuredWidth + paddingRight >= measuredWidth
-            ) { // перенос детей на следующую строку
+            if (currentStart + child.measuredWidth + paddingRight >= measuredWidth) { // перенос детей на следующую строку
                 currentTop += heightLine + paddingRows
                 heightLine = 0
                 currentStart = paddingLeft
