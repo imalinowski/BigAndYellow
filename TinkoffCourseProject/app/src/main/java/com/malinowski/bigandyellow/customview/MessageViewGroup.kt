@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import com.malinowski.bigandyellow.R
 
-class CustomViewGroup @JvmOverloads constructor(
+class MessageViewGroup @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
@@ -13,7 +13,7 @@ class CustomViewGroup @JvmOverloads constructor(
 ) : ViewGroup(context, attrs, defStyleAttr, defStyleRes) {
 
     init {
-        inflate(context, R.layout.custom_view_group_layout, this)
+        inflate(context, R.layout.message_view_group_layout, this)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

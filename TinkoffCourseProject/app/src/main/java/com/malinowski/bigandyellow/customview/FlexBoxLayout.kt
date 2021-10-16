@@ -33,11 +33,15 @@ class FlexBoxLayout @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        ImageButton(context).apply {
-            setImageResource(R.drawable.ic_plus)
-            setBackgroundResource(R.drawable.bg_button_pls)
-            addView(this)
-        }
+        if (childCount > 0 && getChildAt(childCount - 1) !is ImageButton)
+            ImageButton(context).apply {
+                setImageResource(R.drawable.ic_plus)
+                setBackgroundResource(R.drawable.bg_button_pls)
+                addView(this)
+            }.layoutParams.apply {
+                height = 100
+                width = 100
+            }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -72,6 +76,7 @@ class FlexBoxLayout @JvmOverloads constructor(
             height = sumHeight / childCount // average height
             width = height
             totalHeight += height
+            getChildAt(childCount - 1).layoutParams = this
         }
 
         val resultWidth = resolveSize(totalWidth, widthMeasureSpec)
