@@ -5,12 +5,12 @@ import io.reactivex.rxjava3.subjects.PublishSubject
 data class Message(
     val message: String,
     val name: String = "James Huxley",
-    val emojis: MutableList<Pair<Int, Int>> = mutableListOf(),
-    val flow: PublishSubject<Int> = PublishSubject.create()
+    val emojis: MutableList<Reaction> = mutableListOf(),
+    val flow: PublishSubject<Reaction> = PublishSubject.create()
 ) {
     init {
         flow.subscribe {
-            emojis.add(Pair(it,0))
+            emojis.add(it)
         }
     }
 }

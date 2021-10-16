@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.core.view.isVisible
 import com.malinowski.bigandyellow.R
+import com.malinowski.bigandyellow.data.Reaction
 
 class FlexBoxLayout @JvmOverloads constructor(
     context: Context,
@@ -24,11 +25,12 @@ class FlexBoxLayout @JvmOverloads constructor(
         visibility = GONE
     }
 
-    fun addEmoji(emoji: Int, num: Int) {
+    fun addEmoji(reaction: Reaction) {
         addView(CustomEmoji(context).apply {
-            setEmoji(emoji)
+            setEmoji(reaction.smile)
+            num = reaction.num
+            user_id = reaction.user_id
             setBackgroundResource(R.drawable.bg_custom_emoji)
-            this.num = num
         }, 0)
         plus.visibility = View.VISIBLE
     }
@@ -49,7 +51,7 @@ class FlexBoxLayout @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        if(childCount == 0 || getChildAt(childCount - 1) !== plus)plus.apply {
+        if (childCount == 0 || getChildAt(childCount - 1) !== plus) plus.apply {
             addView(this)
             layoutParams.apply {
                 height = 100

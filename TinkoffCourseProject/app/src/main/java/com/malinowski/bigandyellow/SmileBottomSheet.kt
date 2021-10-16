@@ -9,9 +9,10 @@ import android.widget.Button
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.malinowski.bigandyellow.customview.FlexBoxLayout
+import com.malinowski.bigandyellow.data.Reaction
 import io.reactivex.rxjava3.subjects.PublishSubject
 
-class SmileBottomSheet: BottomSheetDialogFragment() {
+class SmileBottomSheet : BottomSheetDialogFragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -31,14 +32,14 @@ class SmileBottomSheet: BottomSheetDialogFragment() {
                 textSize = 30f
                 store?.addView(this)
                 setOnClickListener {
-                    flow?.onNext(i)
+                    flow?.onNext(Reaction(smile = i, num = 1))
                     dismiss()
                 }
             }
     }
 
-    private var flow: PublishSubject<Int>? = null
-    fun show(flow: PublishSubject<Int>, manager: FragmentManager) {
+    private var flow: PublishSubject<Reaction>? = null
+    fun show(flow: PublishSubject<Reaction>, manager: FragmentManager) {
         this.flow = flow
         show(manager, TAG)
     }

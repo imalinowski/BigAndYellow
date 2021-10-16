@@ -5,10 +5,9 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.TextView
 import com.malinowski.bigandyellow.R
-import io.reactivex.rxjava3.core.Observable
+import com.malinowski.bigandyellow.data.Reaction
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.subjects.PublishSubject
-import java.util.*
 
 class MessageViewGroup @JvmOverloads constructor(
     context: Context,
@@ -25,17 +24,22 @@ class MessageViewGroup @JvmOverloads constructor(
     private val name: TextView = findViewById(R.id.name)
     private var subscription: Disposable? = null
 
-    fun setMessage(name: String, message: String, emojis: List<Pair<Int, Int>>, flow: PublishSubject<Int>) {
+    fun setMessage(
+        name: String,
+        message: String,
+        reactions: List<Reaction>,
+        flow: PublishSubject<Reaction>
+    ) {
         this.message.text = message
         this.name.text = name
         (getChildAt(2) as FlexBoxLayout).apply {
             removeAllViews()
-            for (i in emojis.indices) {
-                addEmoji(emojis[i].first, emojis[i].second)
+            for (reaction in reactions) {
+                addEmoji(reaction)
             }
             subscription?.dispose()
             subscription = flow.subscribe {
-                addEmoji(it, 0)
+                addEmoji(it)
             }
 
         }
