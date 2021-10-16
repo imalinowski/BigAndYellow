@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow
+package com.malinowski.bigandyellow.messagesRecyclerView
 
 import android.view.View
 import android.view.ViewGroup
