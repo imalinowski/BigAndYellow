@@ -49,66 +49,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:customNum="1"
-            app:emoji="winking" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:customNum="2"
-            app:emoji="heart" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:customNum="3"
-            app:emoji="sad" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:customNum="4"
-            app:emoji="cat_joy" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:background="@drawable/bg_custom_emoji"
-            app:customNum="5" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:customNum="6"
-            app:emoji="sad" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:customNum="7"
-            app:emoji="cat_joy" />
-
-        <com.malinowski.bigandyellow.customview.CustomEmoji
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_custom_emoji"
-            app:customNum="8" />
-
     </com.malinowski.bigandyellow.customview.FlexBoxLayout>
 
 </merge>

@@ -5,6 +5,10 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.TextView
 import com.malinowski.bigandyellow.R
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.subjects.PublishSubject
+import java.util.*
 
 class MessageViewGroup @JvmOverloads constructor(
     context: Context,
@@ -18,9 +22,33 @@ class MessageViewGroup @JvmOverloads constructor(
     }
 
     private val message: TextView = findViewById(R.id.message)
+    private val name: TextView = findViewById(R.id.name)
+    private var subscription: Disposable? = null
 
-    fun setMessage(text: String) {
-        message.text = text
+    fun setMessage(name: String, message: String, emojis: List<Pair<Int, Int>>, flow: PublishSubject<Int>) {
+        this.message.text = message
+        this.name.text = name
+        (getChildAt(2) as FlexBoxLayout).apply {
+            removeAllViews()
+            for (i in emojis.indices) {
+                addEmoji(emojis[i].first, emojis[i].second)
+            }
+            subscription?.dispose()
+            subscription = flow.subscribe {
+                addEmoji(it, 0)
+            }
+
+        }
+    }
+
+    fun setMessageOnLongClick(callback: () -> Unit) {
+        getChildAt(1).setOnLongClickListener {
+            callback()
+            true
+        }
+        (getChildAt(2) as FlexBoxLayout).plus.setOnClickListener {
+            callback()
+        }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

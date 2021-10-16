@@ -36,7 +36,7 @@ class DateItemDecorator :
             .let { if (it == RecyclerView.NO_POSITION) return else it }
         rect.bottom =
             if (position % 2 == 0) 2
-            else abs(textBounds.top - textBounds.bottom) * 2
+            else abs(textBounds.height()) * 2 + padding
     }
 
     override fun onDraw(canvas: Canvas, parent: RecyclerView, state: RecyclerView.State) {
@@ -45,8 +45,8 @@ class DateItemDecorator :
                 .let { if (it == RecyclerView.NO_POSITION) return else it }
             if (position % 2 != 0) {
                 textCoordinate.x = view.width / 2f
-                textCoordinate.y = view.bottom.toFloat()
-                if(textCoordinate.y > parent.height - parent.paddingBottom)
+                textCoordinate.y = view.bottom.toFloat() + textBounds.height() / 2 + padding
+                if (textCoordinate.y > parent.height - parent.paddingBottom)
                     return@forEach
                 canvas.drawRoundRect(
                     textCoordinate.x - textBounds.width() / 2 - padding,

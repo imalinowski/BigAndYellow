@@ -4,16 +4,22 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.malinowski.bigandyellow.data.Message
 import com.malinowski.bigandyellow.databinding.ActivityMainBinding
 import com.malinowski.bigandyellow.messagesRecyclerView.DateItemDecorator
 import com.malinowski.bigandyellow.messagesRecyclerView.MessagesAdapter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val messages: MutableList<String> = MutableList(10) { "$it" }
-    val adapter = MessagesAdapter(messages)
-    val layoutManager = LinearLayoutManager(this)
-
+    private val message: MutableList<Message> = mutableListOf()
+    private val adapter = MessagesAdapter(message) { flow ->
+        modalBottomSheet.show(flow, supportFragmentManager)
+    }
+    private val layoutManager = LinearLayoutManager(this).apply {
+        //reverseLayout = true
+        stackFromEnd = true
+    }
+    private val modalBottomSheet = SmileBottomSheet()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,12 +38,12 @@ class MainActivity : AppCompatActivity() {
 
         binding.sendMessageButton.setOnClickListener {
             binding.sendMessageText.apply {
-                if(this.length() == 0) return@apply
-                messages.add(text.toString())
+                if (this.length() == 0) return@apply
+                message.add(Message(text.toString()))
                 setText("")
-                layoutManager.scrollToPosition(messages.size - 1)
+                layoutManager.scrollToPosition(message.size - 1)
             }
-            binding.messageRecycler.adapter?.notifyItemInserted(messages.size)
+            binding.messageRecycler.adapter?.notifyItemInserted(message.size)
         }
 
         binding.sendMessageText.doAfterTextChanged {
@@ -46,5 +52,12 @@ class MainActivity : AppCompatActivity() {
             else
                 binding.sendMessageButton.setImageResource(R.drawable.ic_send_message)
         }
+
+        binding.sendMessageText.setOnLongClickListener {
+            modalBottomSheet.show(supportFragmentManager, SmileBottomSheet.TAG)
+            true
+        }
     }
+
+
 }

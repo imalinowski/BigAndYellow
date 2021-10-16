@@ -1,17 +1,18 @@
 package com.malinowski.bigandyellow.messagesRecyclerView
 
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.customview.MessageViewGroup
+import com.malinowski.bigandyellow.data.Message
+import io.reactivex.rxjava3.subjects.PublishSubject
 
-class MessagesAdapter(private val dataSet: MutableList<String>) :
+class MessagesAdapter(
+    private val dataSet: MutableList<Message>,
+    val openBottomSheet: (PublishSubject<Int>) -> Unit
+) :
     RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
 
-
-    class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-
-    }
+    class ViewHolder(val view: MessageViewGroup) : RecyclerView.ViewHolder(view) {}
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
 
@@ -21,7 +22,12 @@ class MessagesAdapter(private val dataSet: MutableList<String>) :
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        (viewHolder.view as MessageViewGroup).setMessage(dataSet[position])
+        dataSet[position].apply {
+            viewHolder.view.setMessage(name, message, emojis.toList(), flow)
+            viewHolder.view.setMessageOnLongClick {
+                openBottomSheet(flow)
+            }
+        }
     }
 
     override fun getItemCount() = dataSet.size

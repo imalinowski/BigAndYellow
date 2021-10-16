@@ -14,11 +14,18 @@ class CustomEmoji @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
-    var emoji: Emoji = Emoji.SMILING
-        set(value) {
+    private var emoji: String = ":)"
+        private set(value) {
             field = value
             invalidate()
         }
+
+    fun setEmoji(num: Int) {
+        resources.getStringArray(R.array.smiles).apply {
+            if (num < size)
+                emoji = get(num)
+        }
+    }
 
     var num = 0
         set(value) {
@@ -37,6 +44,8 @@ class CustomEmoji @JvmOverloads constructor(
     private val textCoordinate = PointF()
     private val tempFontMetrics = Paint.FontMetrics()
 
+    private val smiles: Array<String> = resources.getStringArray(R.array.smiles)
+
     init {
         val typedArray: TypedArray = context.obtainStyledAttributes(
             attrs,
@@ -44,15 +53,7 @@ class CustomEmoji @JvmOverloads constructor(
             defStyleAttr,
             defStyleRes
         )
-
-        emoji = when (typedArray.getInt(R.styleable.CustomEmoji_emoji, 1)) {
-            1 -> Emoji.SMILING
-            2 -> Emoji.WINKING
-            3 -> Emoji.HEART
-            4 -> Emoji.SAD
-            5 -> Emoji.CAT_JOY
-            else -> Emoji.SMILING
-        }
+        emoji = smiles[typedArray.getInt(R.styleable.CustomEmoji_emoji, 1)]
         num = typedArray.getInt(R.styleable.CustomEmoji_customNum, num)
 
         textPaint.color =
