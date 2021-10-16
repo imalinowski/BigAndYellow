@@ -26,7 +26,8 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_button_pls"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:minWidth="125dp">
 
         <TextView
             android:id="@+id/name"
@@ -39,7 +40,6 @@
             android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxWidth="175dp"
             android:text="@string/lorem_ipsum"
             android:textColor="@color/white" />
     </LinearLayout>

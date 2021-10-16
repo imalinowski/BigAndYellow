@@ -11,6 +11,9 @@ import com.malinowski.bigandyellow.messagesRecyclerView.MessagesAdapter
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val messages: MutableList<String> = MutableList(10) { "$it" }
+    val adapter = MessagesAdapter(messages)
+    val layoutManager = LinearLayoutManager(this)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,8 +23,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.messageRecycler.apply {
-            adapter = MessagesAdapter(messages)
-            layoutManager = LinearLayoutManager(this.context)
+            adapter = this@MainActivity.adapter
+            layoutManager = this@MainActivity.layoutManager
             addItemDecoration(
                 DateItemDecorator()
             )
@@ -29,8 +32,10 @@ class MainActivity : AppCompatActivity() {
 
         binding.sendMessageButton.setOnClickListener {
             binding.sendMessageText.apply {
+                if(this.length() == 0) return@apply
                 messages.add(text.toString())
                 setText("")
+                layoutManager.scrollToPosition(messages.size - 1)
             }
             binding.messageRecycler.adapter?.notifyItemInserted(messages.size)
         }
