@@ -25,6 +25,13 @@ class MessageViewGroup @JvmOverloads constructor(
         var totalWidth = 0
         var totalHeight = 0
 
+        setPadding( // max width of message
+            paddingLeft,
+            paddingTop,
+            paddingRight + MeasureSpec.getSize(widthMeasureSpec) / 6,
+            paddingBottom
+        )
+
         measureChildWithMargins(
             imageView,
             widthMeasureSpec,
