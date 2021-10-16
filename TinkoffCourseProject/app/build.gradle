@@ -6,6 +6,10 @@ plugins {
 android {
     compileSdk rootProject.compileSdkVersion
 
+    buildFeatures {
+        viewBinding true
+    }
+
     defaultConfig {
         applicationId "com.malinowski.bigandyellow"
         minSdkVersion rootProject.minSdkVersion

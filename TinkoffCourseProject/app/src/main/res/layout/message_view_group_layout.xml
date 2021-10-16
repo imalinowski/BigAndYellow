@@ -29,12 +29,14 @@
         android:padding="10dp">
 
         <TextView
+            android:id="@+id/name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/darrell_steward"
             android:textColor="@color/text_green" />
 
         <TextView
+            android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxWidth="175dp"

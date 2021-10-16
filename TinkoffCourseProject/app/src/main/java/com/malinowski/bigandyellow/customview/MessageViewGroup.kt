@@ -3,6 +3,7 @@ package com.malinowski.bigandyellow.customview
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
+import android.widget.TextView
 import com.malinowski.bigandyellow.R
 
 class MessageViewGroup @JvmOverloads constructor(
@@ -14,6 +15,12 @@ class MessageViewGroup @JvmOverloads constructor(
 
     init {
         inflate(context, R.layout.message_view_group_layout, this)
+    }
+
+    private val message: TextView = findViewById(R.id.message)
+
+    fun setMessage(text: String) {
+        message.text = text
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -28,7 +35,7 @@ class MessageViewGroup @JvmOverloads constructor(
         setPadding( // max width of message
             paddingLeft,
             paddingTop,
-            paddingRight + MeasureSpec.getSize(widthMeasureSpec) / 6,
+            maxOf(paddingRight, MeasureSpec.getSize(widthMeasureSpec) / 6),
             paddingBottom
         )
 

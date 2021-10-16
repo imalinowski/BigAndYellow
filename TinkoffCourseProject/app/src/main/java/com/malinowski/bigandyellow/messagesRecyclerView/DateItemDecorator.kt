@@ -46,6 +46,8 @@ class DateItemDecorator :
             if (position % 2 != 0) {
                 textCoordinate.x = view.width / 2f
                 textCoordinate.y = view.bottom.toFloat()
+                if(textCoordinate.y > parent.height - parent.paddingBottom)
+                    return@forEach
                 canvas.drawRoundRect(
                     textCoordinate.x - textBounds.width() / 2 - padding,
                     textCoordinate.y - textBounds.height() * 1.5f,

@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.customview.MessageViewGroup
 
-class MessagesAdapter(private val dataSet: Array<String>) :
+class MessagesAdapter(private val dataSet: MutableList<String>) :
     RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
 
 
@@ -21,7 +21,7 @@ class MessagesAdapter(private val dataSet: Array<String>) :
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-
+        (viewHolder.view as MessageViewGroup).setMessage(dataSet[position])
     }
 
     override fun getItemCount() = dataSet.size
