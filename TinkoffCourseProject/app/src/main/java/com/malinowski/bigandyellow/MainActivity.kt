@@ -12,14 +12,13 @@ import com.malinowski.bigandyellow.messagesRecyclerView.MessagesAdapter
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val message: MutableList<Message> = mutableListOf()
+    private val modalBottomSheet = SmileBottomSheet()
     private val adapter = MessagesAdapter(message) { flow ->
         modalBottomSheet.show(flow, supportFragmentManager)
     }
     private val layoutManager = LinearLayoutManager(this).apply {
-        //reverseLayout = true
         stackFromEnd = true
     }
-    private val modalBottomSheet = SmileBottomSheet()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,11 +50,6 @@ class MainActivity : AppCompatActivity() {
                 binding.sendMessageButton.setImageResource(R.drawable.ic_add_file_to_message)
             else
                 binding.sendMessageButton.setImageResource(R.drawable.ic_send_message)
-        }
-
-        binding.sendMessageText.setOnLongClickListener {
-            modalBottomSheet.show(supportFragmentManager, SmileBottomSheet.TAG)
-            true
         }
     }
 

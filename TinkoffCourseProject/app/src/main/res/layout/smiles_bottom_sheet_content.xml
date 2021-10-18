@@ -3,16 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@android:color/transparent">
+    android:orientation="vertical">
 
     <com.malinowski.bigandyellow.customview.FlexBoxLayout
         android:id="@+id/smile_store"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="10dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:background="@drawable/bg_button_pls">
+        app:layout_constraintTop_toTopOf="parent">
 
     </com.malinowski.bigandyellow.customview.FlexBoxLayout>
 

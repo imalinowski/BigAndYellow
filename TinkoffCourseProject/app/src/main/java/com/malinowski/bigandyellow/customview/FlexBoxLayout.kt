@@ -21,7 +21,7 @@ class FlexBoxLayout @JvmOverloads constructor(
     var paddingColumns: Int
     var plus = ImageButton(context).apply {
         setImageResource(R.drawable.ic_plus)
-        setBackgroundResource(R.drawable.bg_button_pls)
+        setBackgroundResource(R.drawable.bg_gray_round)
         visibility = GONE
     }
 
@@ -29,7 +29,7 @@ class FlexBoxLayout @JvmOverloads constructor(
         addView(CustomEmoji(context).apply {
             setEmoji(reaction.smile)
             num = reaction.num
-            user_id = reaction.user_id
+            userId = reaction.userId
             setBackgroundResource(R.drawable.bg_custom_emoji)
         }, 0)
         plus.visibility = View.VISIBLE

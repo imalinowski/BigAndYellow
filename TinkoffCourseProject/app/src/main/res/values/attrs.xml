@@ -13,7 +13,7 @@
         </attr>
     </declare-styleable>
     <declare-styleable name="FlexBoxLayout">
-        <attr name="paddingColumns" format="dimension"/>
-        <attr name="paddingRows" format="dimension"/>
+        <attr name="paddingColumns" format="dimension" />
+        <attr name="paddingRows" format="dimension" />
     </declare-styleable>
 </resources>

@@ -5,7 +5,6 @@ import android.content.res.TypedArray
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewGroup
 import com.malinowski.bigandyellow.R
 
 class CustomEmoji @JvmOverloads constructor(
@@ -35,7 +34,7 @@ class CustomEmoji @JvmOverloads constructor(
             requestLayout()
         }
 
-    var user_id = ""
+    var userId = ""
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
@@ -66,10 +65,10 @@ class CustomEmoji @JvmOverloads constructor(
 
         setOnClickListener {
             isSelected = !isSelected
-            if(user_id == "me")
+            if (userId == "me")
                 (this.parent as FlexBoxLayout).apply {
                     removeView(this@CustomEmoji)
-                    if(childCount == 1) plus.visibility = GONE
+                    if (childCount == 1) plus.visibility = GONE
                 }
         }
 
