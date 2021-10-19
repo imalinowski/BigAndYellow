@@ -5,13 +5,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.data.Message
+import com.malinowski.bigandyellow.data.Reaction
 import com.malinowski.bigandyellow.databinding.ActivityMainBinding
 import com.malinowski.bigandyellow.messagesRecyclerView.DateItemDecorator
 import com.malinowski.bigandyellow.messagesRecyclerView.MessagesAdapter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private val message: MutableList<Message> = mutableListOf()
+
+    // backend in future
+    private val message: MutableList<Message> = with("Nikolay Nekrasov") {
+        mutableListOf(
+            Message("Вчерашний день, часу в шестом,\nЗашел я на Сенную;", this),
+            Message("Там били женщину кнутом,\nКрестьянку молодую.", this),
+            Message("Ни звука из ее груди,\nЛишь бич свистал, играя...", this),
+            Message(
+                "И Музе я сказал: «Гляди!\nСестра твоя родная!».", this,
+                mutableListOf(Reaction("other", 34, 3))
+            ),
+        )
+    }
+
     private val modalBottomSheet = SmileBottomSheet()
     private val adapter = MessagesAdapter(message) { flow ->
         modalBottomSheet.show(flow, supportFragmentManager)

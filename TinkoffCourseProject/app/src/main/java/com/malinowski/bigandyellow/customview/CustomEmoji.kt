@@ -65,11 +65,17 @@ class CustomEmoji @JvmOverloads constructor(
 
         setOnClickListener {
             isSelected = !isSelected
-            if (userId == "me")
-                (this.parent as FlexBoxLayout).apply {
-                    removeView(this@CustomEmoji)
-                    if (childCount == 1) plus.visibility = GONE
-                }
+            if (userId == "me") {
+                num -= 1
+                userId = "other"
+            } else {
+                num += 1
+                userId = "me"
+            }
+            if (num == 0) (this.parent as FlexBoxLayout).apply {
+                removeView(this@CustomEmoji)
+                if (childCount == 1) plus.visibility = GONE
+            }
         }
 
         typedArray.recycle()
