@@ -24,7 +24,7 @@ class MessagesAdapter(
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         dataSet[position].apply {
-            viewHolder.view.setMessage(name, message, emojis.toList(), flow)
+            viewHolder.view.setMessage(this)
             viewHolder.view.setMessageOnLongClick {
                 openBottomSheet(flow)
             }

@@ -6,6 +6,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import com.malinowski.bigandyellow.R
+import com.malinowski.bigandyellow.data.Reaction
 
 class CustomEmoji @JvmOverloads constructor(
     context: Context,
@@ -20,26 +21,41 @@ class CustomEmoji @JvmOverloads constructor(
             invalidate()
         }
 
-    fun setEmoji(num: Int) {
+    private fun setEmoji(num: Int) {
         resources.getStringArray(R.array.smiles).apply {
             if (num < size)
                 emoji = get(num)
         }
     }
 
-    var num = 0
+    private var num = 0
         set(value) {
             if (value < 0) return
             field = value
+            reaction?.num = num
             requestLayout()
         }
 
-    var userId = ""
+    private var userId = ""
+        set(value) {
+            reaction?.userId = value
+            isSelected = value == "me"
+            field = value
+        }
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textSize = 40f
         textAlign = Paint.Align.CENTER
+    }
+
+    private var reaction: Reaction? = null
+
+    fun setReaction(reaction: Reaction) {
+        this.reaction = reaction
+        setEmoji(reaction.smile)
+        num = reaction.num
+        userId = reaction.userId
     }
 
     private val textBounds = Rect()
@@ -74,9 +90,12 @@ class CustomEmoji @JvmOverloads constructor(
             }
             if (num == 0) (this.parent as FlexBoxLayout).apply {
                 removeView(this@CustomEmoji)
+                (this.parent as MessageViewGroup).messageData?.reactions?.remove(reaction)
                 if (childCount == 1) plus.visibility = GONE
             }
         }
+
+        setBackgroundResource(R.drawable.bg_custom_emoji)
 
         typedArray.recycle()
     }

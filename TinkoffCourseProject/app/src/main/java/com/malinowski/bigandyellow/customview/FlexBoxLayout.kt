@@ -27,10 +27,7 @@ class FlexBoxLayout @JvmOverloads constructor(
 
     fun addEmoji(reaction: Reaction) {
         addView(CustomEmoji(context).apply {
-            setEmoji(reaction.smile)
-            num = reaction.num
-            userId = reaction.userId
-            setBackgroundResource(R.drawable.bg_custom_emoji)
+            setReaction(reaction)
         }, 0)
         plus.visibility = View.VISIBLE
     }
