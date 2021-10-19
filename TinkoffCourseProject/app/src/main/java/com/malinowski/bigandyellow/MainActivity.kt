@@ -6,6 +6,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.data.Message
 import com.malinowski.bigandyellow.data.Reaction
+import com.malinowski.bigandyellow.data.User
 import com.malinowski.bigandyellow.databinding.ActivityMainBinding
 import com.malinowski.bigandyellow.messagesRecyclerView.DateItemDecorator
 import com.malinowski.bigandyellow.messagesRecyclerView.MessagesAdapter
@@ -14,7 +15,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     // backend in future
-    private val message: MutableList<Message> = with("Nikolay Nekrasov") {
+    private val message: MutableList<Message> = with(User(name = "Nikolay Nekrasov")) {
         mutableListOf(
             Message("Вчерашний день, часу в шестом,\nЗашел я на Сенную;", this),
             Message("Там били женщину кнутом,\nКрестьянку молодую.", this),
@@ -52,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         binding.sendMessageButton.setOnClickListener {
             binding.sendMessageText.apply {
                 if (this.length() == 0) return@apply
-                message.add(Message(text.toString()))
+                message.add(Message(text.toString(), User.INSTANCE))
                 setText("")
                 layoutManager.scrollToPosition(message.size - 1)
             }
