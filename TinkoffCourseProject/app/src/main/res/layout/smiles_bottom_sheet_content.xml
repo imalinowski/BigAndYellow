@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.malinowski.bigandyellow.customview.FlexBoxLayout
+    <com.malinowski.bigandyellow.view.customview.FlexBoxLayout
         android:id="@+id/smile_store"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -13,6 +13,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-    </com.malinowski.bigandyellow.customview.FlexBoxLayout>
+    </com.malinowski.bigandyellow.view.customview.FlexBoxLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

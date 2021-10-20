@@ -1,36 +1,24 @@
-package com.malinowski.bigandyellow
+package com.malinowski.bigandyellow.view
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.malinowski.bigandyellow.data.Message
-import com.malinowski.bigandyellow.data.Reaction
-import com.malinowski.bigandyellow.data.User
+import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.ActivityMainBinding
-import com.malinowski.bigandyellow.messagesRecyclerView.DateItemDecorator
-import com.malinowski.bigandyellow.messagesRecyclerView.MessagesAdapter
+import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.viewmodel.MainViewModel
+import com.malinowski.bigandyellow.viewmodel.messagesRecyclerView.DateItemDecorator
+import com.malinowski.bigandyellow.viewmodel.messagesRecyclerView.MessagesAdapter
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-
-    // backend in future
-    private val message: MutableList<Message> = with(User(name = "Nikolay Nekrasov")) {
-        mutableListOf(
-            Message("Вчерашний день, часу в шестом,\nЗашел я на Сенную;", this),
-            Message("Там били женщину кнутом,\nКрестьянку молодую.", this),
-            Message("Ни звука из ее груди,\nЛишь бич свистал, играя...", this),
-            Message(
-                "И Музе я сказал: «Гляди!\nСестра твоя родная!».", this,
-                mutableListOf(Reaction("other", 34, 3))
-            ),
-        )
-    }
+    private val model: MainViewModel by viewModels()
 
     private val modalBottomSheet = SmileBottomSheet()
-    private val adapter = MessagesAdapter(message) { flow ->
-        modalBottomSheet.show(flow, supportFragmentManager)
-    }
+
     private val layoutManager = LinearLayoutManager(this).apply {
         stackFromEnd = true
     }
@@ -43,7 +31,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.messageRecycler.apply {
-            adapter = this@MainActivity.adapter
+            adapter = MessagesAdapter(model.messages) { flow ->
+                modalBottomSheet.show(flow, supportFragmentManager)
+            }
             layoutManager = this@MainActivity.layoutManager
             addItemDecoration(
                 DateItemDecorator()
@@ -53,11 +43,11 @@ class MainActivity : AppCompatActivity() {
         binding.sendMessageButton.setOnClickListener {
             binding.sendMessageText.apply {
                 if (this.length() == 0) return@apply
-                message.add(Message(text.toString(), User.INSTANCE))
+                model.addMessage(Message(text.toString(), User.INSTANCE))
                 setText("")
-                layoutManager.scrollToPosition(message.size - 1)
+                layoutManager.scrollToPosition(model.messages.size - 1)
             }
-            binding.messageRecycler.adapter?.notifyItemInserted(message.size)
+            binding.messageRecycler.adapter?.notifyItemInserted(model.messages.size)
         }
 
         binding.sendMessageText.doAfterTextChanged {

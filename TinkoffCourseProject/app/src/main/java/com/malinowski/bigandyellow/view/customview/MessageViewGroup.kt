@@ -1,12 +1,12 @@
-package com.malinowski.bigandyellow.customview
+package com.malinowski.bigandyellow.view.customview
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.TextView
 import com.malinowski.bigandyellow.R
-import com.malinowski.bigandyellow.data.Message
-import com.malinowski.bigandyellow.data.User
+import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.User
 import io.reactivex.rxjava3.disposables.Disposable
 
 class MessageViewGroup @JvmOverloads constructor(

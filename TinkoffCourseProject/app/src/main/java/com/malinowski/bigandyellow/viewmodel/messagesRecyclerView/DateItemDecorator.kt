@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow.messagesRecyclerView
+package com.malinowski.bigandyellow.viewmodel.messagesRecyclerView
 
 import android.graphics.Canvas
 import android.graphics.Color.parseColor

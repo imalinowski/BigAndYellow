@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow
+package com.malinowski.bigandyellow.view
 
 import android.graphics.Color
 import android.os.Bundle
@@ -9,8 +9,9 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.malinowski.bigandyellow.customview.FlexBoxLayout
-import com.malinowski.bigandyellow.data.Reaction
+import com.malinowski.bigandyellow.R
+import com.malinowski.bigandyellow.view.customview.FlexBoxLayout
+import com.malinowski.bigandyellow.model.data.Reaction
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 

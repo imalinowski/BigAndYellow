@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow.customview
+package com.malinowski.bigandyellow.view.customview
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -6,7 +6,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import com.malinowski.bigandyellow.R
-import com.malinowski.bigandyellow.data.Reaction
+import com.malinowski.bigandyellow.model.data.Reaction
 
 class CustomEmoji @JvmOverloads constructor(
     context: Context,

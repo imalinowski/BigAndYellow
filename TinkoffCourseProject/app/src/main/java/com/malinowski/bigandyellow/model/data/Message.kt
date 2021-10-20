@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow.data
+package com.malinowski.bigandyellow.model.data
 
 import io.reactivex.rxjava3.subjects.PublishSubject
 

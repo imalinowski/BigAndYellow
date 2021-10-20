@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow.customview
+package com.malinowski.bigandyellow.view.customview
 
 import android.content.Context
 import android.content.res.TypedArray
@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import androidx.core.view.isVisible
 import com.malinowski.bigandyellow.R
-import com.malinowski.bigandyellow.data.Reaction
+import com.malinowski.bigandyellow.model.data.Reaction
 
 class FlexBoxLayout @JvmOverloads constructor(
     context: Context,

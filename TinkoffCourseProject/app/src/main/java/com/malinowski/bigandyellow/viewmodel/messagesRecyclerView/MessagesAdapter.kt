@@ -1,10 +1,10 @@
-package com.malinowski.bigandyellow.messagesRecyclerView
+package com.malinowski.bigandyellow.viewmodel.messagesRecyclerView
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.malinowski.bigandyellow.customview.MessageViewGroup
-import com.malinowski.bigandyellow.data.Message
-import com.malinowski.bigandyellow.data.Reaction
+import com.malinowski.bigandyellow.view.customview.MessageViewGroup
+import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.Reaction
 import io.reactivex.rxjava3.subjects.PublishSubject
 
 class MessagesAdapter(

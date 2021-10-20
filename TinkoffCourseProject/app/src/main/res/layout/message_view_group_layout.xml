@@ -44,11 +44,11 @@
             android:textColor="@color/white" />
     </LinearLayout>
 
-    <com.malinowski.bigandyellow.customview.FlexBoxLayout
+    <com.malinowski.bigandyellow.view.customview.FlexBoxLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
-    </com.malinowski.bigandyellow.customview.FlexBoxLayout>
+    </com.malinowski.bigandyellow.view.customview.FlexBoxLayout>
 
 </merge>
