@@ -44,7 +44,7 @@ class DateItemDecorator :
             val position = parent.getChildAdapterPosition(view)
                 .let { if (it == RecyclerView.NO_POSITION) return else it }
             if (position % 2 != 0) {
-                textCoordinate.x = view.width / 2f
+                textCoordinate.x = parent.width / 2f
                 textCoordinate.y = view.bottom.toFloat() + textBounds.height() / 2 + padding
                 if (textCoordinate.y > parent.height - parent.paddingBottom)
                     return@forEach

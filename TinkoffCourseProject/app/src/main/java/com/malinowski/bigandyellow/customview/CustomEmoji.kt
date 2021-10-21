@@ -45,7 +45,7 @@ class CustomEmoji @JvmOverloads constructor(
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textSize = 40f
+        textSize = context.resources.getDimension(R.dimen.custom_default_text_size)
         textAlign = Paint.Align.CENTER
     }
 
@@ -76,8 +76,11 @@ class CustomEmoji @JvmOverloads constructor(
 
         textPaint.color =
             typedArray.getColor(R.styleable.CustomEmoji_customTextColor, textPaint.color)
+
         textPaint.textSize =
             typedArray.getDimension(R.styleable.CustomEmoji_customTextSize, textPaint.textSize)
+
+        setBackgroundResource(R.drawable.bg_custom_emoji)
 
         setOnClickListener {
             isSelected = !isSelected
@@ -106,8 +109,8 @@ class CustomEmoji @JvmOverloads constructor(
         val textHeight = textBounds.height()
         val textWidth = textBounds.width()
 
-        val totalWidth = textWidth + paddingRight + paddingLeft + 50
-        val totalHeight = textHeight + paddingTop + paddingBottom + 50
+        val totalWidth = textWidth + paddingRight + paddingLeft + DEFAULT_PADDINGS
+        val totalHeight = textHeight + paddingTop + paddingBottom + DEFAULT_PADDINGS
 
         val resultWidth = resolveSize(totalWidth, widthMeasureSpec)
         val resultHeight = resolveSize(totalHeight, heightMeasureSpec)
@@ -135,5 +138,6 @@ class CustomEmoji @JvmOverloads constructor(
 
     companion object {
         private val SUPPORTED_DRAWABLE_STATE = intArrayOf(android.R.attr.state_selected)
+        private const val DEFAULT_PADDINGS = 50
     }
 }
