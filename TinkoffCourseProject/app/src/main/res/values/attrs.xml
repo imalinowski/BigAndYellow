@@ -3,6 +3,7 @@
     <declare-styleable name="CustomEmoji">
         <attr name="customNum" format="integer" />
         <attr name="customTextColor" format="color" />
+        <attr name="customTextSize" format="dimension" />
         <attr name="emoji" format="enum">
             <enum name="smiling" value="1" />
             <enum name="winking" value="2" />

@@ -29,7 +29,7 @@ class CustomEmoji @JvmOverloads constructor(
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
-        textSize = 40f
+        textSize = context.resources.getDimension(R.dimen.custom_default_text_size)
         textAlign = Paint.Align.CENTER
     }
 
@@ -57,6 +57,9 @@ class CustomEmoji @JvmOverloads constructor(
 
         textPaint.color =
             typedArray.getColor(R.styleable.CustomEmoji_customTextColor, textPaint.color)
+
+        textPaint.textSize =
+            typedArray.getDimension(R.styleable.CustomEmoji_customTextSize, textPaint.textSize)
 
         setBackgroundResource(R.drawable.bg_custom_emoji)
 
