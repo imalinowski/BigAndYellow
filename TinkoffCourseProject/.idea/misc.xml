@@ -23,6 +23,7 @@
         <entry key="app/src/main/res/drawable/ic_send_message.xml" value="0.3260416666666667" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="app/src/main/res/layout/custom_view_group_layout.xml" value="0.2740036231884058" />
+        <entry key="app/src/main/res/layout/fragment_chat.xml" value="0.18840579710144928" />
         <entry key="app/src/main/res/layout/message_view_group_layout.xml" value="0.335" />
         <entry key="app/src/main/res/layout/miles_bottom_sheet_content.xml" value="0.23233695652173914" />
         <entry key="app/src/main/res/layout/smiles_bottom_sheet_content.xml" value="0.15070921985815602" />

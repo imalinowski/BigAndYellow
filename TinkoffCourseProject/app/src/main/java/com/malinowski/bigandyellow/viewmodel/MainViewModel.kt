@@ -7,7 +7,10 @@ import com.malinowski.bigandyellow.model.data.User
 
 class MainViewModel : ViewModel() {
     // backend in future
-    val messages: MutableList<Message> = mutableListOf()
+    private val messages: MutableList<Message> = mutableListOf()
+    fun getMessages(chatNum: Int): MutableList<Message> {
+        return messages
+    }
 
     init {
         messages.addAll(with(User(name = "Nikolay Nekrasov")) {
