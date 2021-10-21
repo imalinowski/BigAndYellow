@@ -1,23 +1,27 @@
 package com.malinowski.bigandyellow.view
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.malinowski.bigandyellow.R
+import com.malinowski.bigandyellow.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        if (savedInstanceState == null) Handler(Looper.getMainLooper()).postDelayed({
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+
+        if (savedInstanceState == null)
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container_view, ChatFragment.newInstance(0))
-                .addToBackStack("sample")
+                .replace(R.id.activity_fragment_container_view, MainFragment.newInstance())
                 .commitAllowingStateLoss()
-        }, 1000)
+
     }
 
 }

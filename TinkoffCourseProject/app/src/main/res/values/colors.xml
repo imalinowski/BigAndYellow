@@ -11,4 +11,5 @@
     <color name="item_unselected">#1C1C1C</color>
     <color name="custom_green">#2A9D8F</color>
     <color name="message_field">#282828</color>
+    <color name="bg_view_gray">#1E1E1E</color>
 </resources>

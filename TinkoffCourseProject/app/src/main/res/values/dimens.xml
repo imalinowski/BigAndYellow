@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="custom_default_text_size">14sp</dimen>
+    <dimen name="bottom_nav_height">60dp</dimen>
+    <dimen name="tabs_and_search_height">161dp</dimen>
 </resources>
