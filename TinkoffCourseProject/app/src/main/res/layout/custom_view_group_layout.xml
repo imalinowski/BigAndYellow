@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/view2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginEnd="5dp"
+        app:cardCornerRadius="50dp">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:contentDescription="@string/user_avatar"
+            android:scaleX="1.1"
+            android:scaleY="1.1"
+            android:src="@drawable/carrot" />
+    </androidx.cardview.widget.CardView>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_button_pls"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/darrell_steward"
+            android:textColor="@color/text_green" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxWidth="175dp"
+            android:text="@string/lorem_ipsum"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <com.malinowski.bigandyellow.customview.FlexBoxLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:customNum="1"
+            app:emoji="winking" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:customNum="2"
+            app:emoji="heart" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:customNum="3"
+            app:emoji="sad" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:customNum="4"
+            app:emoji="cat_joy" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:customNum="5" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:customNum="6"
+            app:emoji="sad" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:customNum="7"
+            app:emoji="cat_joy" />
+
+        <com.malinowski.bigandyellow.customview.CustomEmoji
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:customNum="8" />
+
+    </com.malinowski.bigandyellow.customview.FlexBoxLayout>
+
+</merge>

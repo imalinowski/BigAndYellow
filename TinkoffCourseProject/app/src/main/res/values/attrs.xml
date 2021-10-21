@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomEmoji">
+        <attr name="customNum" format="integer" />
+        <attr name="customTextColor" format="color" />
+        <attr name="customTextSize" format="dimension" />
+        <attr name="emoji" format="enum">
+            <enum name="smiling" value="1" />
+            <enum name="winking" value="2" />
+            <enum name="heart" value="3" />
+            <enum name="sad" value="4" />
+            <enum name="cat_joy" value="5" />
+        </attr>
+    </declare-styleable>
+    <declare-styleable name="FlexBoxLayout">
+        <attr name="paddingColumns" format="dimension"/>
+        <attr name="paddingRows" format="dimension"/>
+    </declare-styleable>
+</resources>
