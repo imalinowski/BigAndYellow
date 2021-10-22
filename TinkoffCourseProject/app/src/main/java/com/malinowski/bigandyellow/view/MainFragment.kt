@@ -27,6 +27,10 @@ class MainFragment : Fragment() {
                     replace(R.id.activity_fragment_container_view, ChatFragment.newInstance(0))
                     addToBackStack(null)
                 }
+                R.id.page_3 -> childFragmentManager.commit {
+                    replace(R.id.main_fragment_container_view, ProfileFragment())
+                    addToBackStack(null)
+                }
             }
             true
         }

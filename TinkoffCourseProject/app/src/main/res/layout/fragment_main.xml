@@ -18,7 +18,7 @@
         android:layout_height="@dimen/bottom_nav_height"
         android:layout_gravity="bottom"
         app:menu="@menu/bottom_navigation_menu"
-        android:background="@color/bg_view_gray"
+        app:elevation="25dp"
        />
 
 </FrameLayout>
