@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/darrell_steward"
-            android:textColor="@color/custom_green" />
+            android:textColor="@color/custom_green_primary_variant" />
 
         <TextView
             android:id="@+id/message"

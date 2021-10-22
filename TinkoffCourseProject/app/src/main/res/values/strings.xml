@@ -71,4 +71,5 @@
     <string name="search">Search...</string>
     <string name="search_button">search_button</string>
     <string name="log_out">Log Out</string>
+    <string name="back_arrow">back arrow</string>
 </resources>

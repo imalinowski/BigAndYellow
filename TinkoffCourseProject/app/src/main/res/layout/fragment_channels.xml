@@ -9,8 +9,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
-        android:orientation="vertical">
+        android:padding="15dp"
+        android:orientation="vertical"
+        android:background="@color/bg_main_gray">
 
         <LinearLayout
             android:id="@+id/search"
@@ -27,6 +28,8 @@
                 android:hint="@string/search"
                 android:inputType="text"
                 android:padding="20dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
                 android:textSize="24sp" />
 
             <ImageButton
@@ -38,7 +41,7 @@
                 android:padding="20dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_bi_search"
-                app:tint="@color/black" />
+                app:tint="@color/white" />
 
         </LinearLayout>
 
@@ -48,7 +51,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/search" />
+            app:layout_constraintTop_toBottomOf="@id/search"
+            android:backgroundTint="@color/bg_main_gray"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
