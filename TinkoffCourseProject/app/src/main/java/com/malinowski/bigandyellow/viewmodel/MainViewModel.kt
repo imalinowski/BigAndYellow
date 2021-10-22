@@ -1,5 +1,6 @@
 package com.malinowski.bigandyellow.viewmodel
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
@@ -11,6 +12,8 @@ class MainViewModel : ViewModel() {
     fun getMessages(chatNum: Int): MutableList<Message> {
         return messages
     }
+
+    val chat = MutableLiveData<Int>()
 
     init {
         messages.addAll(with(User(name = "Nikolay Nekrasov")) {
@@ -24,6 +27,10 @@ class MainViewModel : ViewModel() {
                 ),
             )
         })
+    }
+
+    fun openChat() {
+        chat.postValue(chat.value ?: 0 + 1 )
     }
 
     fun addMessage(message: Message) {

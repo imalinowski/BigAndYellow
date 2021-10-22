@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        app:cardCornerRadius="50dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <ImageView
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:contentDescription="@string/user_avatar"
+            android:scaleX="1.1"
+            android:scaleY="1.1"
+            android:src="@drawable/carrot" />
+    </androidx.cardview.widget.CardView>
+
+    <ImageView
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_margin="2dp"
+        android:contentDescription="@string/user_avatar"
+        app:layout_constraintEnd_toEndOf="@id/image"
+        app:layout_constraintBottom_toBottomOf="@id/image"
+        android:src="@drawable/ic_green_dot"
+        android:elevation="15dp"/>
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:textSize="22sp"
+        app:layout_constraintStart_toEndOf="@id/image"
+        app:layout_constraintTop_toTopOf="@id/image"
+        android:text="@string/app_name" />
+
+    <TextView
+        android:id="@+id/email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:textSize="16sp"
+        app:layout_constraintStart_toEndOf="@id/image"
+        app:layout_constraintBottom_toBottomOf="@id/image"
+        android:text="@string/sample_email" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

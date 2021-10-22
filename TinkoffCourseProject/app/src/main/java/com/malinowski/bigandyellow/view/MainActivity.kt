@@ -1,13 +1,17 @@
 package com.malinowski.bigandyellow.view
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.ActivityMainBinding
+import com.malinowski.bigandyellow.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
+    val model: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,6 +26,12 @@ class MainActivity : AppCompatActivity() {
                 .replace(R.id.activity_fragment_container_view, MainFragment.newInstance())
                 .commitAllowingStateLoss()
 
+        model.chat.observe(this) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.activity_fragment_container_view, ChatFragment.newInstance(it))
+                .addToBackStack(null)
+                .commitAllowingStateLoss()
+        }
     }
 
 }

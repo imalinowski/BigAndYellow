@@ -6,22 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
-import com.malinowski.bigandyellow.viewmodel.messagesRecyclerView.DateItemDecorator
-import com.malinowski.bigandyellow.viewmodel.messagesRecyclerView.MessagesAdapter
+import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.DateItemDecorator
+import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 
 private const val CHAT_NUM = "chat_num"
 
 class ChatFragment : Fragment() {
     private var chatNum: Int = 0
     private lateinit var binding: FragmentChatBinding
-    private val model: MainViewModel by viewModels()
+    private val model: MainViewModel by activityViewModels()
 
     private val modalBottomSheet = SmileBottomSheet()
 
@@ -41,6 +41,10 @@ class ChatFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentChatBinding.inflate(layoutInflater)
+
+        binding.back.setOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
 
         binding.messageRecycler.apply {
             adapter = MessagesAdapter(model.getMessages(chatNum)) { flow ->

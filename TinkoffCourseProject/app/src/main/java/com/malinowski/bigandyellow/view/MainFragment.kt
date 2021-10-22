@@ -23,8 +23,8 @@ class MainFragment : Fragment() {
                     .replace(R.id.main_fragment_container_view, ChannelsFragment.newInstance())
                     .addToBackStack(null)
                     .commitAllowingStateLoss()
-                R.id.page_2 -> parentFragmentManager.commit {
-                    replace(R.id.activity_fragment_container_view, ChatFragment.newInstance(0))
+                R.id.page_2 -> childFragmentManager.commit {
+                    replace(R.id.main_fragment_container_view, PeopleFragment())
                     addToBackStack(null)
                 }
                 R.id.page_3 -> childFragmentManager.commit {
