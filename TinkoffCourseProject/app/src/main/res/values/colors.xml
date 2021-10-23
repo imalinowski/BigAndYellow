@@ -15,4 +15,5 @@
     <color name="bg_log_out_color">#1B1B1B</color>
     <color name="custom_green_primary">#219653</color>
     <color name="custom_green_primary_variant">#2A9D8F</color>
+    <color name="custom_purple">#8A7090</color>
 </resources>

@@ -13,18 +13,18 @@ import com.malinowski.bigandyellow.model.data.TopicItem
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter
 
-class SubscribedFragment : Fragment(R.layout.fragment_subscribed) {
+class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
     private val model: MainViewModel by activityViewModels()
     private val items: MutableList<TopicChatItem> = mutableListOf()
 
     private val adapter = TopicsChatsAdapter(items) { position ->
-        when(val item = items[position]){
+        when (val item = items[position]) {
             is ChatItem -> item.also {
                 model.openChat(item.topicId, item.chatId)
             }
             is TopicItem -> {
-                if(item.expanded)
+                if (item.expanded)
                     deleteItems(position)
                 else
                     addItems(item.id, position)
@@ -34,8 +34,8 @@ class SubscribedFragment : Fragment(R.layout.fragment_subscribed) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-
-        items.addAll(model.getTopics(true).map {
+        val subscribed = arguments?.getBoolean(SUBSCRIBED) ?: false
+        items.addAll(model.getTopics(subscribed).map {
             TopicItem(name = it.second, id = it.first)
         })
 
@@ -54,23 +54,30 @@ class SubscribedFragment : Fragment(R.layout.fragment_subscribed) {
         items.addAll(listPosition + 1, chats)
         adapter.notifyItemRangeInserted(
             listPosition + 1,
-            listPosition + chats.size
+            chats.size
         )
+        adapter.notifyItemRangeChanged(listPosition + chats.size + 1, adapter.itemCount)
 
-        for(i in listPosition + chats.size..items.size){
-            adapter.notifyItemChanged(i)
-        }
     }
 
     private fun deleteItems(listPosition: Int) {
-        if (listPosition == items.size - 1) return
-        while (items[listPosition + 1] is ChatItem) {
+        var count = 0
+        while (listPosition + 1 < items.size && items[listPosition + 1] is ChatItem) {
             items.removeAt(listPosition + 1)
-            adapter.notifyItemRemoved(listPosition + 1)
+            count += 1
         }
+        adapter.notifyItemRangeRemoved(listPosition + 1, count)
+        adapter.notifyItemRangeChanged(listPosition + 1, adapter.itemCount)
+
     }
 
     companion object {
-        const val TAG = "Subscribed"
+        private const val SUBSCRIBED = "subscribed"
+        fun newInstance(subscribed: Boolean) =
+            StreamsRecyclerFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean(SUBSCRIBED, subscribed)
+                }
+            }
     }
 }

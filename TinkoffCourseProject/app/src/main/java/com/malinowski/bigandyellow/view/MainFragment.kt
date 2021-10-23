@@ -20,7 +20,7 @@ class MainFragment : Fragment() {
         binding.bottomNavigation.setOnItemSelectedListener {
             when (it.itemId) {
                 R.id.page_1 -> childFragmentManager.beginTransaction()
-                    .replace(R.id.main_fragment_container_view, ChannelsFragment.newInstance())
+                    .replace(R.id.main_fragment_container_view, ChannelsFragment())
                     .addToBackStack(null)
                     .commitAllowingStateLoss()
                 R.id.page_2 -> childFragmentManager.commit {
@@ -36,7 +36,7 @@ class MainFragment : Fragment() {
         }
 
         childFragmentManager.beginTransaction()
-            .replace(R.id.main_fragment_container_view, ChannelsFragment.newInstance())
+            .replace(R.id.main_fragment_container_view, ChannelsFragment())
             .addToBackStack(null)
             .commitAllowingStateLoss()
 

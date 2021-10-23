@@ -17,19 +17,20 @@ class ChannelsFragment : Fragment() {
     ): View {
         binding = FragmentChannelsBinding.inflate(layoutInflater)
 
-        val tabs: List<String> = listOf(SubscribedFragment.TAG, AllStreamsFragment.TAG)
+        val tabs: List<String> = listOf("Subscribed", "All Streams")
         val pagerAdapter = PagerAdapter(childFragmentManager, lifecycle)
         binding.fragmentViewPager.adapter = pagerAdapter
-        pagerAdapter.update(listOf(SubscribedFragment(), AllStreamsFragment()))
+        pagerAdapter.update(
+            listOf(
+                StreamsRecyclerFragment.newInstance(true),
+                StreamsRecyclerFragment.newInstance(false)
+            )
+        )
 
         TabLayoutMediator(binding.tabLayout, binding.fragmentViewPager) { tab, position ->
             tab.text = tabs[position]
         }.attach()
 
         return binding.root
-    }
-
-    companion object {
-        fun newInstance() = ChannelsFragment()
     }
 }

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.SubscribedFragment">
+    tools:context=".view.StreamsRecyclerFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/topics_chats_recycler"

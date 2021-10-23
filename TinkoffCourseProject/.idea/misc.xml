@@ -16,9 +16,11 @@
         <entry key="app/src/main/res/drawable/bg_button_pls.xml" value="0.321025641025641" />
         <entry key="app/src/main/res/drawable/bg_custom_emoji.xml" value="0.321025641025641" />
         <entry key="app/src/main/res/drawable/bg_gray_round.xml" value="0.2574074074074074" />
+        <entry key="app/src/main/res/drawable/bg_green.xml" value="0.3074074074074074" />
         <entry key="app/src/main/res/drawable/bg_green_round.xml" value="0.18385416666666668" />
         <entry key="app/src/main/res/drawable/bg_log_out.xml" value="0.31666666666666665" />
         <entry key="app/src/main/res/drawable/bg_message_field.xml" value="0.321025641025641" />
+        <entry key="app/src/main/res/drawable/bg_yellow.xml" value="0.3074074074074074" />
         <entry key="app/src/main/res/drawable/channels.xml" value="0.24444444444444444" />
         <entry key="app/src/main/res/drawable/ic_add_file_to_message.xml" value="0.2611111111111111" />
         <entry key="app/src/main/res/drawable/ic_channels.xml" value="0.24444444444444444" />

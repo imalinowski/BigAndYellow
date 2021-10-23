@@ -38,34 +38,33 @@ class TopicsChatsAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        when (dataSet[position]) {
+        val item = dataSet[position]
+        when (item) {
             is TopicItem -> holder.apply {
                 chat.visibility = GONE
                 topic.visibility = VISIBLE
-                topicName.text = (dataSet[position] as TopicItem).name
+                topicName.text = item.name
             }
             is ChatItem -> holder.apply {
                 chat.visibility = VISIBLE
                 topic.visibility = GONE
-                chatName.text = (dataSet[position] as ChatItem).name
-                messagesNum.text = (dataSet[position] as ChatItem).messageNum.toString()
+                chatName.text = item.name
+                messagesNum.text = item.messageNum.toString()
+                chat.setBackgroundResource(if (position % 2 == 0) R.drawable.bg_green else R.drawable.bg_purple)
             }
         }
+
         holder.view.setOnClickListener {
-            if(position >= itemCount) return@setOnClickListener
+            if (position >= itemCount) return@setOnClickListener
             onClick(position)
-            val item = dataSet[position]
-            if ( item is TopicItem) {
-                holder.topicArrow.also { arrow ->
-                    val animation = ObjectAnimator.ofFloat(
-                        arrow,
-                        "rotation",
-                        if(item.expanded) 180f else 0f,
-                        if(item.expanded) 0f else 180f
-                    )
-                    animation.duration = 300
-                    animation.start()
-                }
+            if (item is TopicItem) holder.topicArrow.let { arrow ->
+                ObjectAnimator.ofFloat(
+                    arrow, "rotation",
+                    if (item.expanded) 0f else 180f,
+                    if (item.expanded) 180f else 0f
+                ).apply {
+                    duration = 300
+                }.start()
             }
         }
     }

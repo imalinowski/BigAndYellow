@@ -7,19 +7,30 @@ object DataProvider {
     private val topics: MutableList<Topic> = mutableListOf()
 
     init {
-        topics.addAll(mutableListOf(
-            Topic(
-                "#general", true,
-                chats = mutableListOf(
-                    Chat("Literature"),
-                    Chat("Testing"),
-                    Chat("Bruh"),
-                )
-            ),
-            Topic("#development", true),
-            Topic("#design", true),
-            Topic("#pr", true),
-        ))
+        topics.addAll(
+            mutableListOf(
+                Topic(
+                    "#general", true,
+                    chats = mutableListOf(
+                        Chat("Literature"),
+                        Chat("Testing"),
+                        Chat("Bruh"),
+                    )
+                ),
+                Topic(
+                    "#development", true, chats = mutableListOf(
+                        Chat("Kotlin")
+                    )
+                ),
+                Topic("#design", true),
+                Topic("#PR"),
+                Topic(
+                    "#unsubscribed stream", chats = mutableListOf(
+                        Chat("SomeChat")
+                    )
+                ),
+            )
+        )
         topics[0].chats[0].messages.addAll(with(User(name = "Nikolay Nekrasov")) {
             mutableListOf(
                 Message("Вчерашний день, часу в шестом,\nЗашел я на Сенную;", this),
