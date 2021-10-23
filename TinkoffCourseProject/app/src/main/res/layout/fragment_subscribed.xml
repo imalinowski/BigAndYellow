@@ -5,12 +5,10 @@
     android:layout_height="match_parent"
     tools:context=".view.SubscribedFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <Button
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/topics_chats_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="subscribed"
-        android:layout_margin="100dp"
-        android:id="@+id/btn"/>
+        />
 
 </FrameLayout>
