@@ -14,6 +14,7 @@ class PagerAdapter(
     override fun getItemCount(): Int = fragments.size
 
     override fun createFragment(position: Int): Fragment = fragments[position]
+
     fun update(fragments: List<Fragment>) {
         this.fragments.clear()
         this.fragments.addAll(fragments)
