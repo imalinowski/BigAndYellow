@@ -3,9 +3,11 @@ package com.malinowski.bigandyellow.customview
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.data.Message
+import com.malinowski.bigandyellow.data.Reaction
 import io.reactivex.rxjava3.disposables.Disposable
 
 class MessageViewGroup @JvmOverloads constructor(
@@ -19,34 +21,71 @@ class MessageViewGroup @JvmOverloads constructor(
         inflate(context, R.layout.message_view_group_layout, this)
     }
 
-    private val message: TextView = findViewById(R.id.message)
-    private val name: TextView = findViewById(R.id.name)
+    private val messageTextView: TextView = findViewById(R.id.message)
+    private val nameTextView: TextView = findViewById(R.id.name)
+    var plus = ImageButton(context).apply {
+        setImageResource(R.drawable.ic_plus)
+        setBackgroundResource(R.drawable.bg_gray_round)
+        visibility = GONE
+    }
+
     private var subscription: Disposable? = null
-    var messageData: Message? = null
+    private var message: Message? = null
 
     fun setMessage(message: Message) {
-        this.messageData = message
-        this.message.text = message.message
-        this.name.text = message.name
+        this.message = message
+        this.messageTextView.text = message.message
+        this.nameTextView.text = message.name
         (getChildAt(2) as FlexBoxLayout).apply {
             removeAllViews()
-            for (reaction in message.reactions) {
-                addEmoji(reaction)
-            }
-            subscription?.dispose()
-            subscription = message.flow.subscribe {
-                addEmoji(it)
-            }
+            if (message.reactions.isNotEmpty())
+                plus.visibility = VISIBLE
+            else plus.visibility = GONE
+        }
+        for (reaction in message.reactions)
+            addEmoji(reaction)
+        subscription?.dispose()
+        subscription = message.flow.subscribe {
+            addEmoji(it)
         }
     }
 
+    private fun addEmoji(reaction: Reaction) {
+        val flexbox = (getChildAt(2) as FlexBoxLayout)
+        val emoji = CustomEmoji(context).apply {
+            setReaction(reaction)
+            clickCallback = {
+                if (reaction.num == 0) {
+                    flexbox.removeView(this)
+                    message?.reactions?.remove(reaction)
+                    if (message?.reactions?.size == 0)
+                        plus.visibility = GONE
+                }
+            }
+        }
+        plus.visibility = VISIBLE
+        flexbox.addView(emoji, 0)
+    }
+
     fun setMessageOnLongClick(callback: () -> Unit) {
-        getChildAt(1).setOnLongClickListener {
+        getChildAt(1).setOnLongClickListener { // text message layout
             callback()
             true
         }
-        (getChildAt(2) as FlexBoxLayout).plus.setOnClickListener {
+        plus.setOnClickListener {
             callback()
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        plus.apply {
+            if(parent == null)
+                (getChildAt(2) as FlexBoxLayout).addView(this)
+            layoutParams.apply {
+                height = 100
+                width = 100
+            }
         }
     }
 
@@ -54,7 +93,7 @@ class MessageViewGroup @JvmOverloads constructor(
         require(childCount == 3) { "Child count should be 3 but was $childCount" }
         val imageView = getChildAt(0)
         val textView = getChildAt(1)
-        val flexBoxView = getChildAt(2)
+        val flexBoxView = getChildAt(2) as FlexBoxLayout
 
         var totalWidth = 0
         var totalHeight = 0
@@ -101,6 +140,11 @@ class MessageViewGroup @JvmOverloads constructor(
         totalHeight += flexBoxView.measuredHeight + topMargin // bottom of message - всегда FlexBox
         totalWidth += maxOf(flexBoxView.measuredWidth, textWidth)
         // width of message - ширина текста или FlexBox
+
+        plus.layoutParams = plus.layoutParams.apply {
+            height = flexBoxView.sumHeight / flexBoxView.childCount // average height
+            width = height
+        }
 
         val resultWidth = resolveSize(totalWidth + paddingRight + paddingLeft, widthMeasureSpec)
         val resultHeight = resolveSize(totalHeight + paddingTop + paddingBottom, heightMeasureSpec)
