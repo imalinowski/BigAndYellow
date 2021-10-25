@@ -28,7 +28,10 @@ class MainActivity : AppCompatActivity() {
 
         model.chat.observe(this) {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.activity_fragment_container_view, ChatFragment.newInstance(it.first, it.second))
+                .replace(
+                    R.id.activity_fragment_container_view,
+                    ChatFragment.newInstance(it.first, it.second)
+                )
                 .addToBackStack(null)
                 .commitAllowingStateLoss()
         }

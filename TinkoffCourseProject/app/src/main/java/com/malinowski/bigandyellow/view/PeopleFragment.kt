@@ -31,7 +31,4 @@ class PeopleFragment : Fragment() {
         return binding.root
     }
 
-    companion object {
-        const val TAG = "People"
-    }
 }
