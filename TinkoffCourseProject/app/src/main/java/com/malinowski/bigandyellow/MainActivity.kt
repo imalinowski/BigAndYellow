@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.malinowski.bigandyellow.data.Message
 import com.malinowski.bigandyellow.data.Reaction
 import com.malinowski.bigandyellow.databinding.ActivityMainBinding

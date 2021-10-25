@@ -8,7 +8,6 @@ import android.widget.TextView
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.data.Message
 import com.malinowski.bigandyellow.data.Reaction
-import io.reactivex.rxjava3.disposables.Disposable
 
 class MessageViewGroup @JvmOverloads constructor(
     context: Context,
@@ -29,7 +28,6 @@ class MessageViewGroup @JvmOverloads constructor(
         visibility = GONE
     }
 
-    private var subscription: Disposable? = null
     private lateinit var message: Message
 
     fun setMessage(message: Message) {
@@ -44,7 +42,6 @@ class MessageViewGroup @JvmOverloads constructor(
         }
         for (reaction in message.reactions)
             addEmoji(reaction)
-        subscription?.dispose()
     }
 
     fun addEmoji(reaction: Reaction) {

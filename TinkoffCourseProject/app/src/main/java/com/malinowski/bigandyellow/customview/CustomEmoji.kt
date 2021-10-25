@@ -5,7 +5,6 @@ import android.content.res.TypedArray
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewGroup
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.data.Reaction
 
