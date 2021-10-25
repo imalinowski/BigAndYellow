@@ -5,6 +5,7 @@ import android.content.res.TypedArray
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewGroup
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.model.data.Reaction
 
@@ -23,8 +24,7 @@ class CustomEmoji @JvmOverloads constructor(
 
     private fun setEmoji(num: Int) {
         resources.getStringArray(R.array.smiles).apply {
-            if (num < size)
-                emoji = get(num)
+            if (num < size) emoji = get(num)
         }
     }
 
@@ -49,7 +49,8 @@ class CustomEmoji @JvmOverloads constructor(
         textAlign = Paint.Align.CENTER
     }
 
-    private var reaction: Reaction? = null
+    var reaction: Reaction? = null
+        private set
 
     fun setReaction(reaction: Reaction) {
         this.reaction = reaction
@@ -57,6 +58,8 @@ class CustomEmoji @JvmOverloads constructor(
         num = reaction.num
         userId = reaction.userId
     }
+
+    var clickCallback = { }
 
     private val textBounds = Rect()
     private val textCoordinate = PointF()
@@ -91,14 +94,8 @@ class CustomEmoji @JvmOverloads constructor(
                 num += 1
                 userId = "me"
             }
-            if (num == 0) (this.parent as FlexBoxLayout).apply {
-                removeView(this@CustomEmoji)
-                (this.parent as MessageViewGroup).messageData?.reactions?.remove(reaction)
-                if (childCount == 1) plus.visibility = GONE
-            }
+            clickCallback()
         }
-
-        setBackgroundResource(R.drawable.bg_custom_emoji)
 
         typedArray.recycle()
     }

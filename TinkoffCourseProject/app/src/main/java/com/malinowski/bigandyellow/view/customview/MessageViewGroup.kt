@@ -3,11 +3,12 @@ package com.malinowski.bigandyellow.view.customview
 import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.Reaction
 import com.malinowski.bigandyellow.model.data.User
-import io.reactivex.rxjava3.disposables.Disposable
 
 class MessageViewGroup @JvmOverloads constructor(
     context: Context,
@@ -20,44 +21,80 @@ class MessageViewGroup @JvmOverloads constructor(
         inflate(context, R.layout.message_view_group_layout, this)
     }
 
-    private val message: TextView = findViewById(R.id.message)
-    private val name: TextView = findViewById(R.id.name)
-    private var subscription: Disposable? = null
-    var messageData: Message? = null
+    private val messageTextView: TextView = findViewById(R.id.message)
+    private val nameTextView: TextView = findViewById(R.id.name)
+    var plus = ImageButton(context).apply {
+        setImageResource(R.drawable.ic_plus)
+        setBackgroundResource(R.drawable.bg_gray_round)
+        visibility = GONE
+    }
+
+    private lateinit var message: Message
 
     fun setMessage(message: Message) {
-        this.messageData = message
-        this.message.text = message.message
-        this.name.text = message.user.name
+        this.message = message
+        this.messageTextView.text = message.message
+        this.nameTextView.text = message.user.name
+
         if (message.user === User.INSTANCE) {
-            name.visibility = GONE
+            nameTextView.visibility = GONE
             getChildAt(0).visibility = GONE
             getChildAt(1).setBackgroundResource(R.drawable.bg_green_round)
 
         } else {
-            name.visibility = VISIBLE
+            nameTextView.visibility = VISIBLE
             getChildAt(0).visibility = VISIBLE
             getChildAt(1).setBackgroundResource(R.drawable.bg_gray_round)
         }
+
         (getChildAt(2) as FlexBoxLayout).apply {
             removeAllViews()
-            for (reaction in message.reactions) {
-                addEmoji(reaction)
-            }
-            subscription?.dispose()
-            subscription = message.flow.subscribe {
-                addEmoji(it)
+            if (message.reactions.isNotEmpty())
+                plus.visibility = VISIBLE
+            else plus.visibility = GONE
+        }
+        for (reaction in message.reactions)
+            addEmoji(reaction)
+    }
+
+    private fun addEmoji(reaction: Reaction) {
+        val flexbox = (getChildAt(2) as FlexBoxLayout)
+        val emoji = CustomEmoji(context).apply {
+            setReaction(reaction)
+            clickCallback = {
+                if (reaction.num == 0) {
+                    flexbox.removeView(this)
+                    message.reactions.remove(reaction)
+                    if (message.reactions.size == 0)
+                        plus.visibility = GONE
+                }
             }
         }
+        if (!message.reactions.contains(reaction))
+            message.reactions.add(reaction)
+        plus.visibility = VISIBLE
+        flexbox.addView(emoji, 0)
     }
 
     fun setMessageOnLongClick(callback: () -> Unit) {
-        getChildAt(1).setOnLongClickListener {
+        getChildAt(1).setOnLongClickListener { // text message layout
             callback()
             true
         }
-        (getChildAt(2) as FlexBoxLayout).plus.setOnClickListener {
+        plus.setOnClickListener {
             callback()
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        plus.apply {
+            if (parent == null)
+                (getChildAt(2) as FlexBoxLayout).addView(this)
+            layoutParams.apply {
+                height = 100
+                width = 100
+            }
         }
     }
 
@@ -65,17 +102,10 @@ class MessageViewGroup @JvmOverloads constructor(
         require(childCount == 3) { "Child count should be 3 but was $childCount" }
         val imageView = getChildAt(0)
         val textBox = getChildAt(1)
-        val flexBoxView = getChildAt(2)
+        val flexBoxView = getChildAt(2) as FlexBoxLayout
 
         var totalWidth = 0
         var totalHeight = 0
-
-        /*setPadding( // max width of message
-            paddingLeft,
-            paddingTop,
-            maxOf(paddingRight, MeasureSpec.getSize(widthMeasureSpec) / 6),
-            paddingBottom
-        )*/
 
         measureChildWithMargins(
             imageView,
@@ -113,8 +143,14 @@ class MessageViewGroup @JvmOverloads constructor(
         totalWidth += maxOf(flexBoxView.measuredWidth, textWidth)
         // width of message - ширина текста или FlexBox
 
-        if(messageData?.user === User.INSTANCE)
+        if (message.user === User.INSTANCE)
             totalWidth = MeasureSpec.getSize(widthMeasureSpec)
+
+        plus.layoutParams = plus.layoutParams.apply {
+            height = flexBoxView.sumHeight / flexBoxView.childCount // average height
+            width = height
+        }
+
         val resultWidth = resolveSize(totalWidth + paddingRight + paddingLeft, widthMeasureSpec)
         val resultHeight = resolveSize(totalHeight + paddingTop + paddingBottom, heightMeasureSpec)
         setMeasuredDimension(resultWidth, resultHeight)
@@ -133,7 +169,7 @@ class MessageViewGroup @JvmOverloads constructor(
         )
         val topMargin = (flexBoxView.layoutParams as MarginLayoutParams).topMargin
 
-        if (messageData?.user === User.INSTANCE) {
+        if (message.user === User.INSTANCE) {
             textBox.layout(
                 measuredWidth - textBox.measuredWidth,
                 paddingTop,

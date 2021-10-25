@@ -33,11 +33,11 @@ object DataProvider {
         )
         topics[0].chats[0].messages.addAll(with(User(name = "Nikolay Nekrasov")) {
             mutableListOf(
-                Message("Вчерашний день, часу в шестом,\nЗашел я на Сенную;", this),
-                Message("Там били женщину кнутом,\nКрестьянку молодую.", this),
-                Message("Ни звука из ее груди,\nЛишь бич свистал, играя...", this),
+                Message(1, "Вчерашний день, часу в шестом,\nЗашел я на Сенную;", this),
+                Message(2, "Там били женщину кнутом,\nКрестьянку молодую.", this),
+                Message(3, "Ни звука из ее груди,\nЛишь бич свистал, играя...", this),
                 Message(
-                    "И Музе я сказал: «Гляди!\nСестра твоя родная!».", this,
+                    4, "И Музе я сказал: «Гляди!\nСестра твоя родная!».", this,
                     mutableListOf(Reaction("other", 34, 3))
                 ),
             )

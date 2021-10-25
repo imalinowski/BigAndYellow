@@ -7,12 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import androidx.fragment.app.FragmentManager
+import androidx.core.os.bundleOf
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.view.customview.FlexBoxLayout
-import com.malinowski.bigandyellow.model.data.Reaction
-import io.reactivex.rxjava3.subjects.PublishSubject
 
 
 class SmileBottomSheet : BottomSheetDialogFragment() {
@@ -24,8 +22,9 @@ class SmileBottomSheet : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         val store = (view as ViewGroup).findViewById<FlexBoxLayout>(R.id.smile_store)
-        val smiles = resources.getStringArray(R.array.smiles);
+        val smiles = resources.getStringArray(R.array.smiles)
         store.paddingRows = 5
         store.paddingColumns = 5
         val outValue = TypedValue()
@@ -37,20 +36,20 @@ class SmileBottomSheet : BottomSheetDialogFragment() {
                 textSize = 40f
                 store?.addView(this)
                 setOnClickListener {
-                    flow?.onNext(Reaction(smile = i, num = 1))
+                    parentFragmentManager.setFragmentResult(
+                        SMILE_RESULT,
+                        bundleOf(SMILE_KEY to i, MESSAGE_KEY to arguments?.getInt(MESSAGE_KEY))
+                    )
                     dismiss()
                 }
                 setBackgroundResource(outValue.resourceId)
             }
     }
 
-    private var flow: PublishSubject<Reaction>? = null
-    fun show(flow: PublishSubject<Reaction>, manager: FragmentManager) {
-        this.flow = flow
-        show(manager, TAG)
-    }
-
     companion object {
         const val TAG = "SmileBottomSheet"
+        const val SMILE_RESULT = "smile result"
+        const val SMILE_KEY = "smile key"
+        const val MESSAGE_KEY = "message key"
     }
 }

@@ -3,12 +3,10 @@ package com.malinowski.bigandyellow.view.customview
 import android.content.Context
 import android.content.res.TypedArray
 import android.util.AttributeSet
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import androidx.core.view.isVisible
 import com.malinowski.bigandyellow.R
-import com.malinowski.bigandyellow.model.data.Reaction
+
 
 class FlexBoxLayout @JvmOverloads constructor(
     context: Context,
@@ -19,18 +17,6 @@ class FlexBoxLayout @JvmOverloads constructor(
 
     var paddingRows: Int
     var paddingColumns: Int
-    var plus = ImageButton(context).apply {
-        setImageResource(R.drawable.ic_plus)
-        setBackgroundResource(R.drawable.bg_gray_round)
-        visibility = GONE
-    }
-
-    fun addEmoji(reaction: Reaction) {
-        addView(CustomEmoji(context).apply {
-            setReaction(reaction)
-        }, 0)
-        plus.visibility = View.VISIBLE
-    }
 
     init {
         val typedArray: TypedArray = context.obtainStyledAttributes(
@@ -46,19 +32,8 @@ class FlexBoxLayout @JvmOverloads constructor(
         typedArray.recycle()
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        if (childCount == 0 || getChildAt(childCount - 1) !== plus) plus.apply {
-            addView(this)
-            layoutParams.apply {
-                height = 100
-                width = 100
-            }
-        }
-        if (childCount > 1 && getChildAt(childCount - 2) is CustomEmoji)
-            plus.visibility = VISIBLE
-
-    }
+    var sumHeight = 0
+        private set
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val availableWidth =
@@ -70,7 +45,7 @@ class FlexBoxLayout @JvmOverloads constructor(
         var totalWidth = availableWidth
         var totalHeight = paddingTop + paddingBottom
 
-        var sumHeight = 0
+        sumHeight = 0
         for (i in 0 until childCount) {
             val child = getChildAt(i)
             measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, totalHeight)
@@ -80,21 +55,14 @@ class FlexBoxLayout @JvmOverloads constructor(
                 heightLine = 0
             }
             widthLine += child.measuredWidth + paddingColumns
-            heightLine =
-                if (child.isVisible) maxOf(heightLine, child.measuredHeight) else heightLine
+            if (child.isVisible)
+                heightLine = maxOf(heightLine, child.measuredHeight)
             sumHeight += child.measuredHeight
         }
 
         if (totalHeight == paddingTop + paddingBottom) // нет переноса строки
             totalWidth = widthLine
-        totalHeight += heightLine
-
-        if (plus.isVisible) plus.layoutParams.apply {
-            height = sumHeight / childCount // average height
-            width = height
-            totalHeight += height
-            getChildAt(childCount - 1).layoutParams = this
-        }
+        totalHeight += heightLine + paddingRows * 2
 
         val resultWidth = resolveSize(totalWidth, widthMeasureSpec)
         val resultHeight = resolveSize(totalHeight, heightMeasureSpec)
@@ -121,11 +89,6 @@ class FlexBoxLayout @JvmOverloads constructor(
             currentStart += child.measuredWidth + paddingColumns
             heightLine = maxOf(heightLine, child.measuredHeight)
         }
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        plus.visibility = View.GONE
     }
 
     override fun generateLayoutParams(attrs: AttributeSet?): LayoutParams {
