@@ -4,12 +4,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.customview.MessageViewGroup
 import com.malinowski.bigandyellow.data.Message
-import com.malinowski.bigandyellow.data.Reaction
-import io.reactivex.rxjava3.subjects.PublishSubject
 
 class MessagesAdapter(
     private val dataSet: MutableList<Message>,
-    val openBottomSheet: (PublishSubject<Reaction>) -> Unit
+    val longClickListener: (position: Int) -> Unit
 ) :
     RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
 
@@ -26,7 +24,7 @@ class MessagesAdapter(
         dataSet[position].apply {
             viewHolder.view.setMessage(this)
             viewHolder.view.setMessageOnLongClick {
-                openBottomSheet(flow)
+                longClickListener(position)
             }
         }
     }

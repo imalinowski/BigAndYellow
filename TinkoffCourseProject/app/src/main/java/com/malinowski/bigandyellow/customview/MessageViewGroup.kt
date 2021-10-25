@@ -30,7 +30,7 @@ class MessageViewGroup @JvmOverloads constructor(
     }
 
     private var subscription: Disposable? = null
-    private var message: Message? = null
+    private lateinit var message: Message
 
     fun setMessage(message: Message) {
         this.message = message
@@ -45,24 +45,23 @@ class MessageViewGroup @JvmOverloads constructor(
         for (reaction in message.reactions)
             addEmoji(reaction)
         subscription?.dispose()
-        subscription = message.flow.subscribe {
-            addEmoji(it)
-        }
     }
 
-    private fun addEmoji(reaction: Reaction) {
+    fun addEmoji(reaction: Reaction) {
         val flexbox = (getChildAt(2) as FlexBoxLayout)
         val emoji = CustomEmoji(context).apply {
             setReaction(reaction)
             clickCallback = {
                 if (reaction.num == 0) {
                     flexbox.removeView(this)
-                    message?.reactions?.remove(reaction)
-                    if (message?.reactions?.size == 0)
+                    message.reactions.remove(reaction)
+                    if (message.reactions.size == 0)
                         plus.visibility = GONE
                 }
             }
         }
+        if(!message.reactions.contains(reaction))
+            message.reactions.add(reaction)
         plus.visibility = VISIBLE
         flexbox.addView(emoji, 0)
     }
