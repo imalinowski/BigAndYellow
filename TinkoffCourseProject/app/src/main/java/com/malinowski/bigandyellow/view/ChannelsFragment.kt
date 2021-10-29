@@ -4,18 +4,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.google.android.material.tabs.TabLayoutMediator
 import com.malinowski.bigandyellow.databinding.FragmentChannelsBinding
+import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.PagerAdapter
 
 class ChannelsFragment : Fragment() {
     private lateinit var binding: FragmentChannelsBinding
+    private val model: MainViewModel by activityViewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentChannelsBinding.inflate(layoutInflater)
+
+        binding.searchQuery.doAfterTextChanged {
+            model.search(it.toString())
+        }
 
         val tabs: List<String> = listOf("Subscribed", "All Streams")
         val pagerAdapter = PagerAdapter(childFragmentManager, lifecycle)

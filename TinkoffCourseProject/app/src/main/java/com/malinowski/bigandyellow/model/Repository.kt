@@ -1,16 +1,23 @@
 package com.malinowski.bigandyellow.model
 
 import com.malinowski.bigandyellow.model.data.*
+import io.reactivex.Observable
+import java.util.concurrent.TimeUnit
 
-object DataProvider {
+object Repository : IRepository {
     // backend in future
     private val topics: MutableList<Topic> = mutableListOf()
+
+
+    override fun loadData(): Observable<List<Topic>> =
+        Observable.fromArray(topics.toList())
+            .delay(1000, TimeUnit.MILLISECONDS)
 
     init {
         topics.addAll(
             mutableListOf(
                 Topic(
-                    "#general", true,
+                    "#general", 0, true,
                     chats = mutableListOf(
                         Chat("Literature"),
                         Chat("Testing"),
@@ -18,14 +25,14 @@ object DataProvider {
                     )
                 ),
                 Topic(
-                    "#development", true, chats = mutableListOf(
+                    "#development",1, true, chats = mutableListOf(
                         Chat("Kotlin")
                     )
                 ),
-                Topic("#design", true),
-                Topic("#PR"),
+                Topic("#design", 2, true),
+                Topic("#PR", 3),
                 Topic(
-                    "#unsubscribed stream", chats = mutableListOf(
+                    "#unsubscribed stream", 4, chats = mutableListOf(
                         Chat("SomeChat")
                     )
                 ),
@@ -52,4 +59,5 @@ object DataProvider {
         }
 
     fun getTopicsSize() = topics.size
+
 }

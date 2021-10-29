@@ -1,12 +1,14 @@
 package com.malinowski.bigandyellow.view
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.R
+import com.malinowski.bigandyellow.databinding.FragmentStreamsBinding
 import com.malinowski.bigandyellow.model.data.ChatItem
 import com.malinowski.bigandyellow.model.data.TopicChatItem
 import com.malinowski.bigandyellow.model.data.TopicItem
@@ -15,10 +17,14 @@ import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapte
 
 class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
-    private val model: MainViewModel by activityViewModels()
-    private val items: MutableList<TopicChatItem> = mutableListOf()
+    private val viewBinding: FragmentStreamsBinding by lazy {
+        FragmentStreamsBinding.inflate(layoutInflater)
+    }
 
-    private val adapter = TopicsChatsAdapter(items) { position ->
+    private val model: MainViewModel by activityViewModels()
+    private var items: MutableList<TopicChatItem> = mutableListOf()
+
+    private val adapter = TopicsChatsAdapter() { position -> // on item click
         when (val item = items[position]) {
             is ChatItem -> item.also {
                 model.openChat(item.topicId, item.chatId)
@@ -33,18 +39,35 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val subscribed = arguments?.getBoolean(SUBSCRIBED) ?: false
-        items.addAll(model.getTopics(subscribed).map {
-            TopicItem(name = it.second, id = it.first)
-        })
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
 
-        view.findViewById<RecyclerView>(R.id.topics_chats_recycler)?.let { recycler ->
+        if (savedInstanceState == null)
+            model.search("")
+
+        val subscribed = arguments?.getBoolean(SUBSCRIBED) ?: true
+
+        model.topics.observe(viewLifecycleOwner) {
+            items = it.filter { topic ->
+                if(subscribed)
+                        (topic as TopicItem).subscribed
+                else
+                    true
+            }.toMutableList()
+            adapter.submitList(items) {
+                viewBinding.topicsChatsRecycler.scrollToPosition(0)
+            }
+        }
+
+        viewBinding.topicsChatsRecycler.let { recycler ->
             recycler.adapter = adapter
             recycler.layoutManager = LinearLayoutManager(context)
         }
 
-        super.onViewCreated(view, savedInstanceState)
+        return viewBinding.root
     }
 
     private fun addItems(topicNum: Int, listPosition: Int) {
