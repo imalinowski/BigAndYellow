@@ -50,17 +50,13 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
         val subscribed = arguments?.getBoolean(SUBSCRIBED) ?: true
 
-        model.topics.observe(viewLifecycleOwner) {
-            items = it.filter { topic ->
-                if(subscribed)
-                        (topic as TopicItem).subscribed
-                else
-                    true
-            }.toMutableList()
-            adapter.submitList(items) {
-                viewBinding.topicsChatsRecycler.scrollToPosition(0)
+        (if (subscribed) model.topicsSubscribed else model.topics)
+            .observe(viewLifecycleOwner) {
+                items = it.toMutableList()
+                adapter.submitList(items) {
+                    viewBinding.topicsChatsRecycler.scrollToPosition(0)
+                }
             }
-        }
 
         viewBinding.topicsChatsRecycler.let { recycler ->
             recycler.adapter = adapter

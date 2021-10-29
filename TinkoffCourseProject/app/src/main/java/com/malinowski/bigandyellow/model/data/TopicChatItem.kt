@@ -7,13 +7,11 @@ data class TopicItem(
     val id: Int,
     val subscribed: Boolean = false,
     var expanded: Boolean = false
-) :
-    TopicChatItem()
+) : TopicChatItem()
 
 data class ChatItem(
     val name: String,
     val messageNum: Int,
     val topicId: Int,
     val chatId: Int
-) :
-    TopicChatItem()
+) : TopicChatItem()

@@ -15,4 +15,15 @@
 
     </androidx.fragment.app.FragmentContainerView>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="@dimen/loop_size"
+        android:layout_height="@dimen/loop_size"
+        android:indeterminateTint="@color/custom_purple"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

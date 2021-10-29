@@ -1,27 +1,40 @@
 package com.malinowski.bigandyellow.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.Chat
 import com.malinowski.bigandyellow.model.data.ChatItem
 import com.malinowski.bigandyellow.model.data.TopicChatItem
-import com.malinowski.bigandyellow.model.data.TopicItem
+import com.malinowski.bigandyellow.model.data.TopicToItemMapper
+import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
+import com.malinowski.bigandyellow.usecase.SearchTopicsUseCaseImpl
+import com.malinowski.bigandyellow.view.MainScreenState
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
+import java.util.concurrent.TimeUnit
 
 class MainViewModel : ViewModel() {
 
     private val dataProvider = Repository
     val chat = MutableLiveData<Pair<Int, Int>>() // <topic num> to <chat num in topic>
+
+    private val _mainScreenState: MutableLiveData<MainScreenState> = MutableLiveData()
+    val mainScreenState: LiveData<MainScreenState>
+        get() = _mainScreenState
+
+    val topicsSubscribed = MutableLiveData<List<TopicChatItem>>()
     val topics = MutableLiveData<List<TopicChatItem>>()
 
-    private val searchSubject: PublishSubject<String> = PublishSubject.create()
+    private val searchTopicsUseCase: SearchTopicsUseCase = SearchTopicsUseCaseImpl()
+    private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private val searchSubject: PublishSubject<String> = PublishSubject.create()
 
     fun search(query: String) {
         searchSubject.onNext(query)
@@ -32,30 +45,32 @@ class MainViewModel : ViewModel() {
     }
 
     private fun subscribeToSearchChanges() {
-        searchSubject
+        val flow = searchSubject
             .subscribeOn(Schedulers.io())
-            //.distinctUntilChanged()
-            //.debounce(500, TimeUnit.MILLISECONDS, Schedulers.io())
-            .switchMap { searchQuery ->
-                dataProvider.loadData()
-                    .map { topics ->
-                        topics.filter { it.name.contains(searchQuery, ignoreCase = true) }
-                    }
-            }
-            .map {
-                it.map { topic ->
-                    TopicItem(
-                        name = topic.name,
-                        id = topic.id,
-                        subscribed = topic.subscribed,
-                        expanded = false
-                    )
-                }
-            }
+            .distinctUntilChanged()
+            .doOnNext { _mainScreenState.postValue(MainScreenState.Loading) }
+            .debounce(500, TimeUnit.MILLISECONDS, Schedulers.io())
+            .switchMap { searchQuery -> searchTopicsUseCase(searchQuery) }
+            .map(topicToItemMapper)
+
+        flow.map { it.filter { topic -> topic.subscribed } }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onNext = { topics.value = it }
+                onNext = {
+                    topicsSubscribed.value = it
+                    _mainScreenState.value = MainScreenState.Result
+                },
+                onError = { _mainScreenState.value = MainScreenState.Error(it) }
             )
+            .addTo(compositeDisposable)
+
+        flow.observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = {
+                    topics.value = it
+                    _mainScreenState.value = MainScreenState.Result
+                },
+                onError = { _mainScreenState.value = MainScreenState.Error(it) })
             .addTo(compositeDisposable)
     }
 

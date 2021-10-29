@@ -8,7 +8,6 @@ object Repository : IRepository {
     // backend in future
     private val topics: MutableList<Topic> = mutableListOf()
 
-
     override fun loadData(): Observable<List<Topic>> =
         Observable.fromArray(topics.toList())
             .delay(1000, TimeUnit.MILLISECONDS)
