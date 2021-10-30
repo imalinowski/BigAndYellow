@@ -18,6 +18,7 @@ import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.DateItemDecorator
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
+import io.reactivex.android.schedulers.AndroidSchedulers
 
 class ChatFragment : Fragment() {
     private lateinit var binding: FragmentChatBinding
@@ -35,11 +36,13 @@ class ChatFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let { bundle ->
-            model.getChat(bundle.getInt(TOPIC_NUM), bundle.getInt(CHAT_NUM)).subscribe({
-                chat = it
-                model.result()
-                activity?.runOnUiThread { initUI() }
-            }, { e -> model.error(e) })
+            model.getChat(bundle.getInt(TOPIC_NUM), bundle.getInt(CHAT_NUM))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({
+                    chat = it
+                    model.result()
+                    initUI()
+                }, { e -> model.error(e) })
         }
         model.loading()
     }

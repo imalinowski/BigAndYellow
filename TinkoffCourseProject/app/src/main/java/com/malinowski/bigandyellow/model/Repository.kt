@@ -2,6 +2,7 @@ package com.malinowski.bigandyellow.model
 
 import com.malinowski.bigandyellow.model.data.*
 import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
 
 object Repository : IRepository {
@@ -9,11 +10,11 @@ object Repository : IRepository {
     private val topics: MutableList<Topic> = mutableListOf()
 
     override fun loadData(): Observable<List<Topic>> =
-        Observable.fromArray(topics.toList())
+        Observable.fromArray(topics.toList()).subscribeOn(Schedulers.io())
             .delay(1000, TimeUnit.MILLISECONDS)
 
     override fun loadItem(id: Int): Observable<Topic> =
-        Observable.just(topics[id])
+        Observable.just(topics[id]).subscribeOn(Schedulers.io())
             .delay(1000, TimeUnit.MILLISECONDS)
 
     init {
