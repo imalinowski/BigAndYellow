@@ -4,7 +4,6 @@ import com.malinowski.bigandyellow.model.data.*
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
 object Repository : IRepository {
     // backend in future
@@ -19,7 +18,6 @@ object Repository : IRepository {
     override fun loadTopic(id: Int): Observable<Topic> =
         Observable.just(topics[id]).subscribeOn(Schedulers.io())
             .delay(1000, TimeUnit.MILLISECONDS)
-
 
     override fun loadUsers(): Observable<List<User>> =
         Observable.fromArray(users.toList()).subscribeOn(Schedulers.io())

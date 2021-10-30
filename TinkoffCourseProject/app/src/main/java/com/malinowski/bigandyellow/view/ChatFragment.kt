@@ -11,6 +11,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
+import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.Chat
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
@@ -19,6 +20,7 @@ import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.DateItemDecorator
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 import io.reactivex.android.schedulers.AndroidSchedulers
+import kotlin.random.Random
 
 class ChatFragment : Fragment() {
     private lateinit var binding: FragmentChatBinding
@@ -78,6 +80,10 @@ class ChatFragment : Fragment() {
         binding.sendMessageButton.setOnClickListener {
             binding.sendMessageText.apply {
                 if (this.length() == 0) return@apply
+                if (Random.nextInt() % 13 == 0) {
+                    model.error(Repository.ExpectedError())
+                    return@apply
+                }
                 chat.messages.add(Message(chat.messages.size, text.toString(), User.INSTANCE))
                 setText("")
                 layoutManager.scrollToPosition(chat.messages.size - 1)
