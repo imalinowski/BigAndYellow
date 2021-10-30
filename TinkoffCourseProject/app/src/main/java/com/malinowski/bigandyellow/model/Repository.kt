@@ -12,6 +12,10 @@ object Repository : IRepository {
         Observable.fromArray(topics.toList())
             .delay(1000, TimeUnit.MILLISECONDS)
 
+    override fun loadItem(id: Int): Observable<Topic> =
+        Observable.just(topics[id])
+            .delay(1000, TimeUnit.MILLISECONDS)
+
     init {
         topics.addAll(
             mutableListOf(
@@ -24,7 +28,7 @@ object Repository : IRepository {
                     )
                 ),
                 Topic(
-                    "#development",1, true, chats = mutableListOf(
+                    "#development", 1, true, chats = mutableListOf(
                         Chat("Kotlin")
                     )
                 ),
@@ -49,14 +53,5 @@ object Repository : IRepository {
             )
         })
     }
-
-    fun getTopic(num: Int) = topics[num]
-
-    fun getTopicsNames(): List<String> =
-        topics.map {
-            it.name
-        }
-
-    fun getTopicsSize() = topics.size
 
 }

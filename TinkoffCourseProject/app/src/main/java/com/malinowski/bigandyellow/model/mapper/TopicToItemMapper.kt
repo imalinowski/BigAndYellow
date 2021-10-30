@@ -9,8 +9,8 @@ internal class TopicToItemMapper : (Topic) -> (TopicItem) {
 
     override fun invoke(topic: Topic): TopicItem {
         return TopicItem(
+            topicId = topic.id,
             name = topic.name,
-            id = topic.id,
             chats = chatToItemMapper(topic.chats, topic.id),
             subscribed = topic.subscribed,
             expanded = false

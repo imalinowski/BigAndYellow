@@ -8,4 +8,6 @@ interface IRepository {
 
     fun loadData(): Observable<List<Topic>>
 
+    fun loadItem(id: Int): Observable<Topic>
+
 }

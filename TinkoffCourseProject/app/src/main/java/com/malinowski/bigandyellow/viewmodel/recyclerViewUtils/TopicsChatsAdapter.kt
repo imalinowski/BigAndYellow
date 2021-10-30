@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.view.LayoutInflater
 import android.view.View.*
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -30,7 +31,9 @@ class TopicsChatsAdapter(
                     viewBinding.chatLinear.visibility = GONE
                     viewBinding.topicConstraint.visibility = VISIBLE
                     viewBinding.topicName.text = item.name
-                    if(item.expanded) viewBinding.topicArrow.rotation = 180f
+                    viewBinding.topicArrow.rotation = if (item.expanded) 180f else 0f
+                    viewBinding.progressBar.isVisible = item.loading
+                    viewBinding.topicArrow.isVisible = !item.loading
                 }
                 is ChatItem -> {
                     viewBinding.chatLinear.visibility = VISIBLE
@@ -76,7 +79,7 @@ class TopicsChatsAdapter(
     class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<TopicChatItem>() {
 
         override fun areItemsTheSame(oldItem: TopicChatItem, newItem: TopicChatItem): Boolean {
-            return oldItem === newItem
+            return oldItem.hashCode() == newItem.hashCode()
         }
 
         override fun areContentsTheSame(oldItem: TopicChatItem, newItem: TopicChatItem): Boolean {

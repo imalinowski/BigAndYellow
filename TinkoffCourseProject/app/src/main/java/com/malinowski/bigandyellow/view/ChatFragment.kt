@@ -34,9 +34,14 @@ class ChatFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            chat = model.getChat(it.getInt(TOPIC_NUM), it.getInt(CHAT_NUM))
+        arguments?.let { bundle ->
+            model.getChat(bundle.getInt(TOPIC_NUM), bundle.getInt(CHAT_NUM)).subscribe({
+                chat = it
+                model.result()
+                activity?.runOnUiThread { initUI() }
+            }, { e -> model.error(e) })
         }
+        model.loading()
     }
 
     override fun onCreateView(
@@ -44,7 +49,10 @@ class ChatFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentChatBinding.inflate(layoutInflater)
+        return binding.root
+    }
 
+    fun initUI() {
         binding.chatName.text = chat.name
 
         binding.back.setOnClickListener {
@@ -91,7 +99,6 @@ class ChatFragment : Fragment() {
             adapter.notifyItemChanged(messagePosition)
         }
 
-        return binding.root
     }
 
     companion object {

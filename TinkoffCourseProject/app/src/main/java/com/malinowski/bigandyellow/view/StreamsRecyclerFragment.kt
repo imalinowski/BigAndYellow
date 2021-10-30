@@ -1,5 +1,6 @@
 package com.malinowski.bigandyellow.view
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import com.malinowski.bigandyellow.databinding.FragmentStreamsBinding
 import com.malinowski.bigandyellow.model.data.ChatItem
 import com.malinowski.bigandyellow.model.data.TopicChatItem
 import com.malinowski.bigandyellow.model.data.TopicItem
+import com.malinowski.bigandyellow.model.mapper.ChatToItemMapper
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter
 
@@ -21,10 +23,11 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         FragmentStreamsBinding.inflate(layoutInflater)
     }
 
+    private val chatToItemMapper: ChatToItemMapper = ChatToItemMapper()
     private val model: MainViewModel by activityViewModels()
     private var items: MutableList<TopicChatItem> = mutableListOf()
 
-    private val adapter = TopicsChatsAdapter() { position -> // on item click
+    private val adapter = TopicsChatsAdapter { position -> // on item click
         when (val item = items[position]) {
             is ChatItem -> item.also {
                 model.openChat(item.topicId, item.chatId)
@@ -33,7 +36,7 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
                 if (item.expanded)
                     deleteItems(position)
                 else
-                    addItems(item.id, position)
+                    addItems(item, position)
                 item.expanded = !item.expanded
             }
         }
@@ -50,6 +53,7 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         (if (subscribed) model.topicsSubscribed else model.topics)
             .observe(viewLifecycleOwner) {
                 items = it.toMutableList()
+                    .onEach { item -> if (item is TopicItem) item.expanded = false }
                 adapter.submitList(items) {
                     viewBinding.topicsChatsRecycler.scrollToPosition(0)
                 }
@@ -63,17 +67,23 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         return viewBinding.root
     }
 
-    private fun addItems(topicNum: Int, listPosition: Int) {
-        val chats = model.getChatsByTopic(topicNum)
-        if (chats.isEmpty()) return
+    @SuppressLint("CheckResult")
+    private fun addItems(topic: TopicItem, listPosition: Int) {
+        topic.loading = true
+        adapter.notifyItemChanged(listPosition)
 
-        items.addAll(listPosition + 1, chats)
-        adapter.notifyItemRangeInserted(
-            listPosition + 1,
-            chats.size
-        )
-        adapter.notifyItemRangeChanged(listPosition + chats.size + 1, adapter.itemCount)
-
+        model.getChats(topic.topicId).subscribe({ chats ->
+            topic.loading = false
+            items.addAll(listPosition + 1, chatToItemMapper(chats, topic.topicId))
+            activity?.runOnUiThread {
+                adapter.notifyItemChanged(listPosition)
+                adapter.notifyItemRangeInserted(listPosition + 1, chats.size)
+                adapter.notifyItemRangeChanged(listPosition + chats.size + 1, adapter.itemCount)
+            }
+        }, { e ->
+            topic.loading = false
+            model.error(e)
+        })
     }
 
     private fun deleteItems(listPosition: Int) {

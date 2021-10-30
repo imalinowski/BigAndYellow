@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?android:attr/selectableItemBackground">
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <FrameLayout
         android:id="@+id/topic_constraint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,26 +18,31 @@
             android:layout_margin="10dp"
             android:text="@string/app_name"
             android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/topic_arrow"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="end|center"
             android:contentDescription="@string/topic_arrow"
             android:scaleType="center"
             android:scaleX="2"
             android:scaleY="2"
-            app:tint="@color/black"
             android:src="@drawable/ic_baseline_keyboard_arrow_up_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:tint="@color/black" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="end|center"
+            android:scaleType="center"
+            android:indeterminateTint="@color/custom_purple"
+            android:visibility="visible"/>
+
+    </FrameLayout>
+
     <LinearLayout
         android:id="@+id/chat_linear"
         android:layout_width="match_parent"
@@ -45,25 +51,24 @@
         android:paddingHorizontal="20dp"
         android:paddingVertical="10dp"
         android:visibility="gone">
+
         <TextView
             android:id="@id/chat_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:text="@string/app_name"
             android:layout_gravity="center"
-            android:gravity="center|start"
             android:layout_marginEnd="25dp"
-            />
+            android:gravity="center|start"
+            android:text="@string/app_name"
+            android:textSize="18sp" />
 
         <TextView
             android:id="@+id/messages_num"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:text="@string/app_name"
             android:layout_gravity="center"
             android:gravity="center|start"
-            />
+            android:text="@string/app_name"
+            android:textSize="18sp" />
     </LinearLayout>
 </FrameLayout>
