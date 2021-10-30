@@ -30,6 +30,7 @@ class TopicsChatsAdapter(
                     viewBinding.chatLinear.visibility = GONE
                     viewBinding.topicConstraint.visibility = VISIBLE
                     viewBinding.topicName.text = item.name
+                    if(item.expanded) viewBinding.topicArrow.rotation = 180f
                 }
                 is ChatItem -> {
                     viewBinding.chatLinear.visibility = VISIBLE

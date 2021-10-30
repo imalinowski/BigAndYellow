@@ -7,16 +7,17 @@ import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.Chat
 import com.malinowski.bigandyellow.model.data.ChatItem
 import com.malinowski.bigandyellow.model.data.TopicChatItem
-import com.malinowski.bigandyellow.model.data.TopicToItemMapper
+import com.malinowski.bigandyellow.usecase.FilterSubscribedUseCase
+import com.malinowski.bigandyellow.usecase.IFilterSubscribedUseCase
+import com.malinowski.bigandyellow.usecase.ISearchTopicsUseCase
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
-import com.malinowski.bigandyellow.usecase.SearchTopicsUseCaseImpl
 import com.malinowski.bigandyellow.view.MainScreenState
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.BehaviorSubject
 import java.util.concurrent.TimeUnit
 
 class MainViewModel : ViewModel() {
@@ -31,10 +32,10 @@ class MainViewModel : ViewModel() {
     val topicsSubscribed = MutableLiveData<List<TopicChatItem>>()
     val topics = MutableLiveData<List<TopicChatItem>>()
 
-    private val searchTopicsUseCase: SearchTopicsUseCase = SearchTopicsUseCaseImpl()
-    private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
+    private val searchTopicsUseCase: ISearchTopicsUseCase = SearchTopicsUseCase()
+    private val filterSubscribedUseCase: IFilterSubscribedUseCase = FilterSubscribedUseCase()
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
-    private val searchSubject: PublishSubject<String> = PublishSubject.create()
+    private val searchSubject: BehaviorSubject<String> = BehaviorSubject.create()
 
     fun search(query: String) {
         searchSubject.onNext(query)
@@ -51,10 +52,10 @@ class MainViewModel : ViewModel() {
             .doOnNext { _mainScreenState.postValue(MainScreenState.Loading) }
             .debounce(500, TimeUnit.MILLISECONDS, Schedulers.io())
             .switchMap { searchQuery -> searchTopicsUseCase(searchQuery) }
-            .map(topicToItemMapper)
+            .share()
 
-        flow.map { it.filter { topic -> topic.subscribed } }
-            .observeOn(AndroidSchedulers.mainThread())
+        // subscribed flow
+        flow.map(filterSubscribedUseCase).observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
                     topicsSubscribed.value = it

@@ -22,6 +22,8 @@ class ChannelsFragment : Fragment() {
     ): View {
         binding = FragmentChannelsBinding.inflate(layoutInflater)
 
+        if(savedInstanceState == null)
+            model.search("")
         binding.searchQuery.doAfterTextChanged {
             model.search(it.toString())
         }

@@ -45,9 +45,6 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         savedInstanceState: Bundle?
     ): View {
 
-        if (savedInstanceState == null)
-            model.search("")
-
         val subscribed = arguments?.getBoolean(SUBSCRIBED) ?: true
 
         (if (subscribed) model.topicsSubscribed else model.topics)
