@@ -18,7 +18,7 @@ internal class SearchTopicsUseCase : ISearchTopicsUseCase {
     private val dataProvider = Repository
 
     override fun invoke(searchQuery: String): Observable<List<TopicChatItem>> {
-        return dataProvider.loadData()
+        return dataProvider.loadTopics()
             .map { topics ->
                 if (searchQuery.isNotEmpty())
                     topics.search(searchQuery)

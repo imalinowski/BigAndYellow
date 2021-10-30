@@ -10,16 +10,19 @@ object Repository : IRepository {
     // backend in future
     private val topics: MutableList<Topic> = mutableListOf()
 
-    override fun loadData(): Observable<List<Topic>> =
-        if (Random.nextInt() % 13 == 0)
-            Observable.error(ExpectedError())
-        else Observable.fromArray(topics.toList()).subscribeOn(Schedulers.io())
+    private val users: MutableList<User> = mutableListOf()
+
+    override fun loadTopics(): Observable<List<Topic>> =
+        Observable.fromArray(topics.toList()).subscribeOn(Schedulers.io())
             .delay(1000, TimeUnit.MILLISECONDS)
 
-    override fun loadItem(id: Int): Observable<Topic> =
-        if (Random.nextInt() % 13 == 0)
-            Observable.error(ExpectedError())
-        else Observable.just(topics[id]).subscribeOn(Schedulers.io())
+    override fun loadTopic(id: Int): Observable<Topic> =
+        Observable.just(topics[id]).subscribeOn(Schedulers.io())
+            .delay(1000, TimeUnit.MILLISECONDS)
+
+
+    override fun loadUsers(): Observable<List<User>> =
+        Observable.fromArray(users.toList()).subscribeOn(Schedulers.io())
             .delay(1000, TimeUnit.MILLISECONDS)
 
     init {
@@ -58,6 +61,17 @@ object Repository : IRepository {
                 ),
             )
         })
+
+        users.addAll(
+            mutableListOf(
+                User(1, "Taylan Colon"),
+                User(2, "Priya Roth"),
+                User(3, "Luisa Pennington"),
+                User(4, "Olli Cairns"),
+                User(5, "Jimmy Lee"),
+                User(6, "Murat Coffey"),
+            )
+        )
     }
 
     class ExpectedError : Throwable("Expected Random Error")

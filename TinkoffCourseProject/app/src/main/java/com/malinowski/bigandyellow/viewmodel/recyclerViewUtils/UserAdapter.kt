@@ -4,13 +4,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.model.data.User
 
-class UserAdapter(
-    private val dataSet: MutableList<User>,
-) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+class UserAdapter() :
+    ListAdapter<User, UserAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val name: TextView = view.findViewById(R.id.name)
@@ -24,9 +25,19 @@ class UserAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.name.text = dataSet[position].name
+        holder.name.text = getItem(position).name
     }
 
-    override fun getItemCount(): Int = dataSet.size
+    class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<User>() {
+
+        override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
+            return oldItem.hashCode() == newItem.hashCode()
+        }
+
+        override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
+            return oldItem == newItem
+        }
+
+    }
 
 }

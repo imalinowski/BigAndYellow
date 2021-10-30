@@ -23,9 +23,9 @@ class ChannelsFragment : Fragment() {
         binding = FragmentChannelsBinding.inflate(layoutInflater)
 
         if(savedInstanceState == null)
-            model.search("")
+            model.searchTopics("")
         binding.searchQuery.doAfterTextChanged {
-            model.search(it.toString())
+            model.searchTopics(it.toString())
         }
 
         val tabs: List<String> = listOf("Subscribed", "All Streams")
