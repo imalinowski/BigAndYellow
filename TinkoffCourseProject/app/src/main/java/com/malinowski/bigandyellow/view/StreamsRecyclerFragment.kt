@@ -82,7 +82,6 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
                 adapter.notifyItemChanged(listPosition)
                 adapter.notifyItemRangeInserted(listPosition + 1, chats.size)
                 adapter.notifyItemRangeChanged(listPosition + chats.size + 1, adapter.itemCount)
-
             }, { e ->
                 topic.loading = false
                 model.error(e)

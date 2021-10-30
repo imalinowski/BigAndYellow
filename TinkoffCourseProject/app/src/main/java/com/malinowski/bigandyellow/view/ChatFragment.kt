@@ -55,7 +55,7 @@ class ChatFragment : Fragment() {
         return binding.root
     }
 
-    fun initUI() {
+    private fun initUI() {
         binding.chatName.text = chat.name
 
         binding.back.setOnClickListener {

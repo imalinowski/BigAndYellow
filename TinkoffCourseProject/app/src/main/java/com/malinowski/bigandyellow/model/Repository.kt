@@ -4,17 +4,22 @@ import com.malinowski.bigandyellow.model.data.*
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 object Repository : IRepository {
     // backend in future
     private val topics: MutableList<Topic> = mutableListOf()
 
     override fun loadData(): Observable<List<Topic>> =
-        Observable.fromArray(topics.toList()).subscribeOn(Schedulers.io())
+        if (Random.nextInt() % 13 == 0)
+            Observable.error(ExpectedError())
+        else Observable.fromArray(topics.toList()).subscribeOn(Schedulers.io())
             .delay(1000, TimeUnit.MILLISECONDS)
 
     override fun loadItem(id: Int): Observable<Topic> =
-        Observable.just(topics[id]).subscribeOn(Schedulers.io())
+        if (Random.nextInt() % 13 == 0)
+            Observable.error(ExpectedError())
+        else Observable.just(topics[id]).subscribeOn(Schedulers.io())
             .delay(1000, TimeUnit.MILLISECONDS)
 
     init {
@@ -54,5 +59,7 @@ object Repository : IRepository {
             )
         })
     }
+
+    class ExpectedError : Throwable("Expected Random Error")
 
 }
