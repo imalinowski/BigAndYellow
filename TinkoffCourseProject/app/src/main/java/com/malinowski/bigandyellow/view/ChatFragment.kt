@@ -20,7 +20,10 @@ import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.DateItemDecorator
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 
 class ChatFragment : Fragment() {
-    private lateinit var binding: FragmentChatBinding
+
+    private var _binding: FragmentChatBinding? = null
+    private val binding get() = _binding!!
+
     private val model: MainViewModel by activityViewModels()
     private lateinit var chat: Chat
 
@@ -43,8 +46,13 @@ class ChatFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentChatBinding.inflate(layoutInflater)
+        _binding = FragmentChatBinding.inflate(layoutInflater)
 
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         binding.chatName.text = chat.name
 
         binding.back.setOnClickListener {
@@ -90,8 +98,11 @@ class ChatFragment : Fragment() {
             chat.messages[messagePosition].reactions.add(Reaction(smile = smileNum, num = 1))
             adapter.notifyItemChanged(messagePosition)
         }
+    }
 
-        return binding.root
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {

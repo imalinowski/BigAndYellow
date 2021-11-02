@@ -12,14 +12,21 @@ import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.UserAdapter
 
 class PeopleFragment : Fragment() {
-    private lateinit var binding: FragmentPeopleBinding
+    private var _binding: FragmentPeopleBinding? = null
+    private val binding get() = _binding!!
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentPeopleBinding.inflate(layoutInflater)
+        _binding = FragmentPeopleBinding.inflate(layoutInflater)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         binding.usersRecycler.apply {
             adapter = UserAdapter(MutableList(3) {
@@ -27,8 +34,11 @@ class PeopleFragment : Fragment() {
             })
             layoutManager = LinearLayoutManager(context)
         }
+    }
 
-        return binding.root
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
 }
