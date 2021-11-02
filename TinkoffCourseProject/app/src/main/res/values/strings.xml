@@ -74,4 +74,6 @@
     <string name="sample_email">bigandyellow@company</string>
     <string name="topic_name">#%1$s</string>
     <string name="topic_arrow">topic arrow</string>
+    <string name="subscribed">Subscribed</string>
+    <string name="all_streams">All Streams</string>
 </resources>

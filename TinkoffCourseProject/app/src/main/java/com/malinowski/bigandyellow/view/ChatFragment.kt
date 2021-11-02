@@ -23,7 +23,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlin.random.Random
 
 class ChatFragment : Fragment() {
-    private lateinit var binding: FragmentChatBinding
+
+    private var _binding: FragmentChatBinding? = null
+    private val binding get() = _binding!!
+
     private val model: MainViewModel by activityViewModels()
     private lateinit var chat: Chat
 
@@ -53,7 +56,7 @@ class ChatFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentChatBinding.inflate(layoutInflater)
+        _binding = FragmentChatBinding.inflate(layoutInflater)
         return binding.root
     }
 
@@ -107,7 +110,11 @@ class ChatFragment : Fragment() {
             chat.messages[messagePosition].reactions.add(Reaction(smile = smileNum, num = 1))
             adapter.notifyItemChanged(messagePosition)
         }
+    }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     companion object {

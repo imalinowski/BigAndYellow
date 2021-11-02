@@ -13,7 +13,9 @@ import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.UserAdapter
 
 class PeopleFragment : Fragment() {
-    private lateinit var binding: FragmentPeopleBinding
+    private var _binding: FragmentPeopleBinding? = null
+    private val binding get() = _binding!!
+
 
     private val model: MainViewModel by activityViewModels()
     private var adapter = UserAdapter()
@@ -23,7 +25,12 @@ class PeopleFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentPeopleBinding.inflate(layoutInflater)
+        _binding = FragmentPeopleBinding.inflate(layoutInflater)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         binding.searchQuery.doAfterTextChanged {
             model.searchUsers(it.toString())
@@ -41,8 +48,11 @@ class PeopleFragment : Fragment() {
             adapter = this@PeopleFragment.adapter
             layoutManager = LinearLayoutManager(context)
         }
+    }
 
-        return binding.root
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
 }
