@@ -26,15 +26,15 @@ class MainFragment : Fragment() {
 
         binding.bottomNavigation.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.page_1 -> childFragmentManager.beginTransaction()
-                    .replace(R.id.main_fragment_container_view, ChannelsFragment())
-                    .addToBackStack(null)
-                    .commitAllowingStateLoss()
-                R.id.page_2 -> childFragmentManager.commit {
+                R.id.page_1 -> childFragmentManager.commit(allowStateLoss = true) {
+                    replace(R.id.main_fragment_container_view, ChannelsFragment())
+                    addToBackStack(null)
+                }
+                R.id.page_2 -> childFragmentManager.commit(allowStateLoss = true) {
                     replace(R.id.main_fragment_container_view, PeopleFragment())
                     addToBackStack(null)
                 }
-                R.id.page_3 -> childFragmentManager.commit {
+                R.id.page_3 -> childFragmentManager.commit(allowStateLoss = true) {
                     replace(R.id.main_fragment_container_view, ProfileFragment())
                     addToBackStack(null)
                 }

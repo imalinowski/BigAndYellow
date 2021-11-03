@@ -15,7 +15,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
@@ -26,11 +25,11 @@ class MainActivity : AppCompatActivity() {
                 .replace(R.id.activity_fragment_container_view, MainFragment.newInstance())
                 .commitAllowingStateLoss()
 
-        model.chat.observe(this) {
+        model.chat.observe(this) { (topicNum, chatNum) ->
             supportFragmentManager.beginTransaction()
                 .replace(
                     R.id.activity_fragment_container_view,
-                    ChatFragment.newInstance(it.first, it.second)
+                    ChatFragment.newInstance(topicNum, chatNum)
                 )
                 .addToBackStack(null)
                 .commitAllowingStateLoss()

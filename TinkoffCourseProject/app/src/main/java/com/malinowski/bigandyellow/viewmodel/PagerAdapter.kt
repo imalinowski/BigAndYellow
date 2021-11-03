@@ -4,20 +4,20 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.malinowski.bigandyellow.view.StreamsRecyclerFragment
+
+sealed class Streams
+object SubscribedStreams : Streams()
+object AllStreams : Streams()
 
 class PagerAdapter(
+    private val pages: List<Streams>,
     fragmentManager: FragmentManager, lifecycle: Lifecycle
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
 
-    private val fragments: MutableList<Fragment> = mutableListOf()
+    override fun getItemCount(): Int = pages.size
 
-    override fun getItemCount(): Int = fragments.size
+    override fun createFragment(position: Int): Fragment =
+        StreamsRecyclerFragment.newInstance(pages[position] is SubscribedStreams)
 
-    override fun createFragment(position: Int): Fragment = fragments[position]
-
-    fun update(fragments: List<Fragment>) {
-        this.fragments.clear()
-        this.fragments.addAll(fragments)
-        notifyDataSetChanged()
-    }
 }

@@ -8,7 +8,10 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayoutMediator
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChannelsBinding
+import com.malinowski.bigandyellow.viewmodel.AllStreams
 import com.malinowski.bigandyellow.viewmodel.PagerAdapter
+import com.malinowski.bigandyellow.viewmodel.Streams
+import com.malinowski.bigandyellow.viewmodel.SubscribedStreams
 
 class ChannelsFragment : Fragment() {
 
@@ -28,14 +31,11 @@ class ChannelsFragment : Fragment() {
 
         val tabs: List<String> =
             listOf(getString(R.string.subscribed), getString(R.string.all_streams))
-        val pagerAdapter = PagerAdapter(childFragmentManager, lifecycle)
-        binding.fragmentViewPager.adapter = pagerAdapter
-        pagerAdapter.update(
-            listOf(
-                StreamsRecyclerFragment.newInstance(subscribed = true),
-                StreamsRecyclerFragment.newInstance(subscribed = false)
-            )
+        val pagerAdapter = PagerAdapter(
+            pages = listOf(SubscribedStreams, AllStreams),
+            childFragmentManager, lifecycle
         )
+        binding.fragmentViewPager.adapter = pagerAdapter
 
         TabLayoutMediator(binding.tabLayout, binding.fragmentViewPager) { tab, position ->
             tab.text = tabs[position]
