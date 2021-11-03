@@ -11,11 +11,11 @@ class MainViewModel : ViewModel() {
     private val dataProvider = DataProvider
     val chat = MutableLiveData<Pair<Int, Int>>() // <topic num> to <chat num in topic>
 
-    fun getTopics(subscribed: Boolean = false): List<Pair<Int, String>> =
+    fun getTopics(type: Streams): List<Pair<Int, String>> =
         dataProvider.getTopicsNames().mapIndexed { index, s ->
             index to s
         }.filter {
-            !subscribed || dataProvider.getTopic(it.first).subscribed
+            type == Streams.AllStreams || dataProvider.getTopic(it.first).subscribed
         }
 
     fun getChatsByTopic(topicNum: Int): List<ChatItem> =

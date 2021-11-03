@@ -6,9 +6,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.malinowski.bigandyellow.view.StreamsRecyclerFragment
 
-sealed class Streams
-object SubscribedStreams : Streams()
-object AllStreams : Streams()
+enum class Streams {
+    SubscribedStreams, AllStreams
+}
 
 class PagerAdapter(
     private val pages: List<Streams>,
@@ -18,6 +18,6 @@ class PagerAdapter(
     override fun getItemCount(): Int = pages.size
 
     override fun createFragment(position: Int): Fragment =
-        StreamsRecyclerFragment.newInstance(pages[position] is SubscribedStreams)
+        StreamsRecyclerFragment.newInstance(pages[position])
 
 }

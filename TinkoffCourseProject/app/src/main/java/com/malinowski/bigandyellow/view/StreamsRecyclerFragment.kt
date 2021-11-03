@@ -11,6 +11,7 @@ import com.malinowski.bigandyellow.model.data.ChatItem
 import com.malinowski.bigandyellow.model.data.TopicChatItem
 import com.malinowski.bigandyellow.model.data.TopicItem
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
+import com.malinowski.bigandyellow.viewmodel.Streams
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter
 
 class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
@@ -34,9 +35,12 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val subscribed = arguments?.getBoolean(SUBSCRIBED) ?: false
-        items.addAll(model.getTopics(subscribed).map {
-            TopicItem(name = it.second, id = it.first)
+
+        val streamType =
+            arguments?.getSerializable(SUBSCRIBED)?.let { it as Streams } ?: Streams.AllStreams
+
+        items.addAll(model.getTopics(streamType).map { (id, name) ->
+            TopicItem(name = name, id = id)
         })
 
         view.findViewById<RecyclerView>(R.id.topics_chats_recycler)?.let { recycler ->
@@ -73,10 +77,10 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
     companion object {
         private const val SUBSCRIBED = "subscribed"
-        fun newInstance(subscribed: Boolean) =
+        fun newInstance(streamType: Streams) =
             StreamsRecyclerFragment().apply {
                 arguments = Bundle().apply {
-                    putBoolean(SUBSCRIBED, subscribed)
+                    putSerializable(SUBSCRIBED, streamType)
                 }
             }
     }
