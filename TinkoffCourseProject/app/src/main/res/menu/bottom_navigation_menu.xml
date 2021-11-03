@@ -4,15 +4,15 @@
         android:id="@+id/page_1"
         android:enabled="true"
         android:icon="@drawable/ic_channels"
-        android:title="@string/channels"/>
+        android:title="@string/channels" />
     <item
         android:id="@+id/page_2"
         android:enabled="true"
         android:icon="@drawable/ic_people"
-        android:title="@string/people"/>
+        android:title="@string/people" />
     <item
         android:id="@+id/page_3"
         android:enabled="true"
         android:icon="@drawable/ic_profile"
-        android:title="@string/profile"/>
+        android:title="@string/profile" />
 </menu>

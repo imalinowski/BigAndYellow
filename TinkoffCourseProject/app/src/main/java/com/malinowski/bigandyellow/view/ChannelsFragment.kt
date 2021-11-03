@@ -10,7 +10,6 @@ import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChannelsBinding
 import com.malinowski.bigandyellow.viewmodel.AllStreams
 import com.malinowski.bigandyellow.viewmodel.PagerAdapter
-import com.malinowski.bigandyellow.viewmodel.Streams
 import com.malinowski.bigandyellow.viewmodel.SubscribedStreams
 
 class ChannelsFragment : Fragment() {

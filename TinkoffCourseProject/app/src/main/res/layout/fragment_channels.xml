@@ -9,9 +9,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="15dp"
+        android:background="@color/bg_main_gray"
         android:orientation="vertical"
-        android:background="@color/bg_main_gray">
+        android:padding="15dp">
 
         <LinearLayout
             android:id="@+id/search"
@@ -50,9 +50,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
+            android:backgroundTint="@color/bg_main_gray"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/search"
-            android:backgroundTint="@color/bg_main_gray"/>
+            app:layout_constraintTop_toBottomOf="@id/search" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

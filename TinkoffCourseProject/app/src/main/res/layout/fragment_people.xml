@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".view.PeopleFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/users_recycler"
-        android:paddingTop="@dimen/app_bar_height"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:paddingTop="@dimen/app_bar_height" />
 
     <LinearLayout
         android:id="@+id/search"
@@ -21,11 +21,11 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="40dp"
             android:layout_weight="1"
             android:autofillHints="search"
             android:hint="@string/users"
-            android:layout_marginHorizontal="40dp"
-            android:layout_gravity="center"
             android:inputType="text"
             android:textColor="@color/white"
             android:textColorHint="@color/white"
@@ -37,8 +37,8 @@
             android:layout_height="match_parent"
             android:layout_weight="4"
             android:contentDescription="@string/search"
-            android:scaleType="fitCenter"
             android:padding="15dp"
+            android:scaleType="fitCenter"
             android:src="@drawable/ic_bi_search"
             app:tint="@color/white" />
 
