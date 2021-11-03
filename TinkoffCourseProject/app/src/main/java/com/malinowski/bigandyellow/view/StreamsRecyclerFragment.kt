@@ -15,6 +15,7 @@ import com.malinowski.bigandyellow.model.data.TopicChatItem
 import com.malinowski.bigandyellow.model.data.TopicItem
 import com.malinowski.bigandyellow.model.mapper.ChatToItemMapper
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
+import com.malinowski.bigandyellow.viewmodel.Streams
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter
 import io.reactivex.android.schedulers.AndroidSchedulers
 
@@ -49,9 +50,10 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         savedInstanceState: Bundle?
     ): View {
 
-        val subscribed = arguments?.getBoolean(SUBSCRIBED) ?: true
+        val streamType =
+            arguments?.getSerializable(SUBSCRIBED)?.let { it as Streams } ?: Streams.AllStreams
 
-        (if (subscribed) model.topicsSubscribed else model.topics)
+        (if (streamType == Streams.SubscribedStreams) model.topicsSubscribed else model.topics)
             .observe(viewLifecycleOwner) {
                 items = it.toMutableList()
                     .onEach { item -> if (item is TopicItem) item.expanded = false }
@@ -101,10 +103,10 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
     companion object {
         private const val SUBSCRIBED = "subscribed"
-        fun newInstance(subscribed: Boolean) =
+        fun newInstance(streamType: Streams) =
             StreamsRecyclerFragment().apply {
                 arguments = Bundle().apply {
-                    putBoolean(SUBSCRIBED, subscribed)
+                    putSerializable(SUBSCRIBED, streamType)
                 }
             }
     }

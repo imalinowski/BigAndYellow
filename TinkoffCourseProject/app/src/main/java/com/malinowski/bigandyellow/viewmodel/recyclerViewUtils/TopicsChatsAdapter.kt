@@ -52,15 +52,18 @@ class TopicsChatsAdapter(
         }
     }
 
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             TopicAndChatsItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
+
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
         holder.bind(item)
+
         holder.setOnClickListener {
             if (position >= itemCount) return@setOnClickListener
             onClick(position)

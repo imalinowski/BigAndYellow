@@ -38,6 +38,7 @@
             android:layout_height="@dimen/loop_size"
             android:layout_gravity="end|center"
             android:contentDescription="@string/search"
+            android:padding="15dp"
             android:scaleType="fitCenter"
             android:src="@drawable/ic_bi_search"
             app:tint="@color/white" />

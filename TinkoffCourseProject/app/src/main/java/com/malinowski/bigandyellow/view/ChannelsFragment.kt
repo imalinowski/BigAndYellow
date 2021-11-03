@@ -12,6 +12,7 @@ import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChannelsBinding
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.PagerAdapter
+import com.malinowski.bigandyellow.viewmodel.Streams
 
 class ChannelsFragment : Fragment() {
     private val model: MainViewModel by activityViewModels()
@@ -40,14 +41,11 @@ class ChannelsFragment : Fragment() {
         val tabs: List<String> =
             listOf(getString(R.string.subscribed), getString(R.string.all_streams))
 
-        val pagerAdapter = PagerAdapter(childFragmentManager, lifecycle)
-        binding.fragmentViewPager.adapter = pagerAdapter
-        pagerAdapter.update(
-            listOf(
-                StreamsRecyclerFragment.newInstance(subscribed = true),
-                StreamsRecyclerFragment.newInstance(subscribed = false)
-            )
+        val pagerAdapter = PagerAdapter(
+            pages = listOf(Streams.SubscribedStreams, Streams.AllStreams),
+            childFragmentManager, lifecycle
         )
+        binding.fragmentViewPager.adapter = pagerAdapter
 
         TabLayoutMediator(binding.tabLayout, binding.fragmentViewPager) { tab, position ->
             tab.text = tabs[position]
