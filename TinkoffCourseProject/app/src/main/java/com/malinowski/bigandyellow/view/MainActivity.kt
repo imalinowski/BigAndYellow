@@ -1,6 +1,7 @@
 package com.malinowski.bigandyellow.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.Toast
@@ -33,6 +34,7 @@ class MainActivity : AppCompatActivity() {
                 is MainScreenState.Loading -> binding.progressBar.visibility = VISIBLE
                 is MainScreenState.Error -> {
                     Toast.makeText(this, it.error.message, Toast.LENGTH_LONG).show()
+                    Log.e("BigAndYellow", it.error.message.toString())
                     binding.progressBar.visibility = GONE
                 }
                 is MainScreenState.Result -> binding.progressBar.visibility = GONE
