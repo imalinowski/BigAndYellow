@@ -3,6 +3,7 @@ package com.malinowski.bigandyellow.model
 import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.User
 import io.reactivex.Observable
+import io.reactivex.Single
 
 
 interface IRepository {
@@ -11,6 +12,6 @@ interface IRepository {
 
     fun loadTopic(id: Int): Observable<Topic>
 
-    fun loadUsers(): Observable<List<User>>
+    fun loadUsers(): Single<List<User>>
 
 }

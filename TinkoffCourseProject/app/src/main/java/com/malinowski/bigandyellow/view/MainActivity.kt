@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
             when (it) {
                 is MainScreenState.Loading -> binding.progressBar.visibility = VISIBLE
                 is MainScreenState.Error -> {
-                    Toast.makeText(this, it.error.message, Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, it.error.message.toString(), Toast.LENGTH_LONG).show()
                     Log.e("BigAndYellow", it.error.message.toString())
                     binding.progressBar.visibility = GONE
                 }

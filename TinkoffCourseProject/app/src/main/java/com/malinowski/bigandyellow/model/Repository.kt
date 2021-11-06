@@ -1,12 +1,15 @@
 package com.malinowski.bigandyellow.model
 
-import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.malinowski.bigandyellow.model.data.*
 import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -42,18 +45,23 @@ object Repository : IRepository {
         Observable.just(topics[id]).subscribeOn(Schedulers.io())
             .delay(1000, TimeUnit.MILLISECONDS)
 
-    override fun loadUsers(): Observable<List<User>> {
+    override fun loadUsers(): Single<List<User>> {
         val format = Json { ignoreUnknownKeys = true }
-        return service.getUsers().observeOn(Schedulers.io())
-            .map {
-                format.decodeFromString<GetUsersResponse>(it.string()).members
-            }.toObservable()/*.subscribe({ list ->
-            Log.i("BigAndYellow", list.size.toString())
-        }, {
-            Log.e("BigAndYellow", it.message.toString())
-        }).let { }*/
-        //return Observable.just(users.toList()).subscribeOn(Schedulers.io())//.toObservable()
+        return service.getUsers().subscribeOn(Schedulers.io()).map { body ->
+            val membersJSA = format.decodeFromString<JsonObject>(body.string())["members"]
+            format.decodeFromString<List<User>>(membersJSA.toString())
+        }
     }
+
+    fun loadStatus(user: User) =
+        service.getPresence(user.id).subscribeOn(Schedulers.io()).map { body ->
+            val jso = Json.decodeFromString<JsonObject>(body.string())
+                .jsonObject["presence"]?.jsonObject?.get("aggregated")?.jsonObject?.get("status")
+            jso?.jsonPrimitive?.content?.let { status ->
+                user.status = UserStatus.decodeFromString(status)
+                user.status
+            }
+        }
 
     init {
         topics.addAll(
@@ -80,17 +88,18 @@ object Repository : IRepository {
                 ),
             )
         )
-        topics[0].chats[0].messages.addAll(with(User(name = "Nikolay Nekrasov")) {
-            mutableListOf(
-                Message(1, "Вчерашний день, часу в шестом,\nЗашел я на Сенную;", this),
-                Message(2, "Там били женщину кнутом,\nКрестьянку молодую.", this),
-                Message(3, "Ни звука из ее груди,\nЛишь бич свистал, играя...", this),
-                Message(
-                    4, "И Музе я сказал: «Гляди!\nСестра твоя родная!».", this,
-                    mutableListOf(Reaction("other", 34, 3))
-                ),
-            )
-        })
+        topics[0].chats[0].messages.addAll(
+            with(User(id = 1, name = "Nikolay Nekrasov")) {
+                mutableListOf(
+                    Message(1, "Вчерашний день, часу в шестом,\nЗашел я на Сенную;", this),
+                    Message(2, "Там били женщину кнутом,\nКрестьянку молодую.", this),
+                    Message(3, "Ни звука из ее груди,\nЛишь бич свистал, играя...", this),
+                    Message(
+                        4, "И Музе я сказал: «Гляди!\nСестра твоя родная!».", this,
+                        mutableListOf(Reaction("other", 34, 3))
+                    ),
+                )
+            })
 
         users.addAll(
             mutableListOf(

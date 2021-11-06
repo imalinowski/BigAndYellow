@@ -24,7 +24,10 @@
         <entry key="app/src/main/res/drawable/channels.xml" value="0.24444444444444444" />
         <entry key="app/src/main/res/drawable/ic_add_file_to_message.xml" value="0.2611111111111111" />
         <entry key="app/src/main/res/drawable/ic_channels.xml" value="0.24444444444444444" />
+        <entry key="app/src/main/res/drawable/ic_green_dot.xml" value="0.23703703703703705" />
+        <entry key="app/src/main/res/drawable/ic_orange_dot.xml" value="0.23333333333333334" />
         <entry key="app/src/main/res/drawable/ic_plus.xml" value="0.2574074074074074" />
+        <entry key="app/src/main/res/drawable/ic_red_dot.xml" value="0.23703703703703705" />
         <entry key="app/src/main/res/drawable/ic_send_message.xml" value="0.3260416666666667" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="app/src/main/res/layout/custom_view_group_layout.xml" value="0.2740036231884058" />
@@ -40,7 +43,7 @@
         <entry key="app/src/main/res/layout/miles_bottom_sheet_content.xml" value="0.23233695652173914" />
         <entry key="app/src/main/res/layout/smiles_bottom_sheet_content.xml" value="0.15070921985815602" />
         <entry key="app/src/main/res/layout/topic_and_chats_item.xml" value="0.335" />
-        <entry key="app/src/main/res/layout/user_item.xml" value="0.6983376923823384" />
+        <entry key="app/src/main/res/layout/user_item.xml" value="0.664576802507837" />
         <entry key="app/src/main/res/menu/bottom_navigation_menu.xml" value="0.3098958333333333" />
         <entry key="app/src/main/res/menu/toolbar_menu.xml" value="0.3098958333333333" />
       </map>

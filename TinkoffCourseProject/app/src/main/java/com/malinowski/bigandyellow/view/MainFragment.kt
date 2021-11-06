@@ -31,7 +31,7 @@ class MainFragment : Fragment() {
                     addToBackStack(null)
                 }
                 R.id.page_2 -> childFragmentManager.commit(allowStateLoss = true) {
-                    replace(R.id.main_fragment_container_view, PeopleFragment())
+                    replace(R.id.main_fragment_container_view, UsersFragment())
                     addToBackStack(null)
                 }
                 R.id.page_3 -> childFragmentManager.commit(allowStateLoss = true) {
