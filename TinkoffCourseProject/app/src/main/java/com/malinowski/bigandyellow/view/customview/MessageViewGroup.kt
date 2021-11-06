@@ -34,9 +34,9 @@ class MessageViewGroup @JvmOverloads constructor(
     fun setMessage(message: Message) {
         this.message = message
         this.messageTextView.text = message.message
-        this.nameTextView.text = message.user.name
+        this.nameTextView.text = message.senderName
 
-        if (message.user === User.ME) {
+        if (message.isMine) {
             nameTextView.visibility = GONE
             getChildAt(0).visibility = GONE
             getChildAt(1).setBackgroundResource(R.drawable.bg_green_round)
@@ -143,7 +143,7 @@ class MessageViewGroup @JvmOverloads constructor(
         totalWidth += maxOf(flexBoxView.measuredWidth, textWidth)
         // width of message - ширина текста или FlexBox
 
-        if (message.user === User.ME)
+        if (message.isMine)
             totalWidth = MeasureSpec.getSize(widthMeasureSpec)
 
         plus.layoutParams = plus.layoutParams.apply {
@@ -169,7 +169,7 @@ class MessageViewGroup @JvmOverloads constructor(
         )
         val topMargin = (flexBoxView.layoutParams as MarginLayoutParams).topMargin
 
-        if (message.user === User.ME) {
+        if (message.isMine) {
             textBox.layout(
                 measuredWidth - textBox.measuredWidth,
                 paddingTop,

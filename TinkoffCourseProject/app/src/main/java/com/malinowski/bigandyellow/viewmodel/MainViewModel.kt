@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.model.Repository
+import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.User
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeUnit
 class MainViewModel : ViewModel() {
 
     private val dataProvider = Repository
-    val chat = MutableLiveData<Pair<Int, Int>>() // <topic num> to <chat num in topic>
+    val chat = MutableLiveData<Pair<Int, String>>() // <stream id> to <topic name>
 
     private val _mainScreenState: MutableLiveData<MainScreenState> = MutableLiveData()
     val mainScreenState: LiveData<MainScreenState>
@@ -109,15 +110,15 @@ class MainViewModel : ViewModel() {
             .addTo(compositeDisposable)
     }
 
-    fun openChat(topicId: Int, chatId: Int) {
-        chat.postValue(topicId to chatId)
+    fun openChat(streamId: Int, topic: String) {
+        chat.postValue(streamId to topic)
     }
 
     fun getTopics(streamId: Int): Single<List<Topic>> =
         dataProvider.loadTopics(streamId)
 
-    fun getChat(streamId: Int, topicId: Int): Single<Topic> =
-        getTopics(topicId).map { it[streamId] }
+    fun getMessages(stream: Int, topic: String): Single<List<Message>> =
+        dataProvider.loadTopicMessages(stream, topic)
 
     fun result() {
         _mainScreenState.postValue(MainScreenState.Result)

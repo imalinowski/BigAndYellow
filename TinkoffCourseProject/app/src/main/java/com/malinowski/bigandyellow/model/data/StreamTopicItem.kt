@@ -11,8 +11,8 @@ data class StreamItem(
 ) : StreamTopicItem()
 
 data class TopicItem(
-    val chatId: Int,
     val topicId: Int,
+    val streamId: Int,
     val name: String,
     val messageNum: Int
 ) : StreamTopicItem()

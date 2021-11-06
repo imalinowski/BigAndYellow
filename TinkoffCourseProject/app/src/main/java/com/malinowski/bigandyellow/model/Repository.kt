@@ -3,10 +3,7 @@ package com.malinowski.bigandyellow.model
 import android.annotation.SuppressLint
 import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.malinowski.bigandyellow.model.data.Stream
-import com.malinowski.bigandyellow.model.data.Topic
-import com.malinowski.bigandyellow.model.data.User
-import com.malinowski.bigandyellow.model.data.UserStatus
+import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import io.reactivex.Single
@@ -14,10 +11,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -45,7 +39,8 @@ object Repository : IRepository {
     private val compositeDisposable = CompositeDisposable()
     override fun loadStreams(): Single<List<Stream>> {
         return service.getStreams().subscribeOn(Schedulers.io()).map { body ->
-            val streamsJSA = format.decodeFromString<JsonObject>(body.string())["streams"]
+            val streamsJSA =
+                format.decodeFromString<JsonObject>(body.string())["streams"]
             format.decodeFromString<List<Stream>>(streamsJSA.toString())
         }.map { topicsPreload(it) }.delay(1000, TimeUnit.MILLISECONDS)
     }
@@ -70,14 +65,16 @@ object Repository : IRepository {
 
     override fun loadTopics(id: Int): Single<List<Topic>> {
         return service.getTopicsInStream(id).subscribeOn(Schedulers.io()).map { body ->
-            val topicsJSA = format.decodeFromString<JsonObject>(body.string())["topics"]
+            val topicsJSA =
+                format.decodeFromString<JsonObject>(body.string())["topics"]
             format.decodeFromString<List<Topic>>(topicsJSA.toString())
         }
     }
 
     override fun loadUsers(): Single<List<User>> {
         return service.getUsers().subscribeOn(Schedulers.io()).map { body ->
-            val membersJSA = format.decodeFromString<JsonObject>(body.string())["members"]
+            val membersJSA =
+                format.decodeFromString<JsonObject>(body.string())["members"]
             format.decodeFromString<List<User>>(membersJSA.toString())
         }
     }
@@ -102,6 +99,18 @@ object Repository : IRepository {
                 Log.e("LoadOwnUser", it.message.toString())
             }
         )
+    }
+
+    fun loadTopicMessages(stream: Int, topic: String): Single<List<Message>> {
+        val narrow = JsonArray(listOf(
+            Json.encodeToJsonElement(ZulipChat.NarrowElementInt(operator = "stream", operand = stream)),
+            Json.encodeToJsonElement(ZulipChat.NarrowElement(operator = "topic", operand = topic)),
+        ))
+        return service.getMessages(narrow = narrow.toString()).subscribeOn(Schedulers.io())
+            .map { body ->
+                val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
+                format.decodeFromString(jso.toString())
+            }
     }
 
     class ExpectedError : Throwable("Expected Random Error")

@@ -8,10 +8,10 @@ internal class TopicToItemMapper : (List<Topic>, Int) -> (List<TopicItem>) {
     override fun invoke(topics: List<Topic>, streamId: Int): List<TopicItem> {
         return topics.mapIndexed { index, chat ->
             TopicItem(
-                chatId = index,
-                topicId = streamId,
+                topicId = index,
+                streamId = streamId,
                 name = chat.name,
-                messageNum = chat.messages.size
+                messageNum = chat.lastMesID
             )
         }
     }

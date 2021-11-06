@@ -32,7 +32,7 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
     private val adapter = TopicsChatsAdapter { position -> // on item click
         when (val item = items[position]) {
             is TopicItem -> item.also {
-                model.openChat(item.topicId, item.chatId)
+                model.openChat(item.streamId, item.name)
             }
             is StreamItem -> {
                 if (item.expanded)

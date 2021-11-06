@@ -41,7 +41,7 @@ class TopicsChatsAdapter(
                     viewBinding.chatName.text = item.name
                     viewBinding.messagesNum.text = item.messageNum.toString()
                     viewBinding.chatLinear.setBackgroundResource(
-                        if (item.chatId % 2 == 0) R.drawable.bg_green else R.drawable.bg_purple
+                        if (item.topicId % 2 == 0) R.drawable.bg_green else R.drawable.bg_purple
                     )
                 }
             }
