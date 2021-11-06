@@ -12,4 +12,7 @@ interface ZulipChat {
 
     @GET("users/{id}/presence")
     fun getPresence(@Path("id") id: Int): Single<ResponseBody>
+
+    @GET("users/me")
+    fun getOwnUser(): Single<ResponseBody>
 }

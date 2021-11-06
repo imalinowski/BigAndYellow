@@ -1,5 +1,7 @@
 package com.malinowski.bigandyellow.model
 
+import android.annotation.SuppressLint
+import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
@@ -63,7 +65,19 @@ object Repository : IRepository {
                 user.status = UserStatus.decodeFromString(status)
                 user.status
             }
-        }
+        }.doOnError { Log.e("LoadUserStatus", "${user.name} ${it.message}") }
+
+    @SuppressLint("CheckResult")
+    fun loadOwnUser() {
+        val format = Json { ignoreUnknownKeys = true }
+        service.getOwnUser().subscribeOn(Schedulers.io()).subscribe(
+            { body ->
+                User.ME = format.decodeFromString(body.string())
+            }, {
+                Log.e("LoadOwnUser", it.message.toString())
+            }
+        )
+    }
 
     init {
         topics.addAll(

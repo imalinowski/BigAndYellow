@@ -87,7 +87,7 @@ class ChatFragment : Fragment() {
                     model.error(Repository.ExpectedError())
                     return@apply
                 }
-                chat.messages.add(Message(chat.messages.size, text.toString(), User.INSTANCE))
+                chat.messages.add(Message(chat.messages.size, text.toString(), User.ME))
                 setText("")
                 layoutManager.scrollToPosition(chat.messages.size - 1)
             }

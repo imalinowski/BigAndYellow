@@ -16,4 +16,6 @@
     <color name="custom_green_primary">#219653</color>
     <color name="custom_green_primary_variant">#2A9D8F</color>
     <color name="custom_purple">#8A7090</color>
+    <color name="idle_orange">#FF9800</color>
+    <color name="offline_red">#B54A4A</color>
 </resources>

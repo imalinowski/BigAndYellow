@@ -3,9 +3,6 @@ package com.malinowski.bigandyellow.model.data
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class UsersResponse(val result: String, val msg: String, val members: List<User>)
-
 enum class UserStatus {
     Online, Offline, Idle;
 
@@ -27,9 +24,7 @@ data class User(
     var status: UserStatus = UserStatus.Offline
 ) {
     companion object {
-        val INSTANCE by lazy {
-            User(id = 0, name = "me")
-        }
+        lateinit var ME: User
     }
 }
 
