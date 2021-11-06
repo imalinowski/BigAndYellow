@@ -41,7 +41,8 @@ internal class SearchTopicsUseCase : ISearchTopicsUseCase {
             val topics = stream.search(query)
             if(topics.isNotEmpty() || stream.name.contains(query, ignoreCase = true)) {
                 streamTopicItem.add(streamToItemMapper(stream).apply {
-                    if(topics.isNotEmpty()) expanded = true
+                    if(topics.isNotEmpty())
+                        expanded = true
                 })
                 streamTopicItem.addAll(topics)
             }

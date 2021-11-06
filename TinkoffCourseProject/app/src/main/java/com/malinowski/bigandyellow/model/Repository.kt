@@ -3,10 +3,15 @@ package com.malinowski.bigandyellow.model
 import android.annotation.SuppressLint
 import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.data.Stream
+import com.malinowski.bigandyellow.model.data.Topic
+import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.data.UserStatus
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -18,6 +23,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import java.util.concurrent.TimeUnit
 
 object Repository : IRepository {
 
@@ -36,18 +42,30 @@ object Repository : IRepository {
     private var service = retrofit.create(ZulipChat::class.java)
     private val format = Json { ignoreUnknownKeys = true }
 
+    private val compositeDisposable = CompositeDisposable()
     override fun loadStreams(): Single<List<Stream>> {
         return service.getStreams().subscribeOn(Schedulers.io()).map { body ->
-            val subscriptionsJSA = format.decodeFromString<JsonObject>(body.string())["streams"]
-            format.decodeFromString<List<Stream>>(subscriptionsJSA.toString())
-        }
+            val streamsJSA = format.decodeFromString<JsonObject>(body.string())["streams"]
+            format.decodeFromString<List<Stream>>(streamsJSA.toString())
+        }.map { topicsPreload(it) }.delay(1000, TimeUnit.MILLISECONDS)
     }
 
     override fun loadSubscribedStreams(): Single<List<Stream>> {
         return service.getSubscribedStreams().subscribeOn(Schedulers.io()).map { body ->
-            val subscriptionsJSA = format.decodeFromString<JsonObject>(body.string())["subscriptions"]
+            val subscriptionsJSA =
+                format.decodeFromString<JsonObject>(body.string())["subscriptions"]
             format.decodeFromString<List<Stream>>(subscriptionsJSA.toString())
-        }
+        }.map { topicsPreload(it) }.delay(1000, TimeUnit.MILLISECONDS)
+    }
+
+    private fun topicsPreload(streams: List<Stream>): List<Stream> = streams.onEach { stream ->
+        loadTopics(stream.id).subscribe(
+            { topics ->
+                stream.topics = topics.toMutableList()
+            }, {
+                Log.e("topicPreload", it.message.toString())
+            }
+        ).addTo(compositeDisposable)
     }
 
     override fun loadTopics(id: Int): Single<List<Topic>> {
