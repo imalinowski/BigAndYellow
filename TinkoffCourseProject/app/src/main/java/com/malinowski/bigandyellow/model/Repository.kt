@@ -2,6 +2,8 @@ package com.malinowski.bigandyellow.model
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.network.AuthInterceptor
+import com.malinowski.bigandyellow.model.network.ZulipChat
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
@@ -19,14 +21,14 @@ import java.util.concurrent.TimeUnit
 
 
 object Repository : IRepository {
-    // backend in future
-    private val topics: MutableList<Topic> = mutableListOf()
 
+    private val topics: MutableList<Topic> = mutableListOf()
     private val users: MutableList<User> = mutableListOf()
 
-    private val client = OkHttpClient.Builder().addInterceptor(
-        HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
-    ).build()
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+        .addInterceptor(AuthInterceptor())
+        .build()
 
     private var retrofit = Retrofit.Builder()
         .baseUrl("https://tinkoff-android-fall21.zulipchat.com/api/v1/") // http://192.168.0.21:8081/
