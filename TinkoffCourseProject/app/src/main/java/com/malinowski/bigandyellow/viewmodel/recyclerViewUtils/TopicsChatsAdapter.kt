@@ -10,13 +10,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.TopicAndChatsItemBinding
-import com.malinowski.bigandyellow.model.data.ChatItem
-import com.malinowski.bigandyellow.model.data.TopicChatItem
 import com.malinowski.bigandyellow.model.data.TopicItem
+import com.malinowski.bigandyellow.model.data.StreamTopicItem
+import com.malinowski.bigandyellow.model.data.StreamItem
 
 class TopicsChatsAdapter(
     private val onClick: (position: Int) -> Unit
-) : ListAdapter<TopicChatItem, TopicsChatsAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
+) : ListAdapter<StreamTopicItem, TopicsChatsAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
     class ViewHolder(private val viewBinding: TopicAndChatsItemBinding) :
         RecyclerView.ViewHolder(viewBinding.root) {
@@ -25,9 +25,9 @@ class TopicsChatsAdapter(
             viewBinding.topicArrow
         }
 
-        fun bind(item: TopicChatItem) {
+        fun bind(item: StreamTopicItem) {
             when (item) {
-                is TopicItem -> {
+                is StreamItem -> {
                     viewBinding.chatLinear.visibility = GONE
                     viewBinding.topicConstraint.visibility = VISIBLE
                     viewBinding.topicName.text = item.name
@@ -35,7 +35,7 @@ class TopicsChatsAdapter(
                     viewBinding.progressBar.isVisible = item.loading
                     viewBinding.topicArrow.isVisible = !item.loading
                 }
-                is ChatItem -> {
+                is TopicItem -> {
                     viewBinding.chatLinear.visibility = VISIBLE
                     viewBinding.topicConstraint.visibility = GONE
                     viewBinding.chatName.text = item.name
@@ -67,7 +67,7 @@ class TopicsChatsAdapter(
         holder.setOnClickListener {
             if (position >= itemCount) return@setOnClickListener
             onClick(position)
-            if (item is TopicItem) holder.topicArrow.let { arrow ->
+            if (item is StreamItem) holder.topicArrow.let { arrow ->
                 ObjectAnimator.ofFloat(
                     arrow, "rotation",
                     if (item.expanded) 0f else 180f,
@@ -79,13 +79,13 @@ class TopicsChatsAdapter(
         }
     }
 
-    class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<TopicChatItem>() {
+    class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<StreamTopicItem>() {
 
-        override fun areItemsTheSame(oldItem: TopicChatItem, newItem: TopicChatItem): Boolean {
+        override fun areItemsTheSame(oldItem: StreamTopicItem, newItem: StreamTopicItem): Boolean {
             return oldItem.hashCode() == newItem.hashCode()
         }
 
-        override fun areContentsTheSame(oldItem: TopicChatItem, newItem: TopicChatItem): Boolean {
+        override fun areContentsTheSame(oldItem: StreamTopicItem, newItem: StreamTopicItem): Boolean {
             return oldItem == newItem
         }
 

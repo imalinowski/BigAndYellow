@@ -3,17 +3,16 @@ package com.malinowski.bigandyellow.model.mapper
 import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.TopicItem
 
-internal class TopicToItemMapper : (Topic) -> (TopicItem) {
+internal class TopicToItemMapper : (List<Topic>, Int) -> (List<TopicItem>) {
 
-    private val chatToItemMapper: ChatToItemMapper = ChatToItemMapper()
-
-    override fun invoke(topic: Topic): TopicItem {
-        return TopicItem(
-            topicId = topic.id,
-            name = topic.name,
-            chats = chatToItemMapper(topic.chats, topic.id),
-            subscribed = topic.subscribed,
-            expanded = false
-        )
+    override fun invoke(topics: List<Topic>, streamId: Int): List<TopicItem> {
+        return topics.mapIndexed { index, chat ->
+            TopicItem(
+                chatId = index,
+                topicId = streamId,
+                name = chat.name,
+                messageNum = chat.messages.size
+            )
+        }
     }
 }

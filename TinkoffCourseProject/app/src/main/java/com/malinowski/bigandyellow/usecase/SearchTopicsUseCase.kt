@@ -1,52 +1,61 @@
 package com.malinowski.bigandyellow.usecase
 
-import com.malinowski.bigandyellow.model.Repository
-import com.malinowski.bigandyellow.model.data.*
-import com.malinowski.bigandyellow.model.mapper.ChatToItemMapper
+import com.malinowski.bigandyellow.model.data.Stream
+import com.malinowski.bigandyellow.model.data.StreamTopicItem
+import com.malinowski.bigandyellow.model.data.Topic
+import com.malinowski.bigandyellow.model.data.TopicItem
 import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
+import com.malinowski.bigandyellow.model.mapper.StreamToItemMapper
 import io.reactivex.Observable
+import io.reactivex.Single
 
-interface ISearchTopicsUseCase : (String) -> Observable<List<TopicChatItem>> {
+interface ISearchTopicsUseCase :
+        (String, Single<List<Stream>>) -> Observable<List<StreamTopicItem>> {
 
-    override fun invoke(searchQuery: String): Observable<List<TopicChatItem>>
+    override fun invoke(
+        searchQuery: String,
+        streams: Single<List<Stream>>
+    ): Observable<List<StreamTopicItem>>
 }
 
 internal class SearchTopicsUseCase : ISearchTopicsUseCase {
 
+    private val streamToItemMapper: StreamToItemMapper = StreamToItemMapper()
     private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
-    private val chatToItemMapper: ChatToItemMapper = ChatToItemMapper()
-    private val dataProvider = Repository
 
-    override fun invoke(searchQuery: String): Observable<List<TopicChatItem>> {
-        return dataProvider.loadTopics()
-            .map { topics ->
-                if (searchQuery.isNotEmpty())
-                    topics.search(searchQuery)
-                else
-                    topics.map(topicToItemMapper)
-            }
+    override fun invoke(
+        searchQuery: String,
+        streams: Single<List<Stream>>
+    ): Observable<List<StreamTopicItem>> {
+        return streams.map { topics ->
+            if (searchQuery.isNotEmpty())
+                topics.search(searchQuery)
+            else
+                topics.map(streamToItemMapper)
+        }.toObservable()
     }
 
-    private fun List<Topic>.search(query: String): List<TopicChatItem> {
-        val topicChatItems = mutableListOf<TopicChatItem>()
-        this.forEach { topic ->
-            val chats = topic.search(query)
-            if(chats.isNotEmpty() || topic.name.contains(query, ignoreCase = true)) {
-                topicChatItems.add(topicToItemMapper(topic).apply {
-                    if(chats.isNotEmpty()) expanded = true
+    private fun List<Stream>.search(query: String): List<StreamTopicItem> {
+        val streamTopicItem = mutableListOf<StreamTopicItem>()
+        this.forEach { stream ->
+            val topics = stream.search(query)
+            if(topics.isNotEmpty() || stream.name.contains(query, ignoreCase = true)) {
+                streamTopicItem.add(streamToItemMapper(stream).apply {
+                    if(topics.isNotEmpty()) expanded = true
                 })
-                topicChatItems.addAll(chats)
+                streamTopicItem.addAll(topics)
             }
         }
-        return topicChatItems
+        return streamTopicItem
     }
 
-    private fun Topic.search(query: String): List<ChatItem> {
-        val satisfyChats = mutableListOf<Chat>()
-        this.chats.forEach { chat ->
-            if (chat.name.contains(query, ignoreCase = true)) satisfyChats.add(chat)
+    //TODO make topic search
+    private fun Stream.search(query: String): List<TopicItem> {
+        val satisfyChats = mutableListOf<Topic>()
+        this.topics.forEach { topic ->
+            if (topic.name.contains(query, ignoreCase = true)) satisfyChats.add(topic)
         }
-        return chatToItemMapper(satisfyChats, this.id)
+        return topicToItemMapper(satisfyChats, this.id)
     }
 
 }

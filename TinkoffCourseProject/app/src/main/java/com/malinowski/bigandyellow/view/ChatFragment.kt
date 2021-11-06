@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.Repository
-import com.malinowski.bigandyellow.model.data.Chat
+import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
 import com.malinowski.bigandyellow.model.data.User
@@ -28,7 +28,7 @@ class ChatFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val model: MainViewModel by activityViewModels()
-    private lateinit var chat: Chat
+    private lateinit var topic: Topic
 
     private val modalBottomSheet = SmileBottomSheet()
 
@@ -44,7 +44,7 @@ class ChatFragment : Fragment() {
             model.getChat(bundle.getInt(TOPIC_NUM), bundle.getInt(CHAT_NUM))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
-                    chat = it
+                    topic = it
                     model.result()
                     initUI()
                 }, { e -> model.error(e) })
@@ -61,13 +61,13 @@ class ChatFragment : Fragment() {
     }
 
     private fun initUI() {
-        binding.chatName.text = chat.name
+        binding.chatName.text = topic.name
 
         binding.back.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        adapter = MessagesAdapter(chat.messages) { position ->
+        adapter = MessagesAdapter(topic.messages) { position ->
             modalBottomSheet.show(childFragmentManager, SmileBottomSheet.TAG)
             modalBottomSheet.arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position)
         }
@@ -87,11 +87,11 @@ class ChatFragment : Fragment() {
                     model.error(Repository.ExpectedError())
                     return@apply
                 }
-                chat.messages.add(Message(chat.messages.size, text.toString(), User.ME))
+                topic.messages.add(Message(topic.messages.size, text.toString(), User.ME))
                 setText("")
-                layoutManager.scrollToPosition(chat.messages.size - 1)
+                layoutManager.scrollToPosition(topic.messages.size - 1)
             }
-            binding.messageRecycler.adapter?.notifyItemInserted(chat.messages.size)
+            binding.messageRecycler.adapter?.notifyItemInserted(topic.messages.size)
         }
 
         binding.sendMessageText.doAfterTextChanged {
@@ -107,7 +107,7 @@ class ChatFragment : Fragment() {
         ) { _, bundle ->
             val messagePosition = bundle.getInt(SmileBottomSheet.MESSAGE_KEY)
             val smileNum = bundle.getInt(SmileBottomSheet.SMILE_KEY)
-            chat.messages[messagePosition].reactions.add(Reaction(smile = smileNum, num = 1))
+            topic.messages[messagePosition].reactions.add(Reaction(smile = smileNum, num = 1))
             adapter.notifyItemChanged(messagePosition)
         }
     }

@@ -1,19 +1,18 @@
 package com.malinowski.bigandyellow.model.data
 
-sealed class TopicChatItem()
+sealed class StreamTopicItem()
 
-data class TopicItem(
-    val topicId: Int,
+data class StreamItem(
+    val streamId: Int,
     val name: String,
-    val chats: List<ChatItem>,
-    val subscribed: Boolean = false,
+    var topics: List<TopicItem>,
     var expanded: Boolean = false,
     var loading: Boolean = false
-) : TopicChatItem()
+) : StreamTopicItem()
 
-data class ChatItem(
+data class TopicItem(
     val chatId: Int,
     val topicId: Int,
     val name: String,
     val messageNum: Int
-) : TopicChatItem()
+) : StreamTopicItem()

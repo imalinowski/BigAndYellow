@@ -4,8 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Topic(
+data class Stream(
     val name: String,
-    @SerialName("max_id") val lastMesID:Int = 0,
-    val messages: MutableList<Message> = mutableListOf()
+    @SerialName("stream_id") val id: Int,
+    val topics: MutableList<Topic> = mutableListOf()
 )

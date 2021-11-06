@@ -10,10 +10,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentStreamsBinding
-import com.malinowski.bigandyellow.model.data.ChatItem
-import com.malinowski.bigandyellow.model.data.TopicChatItem
+import com.malinowski.bigandyellow.model.data.StreamItem
+import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.TopicItem
-import com.malinowski.bigandyellow.model.mapper.ChatToItemMapper
+import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.Streams
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter
@@ -25,16 +25,16 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         FragmentStreamsBinding.inflate(layoutInflater)
     }
 
-    private val chatToItemMapper: ChatToItemMapper = ChatToItemMapper()
+    private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
     private val model: MainViewModel by activityViewModels()
-    private var items: MutableList<TopicChatItem> = mutableListOf()
+    private var items: MutableList<StreamTopicItem> = mutableListOf()
 
     private val adapter = TopicsChatsAdapter { position -> // on item click
         when (val item = items[position]) {
-            is ChatItem -> item.also {
+            is TopicItem -> item.also {
                 model.openChat(item.topicId, item.chatId)
             }
-            is TopicItem -> {
+            is StreamItem -> {
                 if (item.expanded)
                     deleteItems(position)
                 else
@@ -53,10 +53,10 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         val streamType =
             arguments?.getSerializable(SUBSCRIBED)?.let { it as Streams } ?: Streams.AllStreams
 
-        (if (streamType == Streams.SubscribedStreams) model.topicsSubscribed else model.topics)
+        (if (streamType == Streams.SubscribedStreams) model.streamsSubscribed else model.streams)
             .observe(viewLifecycleOwner) {
                 items = it.toMutableList()
-                    .onEach { item -> if (item is TopicItem) item.expanded = false }
+                    .onEach { item -> if (item is StreamItem) item.expanded = false }
                 adapter.submitList(items) {
                     viewBinding.topicsChatsRecycler.scrollToPosition(0)
                 }
@@ -71,28 +71,29 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
     }
 
     @SuppressLint("CheckResult")
-    private fun addItems(topic: TopicItem, listPosition: Int) {
-        topic.loading = true
+    private fun addItems(stream: StreamItem, listPosition: Int) {
+        stream.loading = true
         adapter.notifyItemChanged(listPosition)
 
-        model.getChats(topic.topicId)
-            .map { chatToItemMapper(it, topic.topicId) }
+        model.getTopics(stream.streamId)
+            .map { topicToItemMapper(it, stream.streamId) }
+            .doOnSuccess { stream.topics = it }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ chats ->
-                topic.loading = false
+                stream.loading = false
                 items.addAll(listPosition + 1, chats)
                 adapter.notifyItemChanged(listPosition)
                 adapter.notifyItemRangeInserted(listPosition + 1, chats.size)
                 adapter.notifyItemRangeChanged(listPosition + chats.size + 1, adapter.itemCount)
             }, { e ->
-                topic.loading = false
+                stream.loading = false
                 model.error(e)
             })
     }
 
     private fun deleteItems(listPosition: Int) {
         var count = 0
-        while (listPosition + 1 < items.size && items[listPosition + 1] is ChatItem) {
+        while (listPosition + 1 < items.size && items[listPosition + 1] is TopicItem) {
             items.removeAt(listPosition + 1)
             count += 1
         }

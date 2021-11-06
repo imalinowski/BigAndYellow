@@ -32,10 +32,10 @@ class ChannelsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         if (savedInstanceState == null)
-            model.searchTopics("")
+            model.searchStreams("")
 
         binding.searchQuery.doAfterTextChanged {
-            model.searchTopics(it.toString())
+            model.searchStreams(it.toString())
         }
 
         val tabs: List<String> =
