@@ -66,7 +66,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private fun initUI() {
-        //binding.chatName.text = topic.name //TODO
+        binding.chatName.text = "#%s".format(arguments?.getString(TOPIC))
 
         binding.back.setOnClickListener {
             parentFragmentManager.popBackStack()
