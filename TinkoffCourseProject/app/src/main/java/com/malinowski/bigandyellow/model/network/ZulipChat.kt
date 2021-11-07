@@ -2,12 +2,8 @@ package com.malinowski.bigandyellow.model.network
 
 import io.reactivex.Single
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -39,8 +35,8 @@ interface ZulipChat {
     @GET("messages")
     fun getMessages(
         @Query("anchor") anchor: String = "newest",
-        @Query("num_before") numBefore: Int = 10,
-        @Query("num_after") numAfter: Int = 10,
+        @Query("num_before") numBefore: Int = 1000,
+        @Query("num_after") numAfter: Int = 1000,
         @Query("narrow") narrow: String,
     ): Single<ResponseBody>
 

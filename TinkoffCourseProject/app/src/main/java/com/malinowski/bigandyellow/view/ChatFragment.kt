@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -16,7 +17,9 @@ import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import java.lang.IllegalArgumentException
 import kotlin.random.Random
 
 class ChatFragment : Fragment(R.layout.fragment_chat) {
@@ -44,15 +47,29 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let { bundle ->
-            model.getMessages(bundle.getInt(STREAM), bundle.getString(TOPIC)!!)
-                .observeOn(AndroidSchedulers.mainThread())
+
+            val flow: Single<List<Message>> =
+                if (bundle.containsKey(USER))
+                    model.getMessages(bundle.getString(USER)!!)
+                else if (bundle.containsKey(STREAM) && bundle.containsKey(TOPIC))
+                    model.getMessages(
+                        bundle.getInt(STREAM),
+                        bundle.getString(TOPIC)!!
+                    )
+                else {
+                    model.error(IllegalArgumentException("open chat -> Invalid arguments"))
+                    parentFragmentManager.popBackStack()
+                    return@let
+                }
+
+            flow.observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     messages = it.toMutableList()
                     model.result()
                     initUI()
                 }, { e ->
                     model.error(e)
-                })
+                }).let { } // TODO
         }
         model.loading()
     }
@@ -66,7 +83,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private fun initUI() {
-        binding.chatName.text = "#%s".format(arguments?.getString(TOPIC))
+        binding.chatName.text = "#%s".format(
+            arguments?.getString(TOPIC) ?:
+            arguments?.getString(USER)
+        )
 
         binding.back.setOnClickListener {
             parentFragmentManager.popBackStack()
@@ -110,14 +130,12 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     companion object {
-        private const val STREAM = "stream"
-        private const val TOPIC = "topic"
-        fun newInstance(streamId: Int, topic: String) =
-            ChatFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(STREAM, streamId)
-                    putString(TOPIC, topic)
-                }
-            }
+
+        const val USER = "user_email"
+        const val STREAM = "stream"
+        const val TOPIC = "topic"
+
+        fun newInstance(bundle: Bundle) = ChatFragment().apply { arguments = bundle }
+
     }
 }

@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import com.google.android.material.tabs.TabLayoutMediator
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChannelsBinding
+import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.PagerAdapter
 import com.malinowski.bigandyellow.viewmodel.Streams
@@ -36,6 +37,11 @@ class ChannelsFragment : Fragment() {
 
         binding.searchQuery.doAfterTextChanged {
             model.searchStreams(it.toString())
+        }
+
+        binding.searchLoop.setOnLongClickListener {
+            model.openChat(User.ME.email)
+            false
         }
 
         val tabs: List<String> =

@@ -41,11 +41,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        model.chat.observe(this) { (stream, topic) ->
+        model.chat.observe(this) { bundle ->
             supportFragmentManager.beginTransaction()
                 .replace(
                     R.id.activity_fragment_container_view,
-                    ChatFragment.newInstance(stream, topic)
+                    ChatFragment.newInstance(bundle)
                 )
                 .addToBackStack(null)
                 .commitAllowingStateLoss()

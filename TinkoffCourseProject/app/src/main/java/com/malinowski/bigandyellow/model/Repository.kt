@@ -5,7 +5,6 @@ import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
-import com.malinowski.bigandyellow.model.network.HtmlStringInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
@@ -25,7 +24,6 @@ object Repository : IRepository {
     private val client = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
         .addInterceptor(AuthInterceptor())
-        .addInterceptor(HtmlStringInterceptor())
         .build()
 
     private var retrofit = Retrofit.Builder()
@@ -111,23 +109,26 @@ object Repository : IRepository {
     }
 
     fun loadMessages(stream: Int, topic: String): Single<List<Message>> {
-        val narrow = JsonArray(
-            listOf(
-                Json.encodeToJsonElement(
-                    ZulipChat.NarrowElementInt(
-                        operator = "stream",
-                        operand = stream
-                    )
-                ),
-                Json.encodeToJsonElement(
-                    ZulipChat.NarrowElement(
-                        operator = "topic",
-                        operand = topic
-                    )
-                ),
-            )
-        )
-        return service.getMessages(narrow = narrow.toString()).subscribeOn(Schedulers.io())
+        val streamFilter = ZulipChat.NarrowElementInt(operator = "stream", operand = stream).let {
+            Json.encodeToJsonElement(it)
+        }
+        val topicFilter = ZulipChat.NarrowElement(operator = "topic", operand = topic).let {
+            Json.encodeToJsonElement(it)
+        }
+        val narrow = JsonArray(listOf(streamFilter, topicFilter)).toString()
+        return service.getMessages(narrow = narrow).subscribeOn(Schedulers.io())
+            .map { body ->
+                val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
+                format.decodeFromString(jso.toString())
+            }
+    }
+
+    fun loadMessages(userEmail: String): Single<List<Message>> {
+        val streamFilter = ZulipChat.NarrowElement(operator = "pm-with", operand = userEmail).let {
+            Json.encodeToJsonElement(it)
+        }
+        val narrow = JsonArray(listOf(streamFilter)).toString()
+        return service.getMessages(narrow = narrow).subscribeOn(Schedulers.io())
             .map { body ->
                 val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
                 format.decodeFromString(jso.toString())

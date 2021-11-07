@@ -1,5 +1,6 @@
 package com.malinowski.bigandyellow.viewmodel
 
+import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,6 +13,7 @@ import com.malinowski.bigandyellow.usecase.ISearchTopicsUseCase
 import com.malinowski.bigandyellow.usecase.ISearchUsersUseCase
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.usecase.SearchUsersUseCase
+import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.MainScreenState
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -25,7 +27,7 @@ import java.util.concurrent.TimeUnit
 class MainViewModel : ViewModel() {
 
     private val dataProvider = Repository
-    val chat = MutableLiveData<Pair<Int, String>>() // <stream id> to <topic name>
+    val chat = MutableLiveData<Bundle>()
 
     private val _mainScreenState: MutableLiveData<MainScreenState> = MutableLiveData()
     val mainScreenState: LiveData<MainScreenState>
@@ -111,7 +113,18 @@ class MainViewModel : ViewModel() {
     }
 
     fun openChat(streamId: Int, topic: String) {
-        chat.postValue(streamId to topic)
+        Bundle().apply {
+            putInt(ChatFragment.STREAM, streamId)
+            putString(ChatFragment.TOPIC, topic)
+            chat.postValue(this)
+        }
+    }
+
+    fun openChat(userEmail: String) {
+        Bundle().apply {
+            putString(ChatFragment.USER, userEmail)
+            chat.postValue(this)
+        }
     }
 
     fun getTopics(streamId: Int): Single<List<Topic>> =
@@ -119,6 +132,9 @@ class MainViewModel : ViewModel() {
 
     fun getMessages(stream: Int, topic: String): Single<List<Message>> =
         dataProvider.loadMessages(stream, topic)
+
+    fun getMessages(user: String): Single<List<Message>> =
+        dataProvider.loadMessages(user)
 
     fun result() {
         _mainScreenState.postValue(MainScreenState.Result)

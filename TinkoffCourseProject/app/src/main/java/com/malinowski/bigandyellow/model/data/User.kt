@@ -19,7 +19,7 @@ enum class UserStatus {
 data class User(
     @SerialName("user_id") val id: Int,
     @SerialName("full_name") val name: String,
-    @SerialName("delivery_email") val email: String = "",
+    @SerialName("email") val email: String = "",
     @SerialName("avatar_url") val avatarUrl: String = "",
     var status: UserStatus = UserStatus.Offline
 ) {
