@@ -4,9 +4,7 @@ import io.reactivex.Single
 import kotlinx.serialization.Serializable
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 
 @Suppress("SpellCheckingInspection")
 interface ZulipChat {
@@ -32,6 +30,15 @@ interface ZulipChat {
     @GET("users/me")
     fun getOwnUser(): Single<ResponseBody>
 
+    @FormUrlEncoded
+    @POST("messages")
+    fun sendMessage(
+        @Field("type") type: String,
+        @Field("to") to: String,
+        @Field("content") content: String,
+        @Field("topic") topic: String = ""
+    ): Single<ResponseBody>
+
     @GET("messages")
     fun getMessages(
         @Query("anchor") anchor: String = "newest",
@@ -45,5 +52,6 @@ interface ZulipChat {
 
     @Serializable
     data class NarrowElementInt(val operator: String, val operand: Int)
+
 
 }

@@ -1,6 +1,7 @@
 package com.malinowski.bigandyellow.viewmodel
 
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -135,6 +136,25 @@ class MainViewModel : ViewModel() {
 
     fun getMessages(user: String): Single<List<Message>> =
         dataProvider.loadMessages(user)
+
+    private fun sendMessage(
+        type: Repository.SendType, to: String, content: String, topic: String = ""
+    ) {
+        dataProvider.sendMessage(type, to, content, topic).subscribeBy(
+            onComplete = { }, onError = {
+                error(it)
+                Log.e("SendMessageError", it.message.toString())
+            }
+        ).addTo(compositeDisposable)
+    }
+
+    fun sendMessageToUser(userEmail: String, content: String) {
+        sendMessage(Repository.SendType.PRIVATE, userEmail, content)
+    }
+
+    fun sendMessageToTopic(stream: Int, topic: String, content: String) {
+        sendMessage(Repository.SendType.STREAM, "[$stream]", content, topic)
+    }
 
     fun result() {
         _mainScreenState.postValue(MainScreenState.Result)

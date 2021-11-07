@@ -6,6 +6,8 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
+import io.reactivex.Completable
+import io.reactivex.CompletableEmitter
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.disposables.CompositeDisposable
@@ -133,6 +135,20 @@ object Repository : IRepository {
                 val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
                 format.decodeFromString(jso.toString())
             }
+    }
+
+    enum class SendType(val type: String) {
+        PRIVATE("private"), STREAM("stream")
+    }
+
+    fun sendMessage(type: SendType, to: String, content: String, topic: String = ""): Completable {
+        lateinit var emitter: CompletableEmitter
+        service.sendMessage(type.type, to, content, topic).subscribeOn(Schedulers.io())
+            .subscribe(
+                { emitter.onComplete() },
+                { e -> emitter.onError(e) }
+            ).let { } //TODO
+        return Completable.create { emitter = it }
     }
 
     class ExpectedError : Throwable("Expected Random Error")

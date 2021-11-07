@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -12,15 +11,12 @@ import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
-import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import java.lang.IllegalArgumentException
-import kotlin.random.Random
 
 class ChatFragment : Fragment(R.layout.fragment_chat) {
 
@@ -84,8 +80,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private fun initUI() {
         binding.chatName.text = "#%s".format(
-            arguments?.getString(TOPIC) ?:
-            arguments?.getString(USER)
+            arguments?.getString(TOPIC) ?: arguments?.getString(USER)
         )
 
         binding.back.setOnClickListener {
@@ -100,11 +95,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         binding.sendMessageButton.setOnClickListener {
             binding.sendMessageText.apply {
                 if (this.length() == 0) return@apply
-                if (Random.nextInt() % 13 == 0) {
-                    model.error(Repository.ExpectedError())
-                    return@apply
-                }
                 messages.add(Message(messages.size, text.toString(), true))
+                sendMessage(text.toString())
                 setText("")
                 layoutManager.scrollToPosition(messages.size - 1)
             }
@@ -129,8 +121,19 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         }
     }
 
-    companion object {
+    private fun sendMessage(content: String) {
+        val bundle = requireArguments()
+        if (bundle.containsKey(USER)) {
+            val userEmail = bundle.getString(USER)!!
+            model.sendMessageToUser(userEmail, content)
+        } else if (bundle.containsKey(STREAM) && bundle.containsKey(TOPIC)) {
+            val streamId = bundle.getInt(STREAM)
+            val topicName = bundle.getString(TOPIC)!!
+            model.sendMessageToTopic(streamId, topicName, content)
+        }
+    }
 
+    companion object {
         const val USER = "user_email"
         const val STREAM = "stream"
         const val TOPIC = "topic"
