@@ -13,6 +13,7 @@
         app:cardCornerRadius="50dp">
 
         <ImageView
+            android:id="@+id/image"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:contentDescription="@string/user_avatar"

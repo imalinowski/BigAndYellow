@@ -4,11 +4,14 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
+import com.bumptech.glide.Glide
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
+import kotlinx.coroutines.flow.combineTransform
 
 class MessageViewGroup @JvmOverloads constructor(
     context: Context,
@@ -21,6 +24,7 @@ class MessageViewGroup @JvmOverloads constructor(
         inflate(context, R.layout.message_view_group_layout, this)
     }
 
+    private val imageView: ImageView = findViewById(R.id.image)
     private val messageTextView: TextView = findViewById(R.id.message)
     private val nameTextView: TextView = findViewById(R.id.name)
     var plus = ImageButton(context).apply {
@@ -36,6 +40,7 @@ class MessageViewGroup @JvmOverloads constructor(
         this.messageTextView.text =
             HtmlCompat.fromHtml(message.message, HtmlCompat.FROM_HTML_MODE_LEGACY).trim()
         this.nameTextView.text = message.senderName
+        Glide.with(context).load(message.avatarUrl).into(this.imageView)
 
         if (message.isMine) {
             nameTextView.visibility = GONE
