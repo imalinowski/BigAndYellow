@@ -3,10 +3,13 @@ package com.malinowski.bigandyellow.view.customview
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.*
+import android.text.Html
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.text.HtmlCompat
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.model.data.Reaction
+import java.lang.NumberFormatException
 
 class CustomEmoji @JvmOverloads constructor(
     context: Context,
@@ -17,13 +20,16 @@ class CustomEmoji @JvmOverloads constructor(
 
     private var emoji: String = ":)"
         private set(value) {
-            field = value
+            field = getEmojiByUnicode(value)
             invalidate()
         }
 
-    private fun setEmoji(num: Int) {
-        resources.getStringArray(R.array.smiles).apply {
-            if (num < size) emoji = get(num)
+    private fun getEmojiByUnicode(reactionCode: String): String {
+        return try{
+            val hex = reactionCode.toInt(16)
+            String(Character.toChars(hex))
+        } catch (e: NumberFormatException) {
+            reactionCode
         }
     }
 
@@ -53,7 +59,7 @@ class CustomEmoji @JvmOverloads constructor(
 
     fun setReaction(reaction: Reaction) {
         this.reaction = reaction
-        setEmoji(reaction.smile)
+        emoji = reaction.smile
         num = reaction.num
         userId = reaction.userId
     }
@@ -73,7 +79,6 @@ class CustomEmoji @JvmOverloads constructor(
             defStyleAttr,
             defStyleRes
         )
-        emoji = smiles[typedArray.getInt(R.styleable.CustomEmoji_emoji, 1)]
         num = typedArray.getInt(R.styleable.CustomEmoji_customNum, num)
 
         textPaint.color =

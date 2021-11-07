@@ -5,6 +5,7 @@ import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
+import com.malinowski.bigandyellow.model.network.HtmlStringInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
@@ -24,6 +25,7 @@ object Repository : IRepository {
     private val client = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
         .addInterceptor(AuthInterceptor())
+        .addInterceptor(HtmlStringInterceptor())
         .build()
 
     private var retrofit = Retrofit.Builder()

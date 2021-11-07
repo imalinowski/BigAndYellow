@@ -103,8 +103,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             this
         ) { _, bundle ->
             val messagePosition = bundle.getInt(SmileBottomSheet.MESSAGE_KEY)
-            val smileNum = bundle.getInt(SmileBottomSheet.SMILE_KEY)
-            messages[messagePosition].reactions.add(Reaction(smile = smileNum, num = 1))
+            val smile = bundle.getString(SmileBottomSheet.SMILE_KEY)!!
+            messages[messagePosition].reactions.add(Reaction(smile = smile, num = 1))
             adapter.notifyItemChanged(messagePosition)
         }
     }

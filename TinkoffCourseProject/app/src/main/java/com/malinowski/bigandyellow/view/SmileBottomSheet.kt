@@ -38,7 +38,7 @@ class SmileBottomSheet : BottomSheetDialogFragment() {
                 setOnClickListener {
                     parentFragmentManager.setFragmentResult(
                         SMILE_RESULT,
-                        bundleOf(SMILE_KEY to i, MESSAGE_KEY to arguments?.getInt(MESSAGE_KEY))
+                        bundleOf(SMILE_KEY to smiles[i], MESSAGE_KEY to arguments?.getInt(MESSAGE_KEY))
                     )
                     dismiss()
                 }
