@@ -11,7 +11,6 @@ import com.bumptech.glide.Glide
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
-import kotlinx.coroutines.flow.combineTransform
 
 class MessageViewGroup @JvmOverloads constructor(
     context: Context,

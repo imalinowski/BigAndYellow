@@ -151,6 +151,24 @@ object Repository : IRepository {
         return Completable.create { emitter = it }
     }
 
-    class ExpectedError : Throwable("Expected Random Error")
+    fun addEmoji(messageId: Int, emoji: Reaction): Completable {
+        lateinit var emitter: CompletableEmitter
+        service.addEmojiReaction(messageId, name = emoji.name).subscribeOn(Schedulers.io())
+            .subscribe(
+                { emitter.onComplete() },
+                { e -> emitter.onError(e) }
+            ).let { } //TODO
+        return Completable.create { emitter = it }
+    }
+
+    fun deleteEmoji(messageId: Int, emoji: Reaction): Completable {
+        lateinit var emitter: CompletableEmitter
+        service.deleteEmojiReacction(messageId, name = emoji.name).subscribeOn(Schedulers.io())
+            .subscribe(
+                { emitter.onComplete() },
+                { e -> emitter.onError(e) }
+            ).let { } //TODO
+        return Completable.create { emitter = it }
+    }
 
 }

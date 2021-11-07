@@ -7,7 +7,7 @@ import java.util.*
 
 @Serializable
 data class Message(
-    val id: Int,
+    @SerialName("id") val id: Int,
     @SerialName("content") val message: String,
     @SerialName("is_me_message") val isMine: Boolean = false,
     @SerialName("sender_full_name") val senderName: String = "",

@@ -6,10 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.model.Repository
-import com.malinowski.bigandyellow.model.data.Message
-import com.malinowski.bigandyellow.model.data.StreamTopicItem
-import com.malinowski.bigandyellow.model.data.Topic
-import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.usecase.ISearchTopicsUseCase
 import com.malinowski.bigandyellow.usecase.ISearchUsersUseCase
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
@@ -154,6 +151,18 @@ class MainViewModel : ViewModel() {
 
     fun sendMessageToTopic(stream: Int, topic: String, content: String) {
         sendMessage(Repository.SendType.STREAM, "[$stream]", content, topic)
+    }
+
+    fun addReaction(messageId: Int, emoji: Reaction) {
+        dataProvider.addEmoji(messageId, emoji).subscribeBy(
+            onComplete = {}, onError = { error(it) }
+        ).addTo(compositeDisposable)
+    }
+
+    fun deleteReaction(messageId: Int, emoji: Reaction) {
+        dataProvider.deleteEmoji(messageId, emoji).subscribeBy(
+            onComplete = {}, onError = { error(it) }
+        ).addTo(compositeDisposable)
     }
 
     fun result() {

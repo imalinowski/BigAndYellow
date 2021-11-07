@@ -10,6 +10,7 @@ import android.widget.Button
 import androidx.core.os.bundleOf
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.malinowski.bigandyellow.R
+import com.malinowski.bigandyellow.model.data.emojiMap
 import com.malinowski.bigandyellow.view.customview.FlexBoxLayout
 
 
@@ -24,21 +25,25 @@ class SmileBottomSheet : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val store = (view as ViewGroup).findViewById<FlexBoxLayout>(R.id.smile_store)
-        val smiles = resources.getStringArray(R.array.smiles)
+        val smiles = emojiMap
         store.paddingRows = 5
         store.paddingColumns = 5
         val outValue = TypedValue()
         requireContext().theme.resolveAttribute(R.attr.selectableItemBackground, outValue, true)
-        for (i in smiles.indices)
+        for (key in smiles.keys)
             Button(context).apply {
                 setBackgroundColor(Color.TRANSPARENT)
-                text = smiles[i]
+                text = smiles[key]
                 textSize = 40f
                 store?.addView(this)
                 setOnClickListener {
                     parentFragmentManager.setFragmentResult(
                         SMILE_RESULT,
-                        bundleOf(SMILE_KEY to smiles[i], MESSAGE_KEY to arguments?.getInt(MESSAGE_KEY))
+                        bundleOf(
+                            SMILE_KEY to smiles[key],
+                            SMILE_NAME to key,
+                            MESSAGE_KEY to arguments?.getInt(MESSAGE_KEY)
+                        )
                     )
                     dismiss()
                 }
@@ -50,6 +55,9 @@ class SmileBottomSheet : BottomSheetDialogFragment() {
         const val TAG = "SmileBottomSheet"
         const val SMILE_RESULT = "smile result"
         const val SMILE_KEY = "smile key"
+        const val SMILE_NAME = "smile name"
         const val MESSAGE_KEY = "message key"
     }
+
+
 }

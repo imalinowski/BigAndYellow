@@ -18,9 +18,6 @@ interface ZulipChat {
     @GET("users/me/{stream_id}/topics")
     fun getTopicsInStream(@Path("stream_id") streamId: Int): Single<ResponseBody>
 
-    @GET("users/me/{stream_id}/topics")
-    fun getTopicsInStreamCall(@Path("stream_id") streamId: Int): Call<ResponseBody>
-
     @GET("users")
     fun getUsers(): Single<ResponseBody>
 
@@ -37,6 +34,19 @@ interface ZulipChat {
         @Field("to") to: String,
         @Field("content") content: String,
         @Field("topic") topic: String = ""
+    ): Single<ResponseBody>
+
+    @FormUrlEncoded
+    @POST("messages/{message_id}/reactions")
+    fun addEmojiReaction(
+        @Path("message_id") messageId: Int,
+        @Field("emoji_name") name: String,
+    ): Single<ResponseBody>
+
+    @DELETE("messages/{message_id}/reactions")
+    fun deleteEmojiReacction(
+        @Path("message_id") messageId: Int,
+        @Field("emoji_name") name: String,
     ): Single<ResponseBody>
 
     @GET("messages")

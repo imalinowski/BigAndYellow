@@ -3,13 +3,11 @@ package com.malinowski.bigandyellow.view.customview
 import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.*
-import android.text.Html
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
-import androidx.core.text.HtmlCompat
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.model.data.Reaction
-import java.lang.NumberFormatException
 
 class CustomEmoji @JvmOverloads constructor(
     context: Context,
@@ -21,11 +19,12 @@ class CustomEmoji @JvmOverloads constructor(
     private var emoji: String = ":)"
         private set(value) {
             field = getEmojiByUnicode(value)
+            Log.i("emojic", field)
             invalidate()
         }
 
     private fun getEmojiByUnicode(reactionCode: String): String {
-        return try{
+        return try {
             val hex = reactionCode.toInt(16)
             String(Character.toChars(hex))
         } catch (e: NumberFormatException) {
@@ -59,7 +58,7 @@ class CustomEmoji @JvmOverloads constructor(
 
     fun setReaction(reaction: Reaction) {
         this.reaction = reaction
-        emoji = reaction.smile
+        emoji = reaction.code
         num = reaction.num
         userId = reaction.userId
     }
@@ -69,8 +68,6 @@ class CustomEmoji @JvmOverloads constructor(
     private val textBounds = Rect()
     private val textCoordinate = PointF()
     private val tempFontMetrics = Paint.FontMetrics()
-
-    private val smiles: Array<String> = resources.getStringArray(R.array.smiles)
 
     init {
         val typedArray: TypedArray = context.obtainStyledAttributes(
