@@ -7,5 +7,4 @@ import kotlinx.serialization.Serializable
 data class Topic(
     val name: String,
     @SerialName("max_id") val lastMesID:Int = 0,
-    val messages: MutableList<Message> = mutableListOf()
 )

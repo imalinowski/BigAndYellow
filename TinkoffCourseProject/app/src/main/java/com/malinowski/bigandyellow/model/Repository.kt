@@ -41,7 +41,7 @@ object Repository : IRepository {
             val streamsJSA =
                 format.decodeFromString<JsonObject>(body.string())["streams"]
             format.decodeFromString<List<Stream>>(streamsJSA.toString())
-        }.flatMap { topicsPreload(it) }
+        }
     }
 
     override fun loadSubscribedStreams(): Single<List<Stream>> {

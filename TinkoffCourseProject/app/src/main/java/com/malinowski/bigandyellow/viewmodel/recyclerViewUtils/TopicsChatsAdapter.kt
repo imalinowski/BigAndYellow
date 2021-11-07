@@ -10,9 +10,9 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.TopicAndChatsItemBinding
-import com.malinowski.bigandyellow.model.data.TopicItem
-import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.StreamItem
+import com.malinowski.bigandyellow.model.data.StreamTopicItem
+import com.malinowski.bigandyellow.model.data.TopicItem
 
 class TopicsChatsAdapter(
     private val onClick: (position: Int) -> Unit
@@ -39,7 +39,8 @@ class TopicsChatsAdapter(
                     viewBinding.chatLinear.visibility = VISIBLE
                     viewBinding.topicConstraint.visibility = GONE
                     viewBinding.chatName.text = item.name
-                    viewBinding.messagesNum.text = item.messageNum.toString()
+                    viewBinding.messagesNum.text =
+                        item.messageNum.let { if (it > 0) it.toString() else "" }
                     viewBinding.chatLinear.setBackgroundResource(
                         if (item.topicId % 2 == 0) R.drawable.bg_green else R.drawable.bg_purple
                     )
@@ -85,7 +86,10 @@ class TopicsChatsAdapter(
             return oldItem.hashCode() == newItem.hashCode()
         }
 
-        override fun areContentsTheSame(oldItem: StreamTopicItem, newItem: StreamTopicItem): Boolean {
+        override fun areContentsTheSame(
+            oldItem: StreamTopicItem,
+            newItem: StreamTopicItem
+        ): Boolean {
             return oldItem == newItem
         }
 
