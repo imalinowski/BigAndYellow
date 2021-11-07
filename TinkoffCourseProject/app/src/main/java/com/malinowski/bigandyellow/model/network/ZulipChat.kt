@@ -46,7 +46,7 @@ interface ZulipChat {
     @DELETE("messages/{message_id}/reactions")
     fun deleteEmojiReacction(
         @Path("message_id") messageId: Int,
-        @Field("emoji_name") name: String,
+        @Query("emoji_name") name: String,
     ): Single<ResponseBody>
 
     @GET("messages")

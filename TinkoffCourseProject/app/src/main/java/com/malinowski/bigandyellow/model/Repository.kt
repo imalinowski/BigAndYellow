@@ -1,18 +1,17 @@
 package com.malinowski.bigandyellow.model
 
-import android.annotation.SuppressLint
 import android.util.Log
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import io.reactivex.Completable
-import io.reactivex.CompletableEmitter
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.CompletableSubject
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -98,7 +97,6 @@ object Repository : IRepository {
             }
         }.doOnError { Log.e("LoadUserStatus", "${user.name} ${it.message}") }
 
-    @SuppressLint("CheckResult")
     fun loadOwnUser() {
         val format = Json { ignoreUnknownKeys = true }
         service.getOwnUser().subscribeOn(Schedulers.io()).subscribe(
@@ -107,7 +105,7 @@ object Repository : IRepository {
             }, {
                 Log.e("LoadOwnUser", it.message.toString())
             }
-        )
+        ).let { } //todo
     }
 
     fun loadMessages(stream: Int, topic: String): Single<List<Message>> {
@@ -142,33 +140,33 @@ object Repository : IRepository {
     }
 
     fun sendMessage(type: SendType, to: String, content: String, topic: String = ""): Completable {
-        lateinit var emitter: CompletableEmitter
+        val complete = CompletableSubject.create()
         service.sendMessage(type.type, to, content, topic).subscribeOn(Schedulers.io())
             .subscribe(
-                { emitter.onComplete() },
-                { e -> emitter.onError(e) }
+                { complete.onComplete() },
+                { e -> complete.onError(e) }
             ).let { } //TODO
-        return Completable.create { emitter = it }
+        return complete
     }
 
     fun addEmoji(messageId: Int, emoji: Reaction): Completable {
-        lateinit var emitter: CompletableEmitter
+        val complete = CompletableSubject.create()
         service.addEmojiReaction(messageId, name = emoji.name).subscribeOn(Schedulers.io())
             .subscribe(
-                { emitter.onComplete() },
-                { e -> emitter.onError(e) }
+                { complete.onComplete() },
+                { e -> complete.onError(e) }
             ).let { } //TODO
-        return Completable.create { emitter = it }
+        return complete
     }
 
     fun deleteEmoji(messageId: Int, emoji: Reaction): Completable {
-        lateinit var emitter: CompletableEmitter
+        val complete = CompletableSubject.create()
         service.deleteEmojiReacction(messageId, name = emoji.name).subscribeOn(Schedulers.io())
             .subscribe(
-                { emitter.onComplete() },
-                { e -> emitter.onError(e) }
+                { complete.onComplete() },
+                { e -> complete.onError(e) }
             ).let { } //TODO
-        return Completable.create { emitter = it }
+        return complete
     }
 
 }

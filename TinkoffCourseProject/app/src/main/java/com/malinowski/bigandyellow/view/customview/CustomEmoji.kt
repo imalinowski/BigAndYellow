@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.model.data.Reaction
+import com.malinowski.bigandyellow.model.data.User
 
 class CustomEmoji @JvmOverloads constructor(
     context: Context,
@@ -40,10 +41,9 @@ class CustomEmoji @JvmOverloads constructor(
             requestLayout()
         }
 
-    private var userId = ""
+    private var userId = User.ME.id
         set(value) {
-            reaction?.userId = value
-            isSelected = value == "me"
+            isSelected = value == User.ME.id
             field = value
         }
 
@@ -88,13 +88,8 @@ class CustomEmoji @JvmOverloads constructor(
 
         setOnClickListener {
             isSelected = !isSelected
-            if (userId == "me") {
-                num -= 1
-                userId = "other"
-            } else {
-                num += 1
-                userId = "me"
-            }
+            if (userId == User.ME.id) num -= 1
+            else num += 1
             clickCallback()
         }
 

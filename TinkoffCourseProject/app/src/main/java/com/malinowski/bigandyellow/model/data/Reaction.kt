@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Reaction(
-    @Transient var userId: String = "me",
+    @SerialName("user_id") var userId: Int,
     @SerialName("emoji_code") val code: String,
     @SerialName("emoji_name") val name: String,
     @Transient var num: Int = 1

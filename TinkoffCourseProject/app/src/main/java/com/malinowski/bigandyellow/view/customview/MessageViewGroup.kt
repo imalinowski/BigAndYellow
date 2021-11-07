@@ -9,8 +9,10 @@ import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import com.bumptech.glide.Glide
 import com.malinowski.bigandyellow.R
+import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
+import com.malinowski.bigandyellow.model.data.User
 
 class MessageViewGroup @JvmOverloads constructor(
     context: Context,
@@ -66,9 +68,12 @@ class MessageViewGroup @JvmOverloads constructor(
         val emoji = CustomEmoji(context).apply {
             setReaction(reaction)
             clickCallback = {
+                if (reaction.userId == User.ME.id)
+                    Repository.deleteEmoji(message.id, reaction)
+                else
+                    Repository.addEmoji(message.id, reaction)
                 if (reaction.num == 0) {
                     flexbox.removeView(this)
-                    message.reactions.remove(reaction)
                     if (message.reactions.size == 0)
                         plus.visibility = GONE
                 }

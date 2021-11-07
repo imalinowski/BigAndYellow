@@ -13,6 +13,7 @@ import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
+import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 import io.reactivex.Single
@@ -118,7 +119,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             val unicode = bundle.getString(SmileBottomSheet.SMILE_KEY)!!
             val name = bundle.getString(SmileBottomSheet.SMILE_NAME)!!
 
-            val emoji = Reaction(code = unicode, num = 1, name = name)
+            val emoji = Reaction(userId = User.ME.id, code = unicode, num = 1, name = name)
             messages[messagePosition].reactions.add(emoji)
             model.addReaction(messages[messagePosition].id, emoji)
             adapter.notifyItemChanged(messagePosition)
