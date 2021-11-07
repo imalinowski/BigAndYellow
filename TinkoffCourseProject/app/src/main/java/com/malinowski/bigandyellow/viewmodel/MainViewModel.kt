@@ -118,7 +118,7 @@ class MainViewModel : ViewModel() {
         dataProvider.loadTopics(streamId)
 
     fun getMessages(stream: Int, topic: String): Single<List<Message>> =
-        dataProvider.loadTopicMessages(stream, topic)
+        dataProvider.loadMessages(stream, topic)
 
     fun result() {
         _mainScreenState.postValue(MainScreenState.Result)

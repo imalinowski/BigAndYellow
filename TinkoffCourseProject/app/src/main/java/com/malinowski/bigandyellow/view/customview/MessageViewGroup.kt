@@ -5,10 +5,10 @@ import android.util.AttributeSet
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.core.text.HtmlCompat
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
-import com.malinowski.bigandyellow.model.data.User
 
 class MessageViewGroup @JvmOverloads constructor(
     context: Context,
@@ -33,14 +33,14 @@ class MessageViewGroup @JvmOverloads constructor(
 
     fun setMessage(message: Message) {
         this.message = message
-        this.messageTextView.text = message.message
+        this.messageTextView.text =
+            HtmlCompat.fromHtml(message.message, HtmlCompat.FROM_HTML_MODE_LEGACY).trim()
         this.nameTextView.text = message.senderName
 
         if (message.isMine) {
             nameTextView.visibility = GONE
             getChildAt(0).visibility = GONE
             getChildAt(1).setBackgroundResource(R.drawable.bg_green_round)
-
         } else {
             nameTextView.visibility = VISIBLE
             getChildAt(0).visibility = VISIBLE

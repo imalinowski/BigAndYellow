@@ -10,9 +10,9 @@
         android:id="@+id/message_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="10dp"
         android:paddingTop="@dimen/app_bar_height"
         android:paddingBottom="@dimen/message_box_height"
+        android:paddingHorizontal="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

@@ -6,6 +6,7 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import okhttp3.ResponseBody
+import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -22,6 +23,9 @@ interface ZulipChat {
 
     @GET("users/me/{stream_id}/topics")
     fun getTopicsInStream(@Path("stream_id") streamId: Int): Single<ResponseBody>
+
+    @GET("users/me/{stream_id}/topics")
+    fun getTopicsInStreamCall(@Path("stream_id") streamId: Int): Call<ResponseBody>
 
     @GET("users")
     fun getUsers(): Single<ResponseBody>
@@ -40,12 +44,8 @@ interface ZulipChat {
         @Query("narrow") narrow: String,
     ): Single<ResponseBody>
 
-
     @Serializable
     data class NarrowElement(val operator: String, val operand: String)
-
-    @Serializable
-    data class NarrowElement1(val operator: String, val operand: String)
 
     @Serializable
     data class NarrowElementInt(val operator: String, val operand: Int)

@@ -55,7 +55,9 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
         (if (streamType == Streams.SubscribedStreams) model.streamsSubscribed else model.streams)
             .observe(viewLifecycleOwner) {
-                items = it.toMutableList()
+                items = it.onEach { item ->
+                    if (item is StreamItem) item.expanded = false
+                }.toMutableList()
                 adapter.submitList(items) {
                     viewBinding.topicsChatsRecycler.scrollToPosition(0)
                 }

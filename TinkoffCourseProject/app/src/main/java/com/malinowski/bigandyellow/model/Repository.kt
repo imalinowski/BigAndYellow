@@ -7,6 +7,7 @@ import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import io.reactivex.Single
+import io.reactivex.SingleEmitter
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
@@ -17,7 +18,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
-import java.util.concurrent.TimeUnit
 
 object Repository : IRepository {
 
@@ -36,13 +36,12 @@ object Repository : IRepository {
     private var service = retrofit.create(ZulipChat::class.java)
     private val format = Json { ignoreUnknownKeys = true }
 
-    private val compositeDisposable = CompositeDisposable()
     override fun loadStreams(): Single<List<Stream>> {
         return service.getStreams().subscribeOn(Schedulers.io()).map { body ->
             val streamsJSA =
                 format.decodeFromString<JsonObject>(body.string())["streams"]
             format.decodeFromString<List<Stream>>(streamsJSA.toString())
-        }.map { topicsPreload(it) }.delay(1000, TimeUnit.MILLISECONDS)
+        }.flatMap { topicsPreload(it) }
     }
 
     override fun loadSubscribedStreams(): Single<List<Stream>> {
@@ -50,17 +49,25 @@ object Repository : IRepository {
             val subscriptionsJSA =
                 format.decodeFromString<JsonObject>(body.string())["subscriptions"]
             format.decodeFromString<List<Stream>>(subscriptionsJSA.toString())
-        }.map { topicsPreload(it) }.delay(1000, TimeUnit.MILLISECONDS)
+        }.flatMap { topicsPreload(it) }
     }
 
-    private fun topicsPreload(streams: List<Stream>): List<Stream> = streams.onEach { stream ->
-        loadTopics(stream.id).subscribe(
-            { topics ->
-                stream.topics = topics.toMutableList()
+    private val compositeDisposable = CompositeDisposable()
+
+    private fun topicsPreload(streams: List<Stream>): Single<List<Stream>> {
+        var emitter: SingleEmitter<List<Stream>>? = null
+        val single: Single<List<Stream>> = Single.create { emitter = it }
+        val newStreams: MutableList<Stream> = mutableListOf()
+        streams.onEach { stream ->
+            loadTopics(stream.id).subscribe({
+                stream.topics = it.toMutableList()
+                newStreams.add(stream)
+                if (newStreams.size == streams.size) emitter?.onSuccess(newStreams)
             }, {
-                Log.e("topicPreload", it.message.toString())
-            }
-        ).addTo(compositeDisposable)
+                Log.e("TopicsPreload", it.message.toString())
+            }).addTo(compositeDisposable)
+        }
+        return single
     }
 
     override fun loadTopics(id: Int): Single<List<Topic>> {
@@ -101,11 +108,23 @@ object Repository : IRepository {
         )
     }
 
-    fun loadTopicMessages(stream: Int, topic: String): Single<List<Message>> {
-        val narrow = JsonArray(listOf(
-            Json.encodeToJsonElement(ZulipChat.NarrowElementInt(operator = "stream", operand = stream)),
-            Json.encodeToJsonElement(ZulipChat.NarrowElement(operator = "topic", operand = topic)),
-        ))
+    fun loadMessages(stream: Int, topic: String): Single<List<Message>> {
+        val narrow = JsonArray(
+            listOf(
+                Json.encodeToJsonElement(
+                    ZulipChat.NarrowElementInt(
+                        operator = "stream",
+                        operand = stream
+                    )
+                ),
+                Json.encodeToJsonElement(
+                    ZulipChat.NarrowElement(
+                        operator = "topic",
+                        operand = topic
+                    )
+                ),
+            )
+        )
         return service.getMessages(narrow = narrow.toString()).subscribeOn(Schedulers.io())
             .map { body ->
                 val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
