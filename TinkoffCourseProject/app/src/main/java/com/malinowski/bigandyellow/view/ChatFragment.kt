@@ -14,24 +14,28 @@ import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
-import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
-import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.DateItemDecorator
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlin.random.Random
 
-class ChatFragment : Fragment() {
+class ChatFragment : Fragment(R.layout.fragment_chat) {
 
-    private var _binding: FragmentChatBinding? = null
-    private val binding get() = _binding!!
+    private val binding by lazy {
+        FragmentChatBinding.inflate(layoutInflater)
+    }
 
     private val model: MainViewModel by activityViewModels()
     private lateinit var messages: MutableList<Message>
 
     private val modalBottomSheet = SmileBottomSheet()
 
-    private lateinit var adapter: MessagesAdapter
+    private val adapter: MessagesAdapter by lazy {
+        MessagesAdapter(messages) { position ->
+            modalBottomSheet.show(childFragmentManager, SmileBottomSheet.TAG)
+            modalBottomSheet.arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position)
+        }
+    }
 
     private val layoutManager = LinearLayoutManager(context).apply {
         stackFromEnd = true
@@ -40,7 +44,7 @@ class ChatFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let { bundle ->
-            model.getMessages(bundle.getInt(STREAM)!!, bundle.getString(TOPIC)!!)
+            model.getMessages(bundle.getInt(STREAM), bundle.getString(TOPIC)!!)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     messages = it.toMutableList()
@@ -54,31 +58,23 @@ class ChatFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentChatBinding.inflate(layoutInflater)
         return binding.root
     }
 
     private fun initUI() {
-        //binding.chatName.text = topic.name
+        //binding.chatName.text = topic.name //TODO
 
         binding.back.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
 
-        adapter = MessagesAdapter(messages) { position ->
-            modalBottomSheet.show(childFragmentManager, SmileBottomSheet.TAG)
-            modalBottomSheet.arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position)
-        }
-
         binding.messageRecycler.apply {
             adapter = this@ChatFragment.adapter
             layoutManager = this@ChatFragment.layoutManager
-            addItemDecoration(
-                DateItemDecorator()
-            )
         }
 
         binding.sendMessageButton.setOnClickListener {
@@ -111,11 +107,6 @@ class ChatFragment : Fragment() {
             messages[messagePosition].reactions.add(Reaction(smile = smileNum, num = 1))
             adapter.notifyItemChanged(messagePosition)
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     companion object {

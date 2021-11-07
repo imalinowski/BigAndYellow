@@ -15,6 +15,7 @@
         <entry key="app/src/main/res/drawable/bg_bottom_sheet.xml" value="0.2601851851851852" />
         <entry key="app/src/main/res/drawable/bg_button_pls.xml" value="0.321025641025641" />
         <entry key="app/src/main/res/drawable/bg_custom_emoji.xml" value="0.321025641025641" />
+        <entry key="app/src/main/res/drawable/bg_date_round.xml" value="0.3260416666666667" />
         <entry key="app/src/main/res/drawable/bg_gray_round.xml" value="0.2574074074074074" />
         <entry key="app/src/main/res/drawable/bg_green.xml" value="0.3074074074074074" />
         <entry key="app/src/main/res/drawable/bg_green_round.xml" value="0.18385416666666668" />
@@ -39,6 +40,7 @@
         <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_streams.xml" value="0.20516304347826086" />
         <entry key="app/src/main/res/layout/fragment_subscribed.xml" value="0.21014492753623187" />
+        <entry key="app/src/main/res/layout/message_item.xml" value="0.335" />
         <entry key="app/src/main/res/layout/message_view_group_layout.xml" value="0.335" />
         <entry key="app/src/main/res/layout/miles_bottom_sheet_content.xml" value="0.23233695652173914" />
         <entry key="app/src/main/res/layout/smiles_bottom_sheet_content.xml" value="0.15070921985815602" />

@@ -56,4 +56,6 @@ dependencies {
     //Serialization
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerialization"
 
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+
 }
