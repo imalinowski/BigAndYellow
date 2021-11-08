@@ -33,6 +33,7 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         when (val item = items[position]) {
             is TopicItem -> item.also {
                 model.openChat(item.streamId, item.name)
+                closeStreams()
             }
             is StreamItem -> {
                 if (item.expanded)
@@ -56,7 +57,6 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         (if (streamType == Streams.SubscribedStreams) model.streamsSubscribed else model.streams)
             .observe(viewLifecycleOwner) {
                 items = it.toMutableList()
-
                 adapter.submitList(items) {
                     viewBinding.topicsChatsRecycler.scrollToPosition(0)
                 }
@@ -68,6 +68,12 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         }
 
         return viewBinding.root
+    }
+
+    private fun closeStreams() {
+        for (item in items)
+            if (item is StreamItem)
+                item.expanded = false
     }
 
     @SuppressLint("CheckResult")
