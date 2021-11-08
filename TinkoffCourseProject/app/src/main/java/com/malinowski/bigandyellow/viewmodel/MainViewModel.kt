@@ -131,6 +131,9 @@ class MainViewModel : ViewModel() {
     fun getMessages(stream: Int, topic: String): Single<List<Message>> =
         dataProvider.loadMessages(stream, topic)
 
+    fun getMessagesCount(stream: Int, topic: String): Single<Int> =
+        Repository.loadMessages(stream, topic).map { it.size }
+
     fun getMessages(user: String): Single<List<Message>> =
         dataProvider.loadMessages(user)
 

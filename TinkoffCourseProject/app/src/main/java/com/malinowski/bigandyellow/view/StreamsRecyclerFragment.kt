@@ -55,9 +55,8 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
         (if (streamType == Streams.SubscribedStreams) model.streamsSubscribed else model.streams)
             .observe(viewLifecycleOwner) {
-                items = it.onEach { item ->
-                    if (item is StreamItem) item.expanded = false
-                }.toMutableList()
+                items = it.toMutableList()
+
                 adapter.submitList(items) {
                     viewBinding.topicsChatsRecycler.scrollToPosition(0)
                 }
@@ -78,7 +77,17 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
         model.getTopics(stream.streamId)
             .map { topicToItemMapper(it, stream.streamId) }
-            .doOnSuccess { stream.topics = it }
+            .doOnSuccess { topics ->
+                stream.topics = topics
+                topics.onEachIndexed { index, topic ->
+                    model.getMessagesCount(stream.streamId, topic.name)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({ messageNum ->
+                            topic.messageNum = messageNum
+                            adapter.notifyItemChanged(listPosition + index + 1)
+                        }, { e -> model.error(e) })
+                }
+            }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({ chats ->
                 stream.loading = false

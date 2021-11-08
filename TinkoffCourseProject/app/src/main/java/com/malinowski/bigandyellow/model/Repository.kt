@@ -9,11 +9,11 @@ import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowElement
 import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowElementInt
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.SingleEmitter
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.CompletableSubject
+import io.reactivex.subjects.SingleSubject
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -47,7 +47,7 @@ object Repository : IRepository {
                 val streamsJSA =
                     format.decodeFromString<JsonObject>(body.string())["streams"]
                 format.decodeFromString<List<Stream>>(streamsJSA.toString())
-            }
+            }.flatMap { topicsPreload(it) }
     }
 
     override fun loadSubscribedStreams(): Single<List<Stream>> {
@@ -61,17 +61,17 @@ object Repository : IRepository {
     }
 
     private fun topicsPreload(streams: List<Stream>): Single<List<Stream>> {
-        var emitter: SingleEmitter<List<Stream>>? = null
-        val single: Single<List<Stream>> = Single.create { emitter = it }
-        val newStreams: MutableList<Stream> = mutableListOf()
+        val single = SingleSubject.create<List<Stream>>()
+        var count = 0
         streams.onEach { stream ->
-            loadTopics(stream.id).subscribe({
-                stream.topics = it.toMutableList()
-                newStreams.add(stream)
-                if (newStreams.size == streams.size) emitter?.onSuccess(newStreams)
-            }, {
-                Log.e("TopicsPreload", it.message.toString())
-            }).addTo(compositeDisposable)
+            loadTopics(stream.id)
+                .doFinally {
+                    count += 1
+                    if (count == streams.size) single.onSuccess(streams)
+                }.subscribe({
+                    stream.topics = it.toMutableList()
+                }, { Log.e("TopicsPreload", it.message.toString()) }
+                ).addTo(compositeDisposable)
         }
         return single
     }

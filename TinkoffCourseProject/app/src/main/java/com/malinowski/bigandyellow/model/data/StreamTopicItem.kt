@@ -14,5 +14,5 @@ data class TopicItem(
     val topicId: Int,
     val streamId: Int,
     val name: String,
-    val messageNum: Int
+    var messageNum: Int
 ) : StreamTopicItem()
