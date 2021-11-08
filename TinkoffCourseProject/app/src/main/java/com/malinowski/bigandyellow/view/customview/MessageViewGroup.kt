@@ -8,10 +8,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import com.bumptech.glide.Glide
+import com.malinowski.bigandyellow.EmojiAddParcel
+import com.malinowski.bigandyellow.EmojiClickParcel
+import com.malinowski.bigandyellow.EmojiDeleteParcel
 import com.malinowski.bigandyellow.R
-import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.Message
-import com.malinowski.bigandyellow.model.data.Reaction
+import com.malinowski.bigandyellow.model.data.UnitedReaction
 import com.malinowski.bigandyellow.model.data.User
 
 class MessageViewGroup @JvmOverloads constructor(
@@ -38,6 +40,7 @@ class MessageViewGroup @JvmOverloads constructor(
 
     fun setMessage(message: Message) {
         this.message = message
+
         this.messageTextView.text =
             HtmlCompat.fromHtml(message.message, HtmlCompat.FROM_HTML_MODE_LEGACY).trim()
         this.nameTextView.text = message.senderName
@@ -55,34 +58,42 @@ class MessageViewGroup @JvmOverloads constructor(
 
         (getChildAt(2) as FlexBoxLayout).apply {
             removeAllViews()
-            if (message.reactions.isNotEmpty())
+            if (message.emoji.isNotEmpty())
                 plus.visibility = VISIBLE
             else plus.visibility = GONE
         }
-        for (reaction in message.reactions)
-            addEmoji(reaction)
+
+        for (reaction in message.emoji)
+            addEmoji(reaction.value)
     }
 
-    private fun addEmoji(reaction: Reaction) {
+    private fun addEmoji(reaction: UnitedReaction) {
         val flexbox = (getChildAt(2) as FlexBoxLayout)
         val emoji = CustomEmoji(context).apply {
-            setReaction(reaction)
+            this.reaction = reaction
             clickCallback = {
-                if (reaction.userId == User.ME.id)
-                    Repository.deleteEmoji(message.id, reaction)
-                else
-                    Repository.addEmoji(message.id, reaction)
-                if (reaction.num == 0) {
+                if (reaction.usersId.size == 0) {
                     flexbox.removeView(this)
-                    if (message.reactions.size == 0)
-                        plus.visibility = GONE
+                    message.emoji.remove(reaction.getUnicode())
                 }
+                if (message.emoji.size == 0)
+                    plus.visibility = GONE
+
+                val parcel =
+                    if (reaction.usersId.contains(User.ME.id))
+                        EmojiAddParcel(message.id, reaction.name)
+                    else
+                        EmojiDeleteParcel(message.id, reaction.name)
+                emojiClickListener(parcel)
             }
         }
-        if (!message.reactions.contains(reaction))
-            message.reactions.add(reaction)
         plus.visibility = VISIBLE
         flexbox.addView(emoji, 0)
+    }
+
+    private var emojiClickListener: (EmojiClickParcel) -> Unit = { _ -> }
+    fun setOnEmojiClickListener(callback: (EmojiClickParcel) -> Unit) {
+        emojiClickListener = callback
     }
 
     fun setMessageOnLongClick(callback: () -> Unit) {

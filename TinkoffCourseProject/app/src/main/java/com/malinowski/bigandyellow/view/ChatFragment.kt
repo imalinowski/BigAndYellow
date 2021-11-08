@@ -9,10 +9,14 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.malinowski.bigandyellow.EmojiAddParcel
+import com.malinowski.bigandyellow.EmojiClickParcel
+import com.malinowski.bigandyellow.EmojiDeleteParcel
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
+import com.malinowski.bigandyellow.model.data.UnitedReaction
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
@@ -31,7 +35,16 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private val modalBottomSheet = SmileBottomSheet()
 
     private val adapter: MessagesAdapter by lazy {
-        MessagesAdapter(messages) { position ->
+        MessagesAdapter(messages,
+            { parcel: EmojiClickParcel ->
+                when (parcel) {
+                    is EmojiAddParcel ->
+                        model.addReaction(parcel.messageId, parcel.name)
+                    is EmojiDeleteParcel ->
+                        model.deleteReaction(parcel.messageId, parcel.name)
+                }
+            })
+        { position ->
             modalBottomSheet.show(childFragmentManager, SmileBottomSheet.TAG)
             modalBottomSheet.arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position)
         }
@@ -119,10 +132,17 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             val unicode = bundle.getString(SmileBottomSheet.SMILE_KEY)!!
             val name = bundle.getString(SmileBottomSheet.SMILE_NAME)!!
 
-            val emoji = Reaction(userId = User.ME.id, code = unicode, num = 1, name = name)
-            messages[messagePosition].reactions.add(emoji)
-            model.addReaction(messages[messagePosition].id, emoji)
-            adapter.notifyItemChanged(messagePosition)
+            val emoji = Reaction(userId = User.ME.id, code = unicode, name = name)
+
+            // add emoji an case emoji haven't exist before or it has been added by other users
+            val emojiGroup: UnitedReaction? = messages[messagePosition].emoji[emoji.getUnicode()]
+            if (emojiGroup == null || !emojiGroup.usersId.contains(User.ME.id)) {
+                messages[messagePosition].addEmoji(emoji) // data update
+                model.addReaction(messages[messagePosition].id, emoji.name) // net call
+                adapter.notifyItemChanged(messagePosition) // ui update
+            } else {
+                model.error(IllegalStateException(getString(R.string.error_emoji_added)))
+            }
         }
     }
 

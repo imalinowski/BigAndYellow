@@ -4,10 +4,9 @@ import android.content.Context
 import android.content.res.TypedArray
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import com.malinowski.bigandyellow.R
-import com.malinowski.bigandyellow.model.data.Reaction
+import com.malinowski.bigandyellow.model.data.UnitedReaction
 import com.malinowski.bigandyellow.model.data.User
 
 class CustomEmoji @JvmOverloads constructor(
@@ -19,32 +18,15 @@ class CustomEmoji @JvmOverloads constructor(
 
     private var emoji: String = ":)"
         private set(value) {
-            field = getEmojiByUnicode(value)
-            Log.i("emojic", field)
+            field = value
             invalidate()
         }
-
-    private fun getEmojiByUnicode(reactionCode: String): String {
-        return try {
-            val hex = reactionCode.toInt(16)
-            String(Character.toChars(hex))
-        } catch (e: NumberFormatException) {
-            reactionCode
-        }
-    }
 
     private var num = 0
         set(value) {
             if (value < 0) return
             field = value
-            reaction?.num = num
             requestLayout()
-        }
-
-    private var userId = User.ME.id
-        set(value) {
-            isSelected = value == User.ME.id
-            field = value
         }
 
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -53,15 +35,14 @@ class CustomEmoji @JvmOverloads constructor(
         textAlign = Paint.Align.CENTER
     }
 
-    var reaction: Reaction? = null
-        private set
-
-    fun setReaction(reaction: Reaction) {
-        this.reaction = reaction
-        emoji = reaction.code
-        num = reaction.num
-        userId = reaction.userId
-    }
+    var reaction: UnitedReaction? = null
+        set(value) {
+            field = value
+            if (value == null) return
+            num = value.usersId.size
+            emoji = value.getUnicode()
+            isSelected = value.usersId.contains(User.ME.id)
+        }
 
     var clickCallback = { }
 
@@ -88,8 +69,15 @@ class CustomEmoji @JvmOverloads constructor(
 
         setOnClickListener {
             isSelected = !isSelected
-            if (userId == User.ME.id) num -= 1
-            else num += 1
+            reaction?.usersId?.let {
+                if (isSelected) {
+                    it.add(User.ME.id)
+                    num += 1
+                } else {
+                    it.remove(User.ME.id)
+                    num -= 1
+                }
+            }
             clickCallback()
         }
 

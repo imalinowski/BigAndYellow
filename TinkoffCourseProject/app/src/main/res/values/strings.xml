@@ -18,4 +18,5 @@
     <string name="topic_arrow">topic arrow</string>
     <string name="subscribed">Subscribed</string>
     <string name="all_streams">All Streams</string>
+    <string name="error_emoji_added">Emoji already added</string>
 </resources>

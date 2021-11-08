@@ -6,10 +6,28 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Reaction(
     @SerialName("user_id") var userId: Int,
-    @SerialName("emoji_code") val code: String,
+    @SerialName("emoji_code") private val code: String,
     @SerialName("emoji_name") val name: String,
-    @Transient var num: Int = 1
-)
+) {
+    fun getUnicode() = processUnicode(code)
+}
+
+data class UnitedReaction(
+    val usersId: MutableList<Int>,
+    private val code: String,
+    val name: String
+) {
+    fun getUnicode() = processUnicode(code)
+}
+
+private fun processUnicode(code: String): String {
+    return try {
+        val hex = code.toInt(16)
+        String(Character.toChars(hex))
+    } catch (e: NumberFormatException) {
+        code
+    }
+}
 
 val emojiMap: HashMap<String, String> = hashMapOf(
     "grinning" to "\uD83D\uDE00",

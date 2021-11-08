@@ -5,6 +5,8 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
+import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowElement
+import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowElementInt
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.SingleEmitter
@@ -36,24 +38,27 @@ object Repository : IRepository {
 
     private var service = retrofit.create(ZulipChat::class.java)
     private val format = Json { ignoreUnknownKeys = true }
+    private val compositeDisposable = CompositeDisposable()
 
     override fun loadStreams(): Single<List<Stream>> {
-        return service.getStreams().subscribeOn(Schedulers.io()).map { body ->
-            val streamsJSA =
-                format.decodeFromString<JsonObject>(body.string())["streams"]
-            format.decodeFromString<List<Stream>>(streamsJSA.toString())
-        }
+        return service.getStreams()
+            .subscribeOn(Schedulers.io())
+            .map { body ->
+                val streamsJSA =
+                    format.decodeFromString<JsonObject>(body.string())["streams"]
+                format.decodeFromString<List<Stream>>(streamsJSA.toString())
+            }
     }
 
     override fun loadSubscribedStreams(): Single<List<Stream>> {
-        return service.getSubscribedStreams().subscribeOn(Schedulers.io()).map { body ->
-            val subscriptionsJSA =
-                format.decodeFromString<JsonObject>(body.string())["subscriptions"]
-            format.decodeFromString<List<Stream>>(subscriptionsJSA.toString())
-        }.flatMap { topicsPreload(it) }
+        return service.getSubscribedStreams()
+            .subscribeOn(Schedulers.io())
+            .map { body ->
+                val subscriptionsJSA =
+                    format.decodeFromString<JsonObject>(body.string())["subscriptions"]
+                format.decodeFromString<List<Stream>>(subscriptionsJSA.toString())
+            }.flatMap { topicsPreload(it) }
     }
-
-    private val compositeDisposable = CompositeDisposable()
 
     private fun topicsPreload(streams: List<Stream>): Single<List<Stream>> {
         var emitter: SingleEmitter<List<Stream>>? = null
@@ -72,100 +77,115 @@ object Repository : IRepository {
     }
 
     override fun loadTopics(id: Int): Single<List<Topic>> {
-        return service.getTopicsInStream(id).subscribeOn(Schedulers.io()).map { body ->
-            val topicsJSA =
-                format.decodeFromString<JsonObject>(body.string())["topics"]
-            format.decodeFromString<List<Topic>>(topicsJSA.toString())
-        }
+        return service.getTopicsInStream(id)
+            .subscribeOn(Schedulers.io())
+            .map { body ->
+                val topicsJSA =
+                    format.decodeFromString<JsonObject>(body.string())["topics"]
+                format.decodeFromString<List<Topic>>(topicsJSA.toString())
+            }
     }
 
     override fun loadUsers(): Single<List<User>> {
-        return service.getUsers().subscribeOn(Schedulers.io()).map { body ->
-            val membersJSA =
-                format.decodeFromString<JsonObject>(body.string())["members"]
-            format.decodeFromString<List<User>>(membersJSA.toString())
-        }
+        return service.getUsers()
+            .subscribeOn(Schedulers.io())
+            .map { body ->
+                val membersJSA =
+                    format.decodeFromString<JsonObject>(body.string())["members"]
+                format.decodeFromString<List<User>>(membersJSA.toString())
+            }
     }
 
     fun loadStatus(user: User) =
-        service.getPresence(user.id).subscribeOn(Schedulers.io()).map { body ->
-            val jso = Json.decodeFromString<JsonObject>(body.string())
-                .jsonObject["presence"]?.jsonObject?.get("aggregated")?.jsonObject?.get("status")
-            jso?.jsonPrimitive?.content?.let { status ->
-                user.status = UserStatus.decodeFromString(status)
-                user.status
+        service.getPresence(user.id)
+            .subscribeOn(Schedulers.io())
+            .map { body ->
+                val jso = Json.decodeFromString<JsonObject>(body.string())
+                    .jsonObject["presence"]?.jsonObject?.get("aggregated")?.jsonObject?.get("status")
+                jso?.jsonPrimitive?.content?.let { status ->
+                    user.status = UserStatus.decodeFromString(status)
+                    user.status
+                }
+            }.doOnError {
+                Log.e("LoadUserStatus", "${user.name} ${it.message}")
             }
-        }.doOnError { Log.e("LoadUserStatus", "${user.name} ${it.message}") }
 
     fun loadOwnUser() {
         val format = Json { ignoreUnknownKeys = true }
-        service.getOwnUser().subscribeOn(Schedulers.io()).subscribe(
-            { body ->
-                User.ME = format.decodeFromString(body.string())
-            }, {
-                Log.e("LoadOwnUser", it.message.toString())
-            }
-        ).let { } //todo
+        service.getOwnUser()
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { body ->
+                    User.ME = format.decodeFromString(body.string())
+                }, {
+                    Log.e("LoadOwnUser", it.message.toString())
+                }
+            ).addTo(compositeDisposable)
     }
 
     fun loadMessages(stream: Int, topic: String): Single<List<Message>> {
-        val streamFilter = ZulipChat.NarrowElementInt(operator = "stream", operand = stream).let {
-            Json.encodeToJsonElement(it)
-        }
-        val topicFilter = ZulipChat.NarrowElement(operator = "topic", operand = topic).let {
-            Json.encodeToJsonElement(it)
-        }
+        val streamFilter = NarrowElementInt(operator = "stream", operand = stream)
+            .let { Json.encodeToJsonElement(it) }
+        val topicFilter = NarrowElement(operator = "topic", operand = topic)
+            .let { Json.encodeToJsonElement(it) }
         val narrow = JsonArray(listOf(streamFilter, topicFilter)).toString()
-        return service.getMessages(narrow = narrow).subscribeOn(Schedulers.io())
+
+        return service.getMessages(narrow = narrow)
+            .subscribeOn(Schedulers.io())
             .map { body ->
                 val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
-                format.decodeFromString(jso.toString())
+                format.decodeFromString<List<Message>>(jso.toString())
             }
     }
 
     fun loadMessages(userEmail: String): Single<List<Message>> {
-        val streamFilter = ZulipChat.NarrowElement(operator = "pm-with", operand = userEmail).let {
-            Json.encodeToJsonElement(it)
-        }
+        val streamFilter = NarrowElement(operator = "pm-with", operand = userEmail)
+            .let { Json.encodeToJsonElement(it) }
         val narrow = JsonArray(listOf(streamFilter)).toString()
-        return service.getMessages(narrow = narrow).subscribeOn(Schedulers.io())
+
+        return service.getMessages(narrow = narrow)
+            .subscribeOn(Schedulers.io())
             .map { body ->
                 val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
-                format.decodeFromString(jso.toString())
+                format.decodeFromString<List<Message>>(jso.toString())
             }
     }
 
     enum class SendType(val type: String) {
-        PRIVATE("private"), STREAM("stream")
+        PRIVATE("private"),
+        STREAM("stream")
     }
 
     fun sendMessage(type: SendType, to: String, content: String, topic: String = ""): Completable {
         val complete = CompletableSubject.create()
-        service.sendMessage(type.type, to, content, topic).subscribeOn(Schedulers.io())
+        service.sendMessage(type.type, to, content, topic)
+            .subscribeOn(Schedulers.io())
             .subscribe(
                 { complete.onComplete() },
                 { e -> complete.onError(e) }
-            ).let { } //TODO
+            ).addTo(compositeDisposable)
         return complete
     }
 
-    fun addEmoji(messageId: Int, emoji: Reaction): Completable {
+    fun addEmoji(messageId: Int, emojiName: String): Completable {
         val complete = CompletableSubject.create()
-        service.addEmojiReaction(messageId, name = emoji.name).subscribeOn(Schedulers.io())
+        service.addEmojiReaction(messageId, name = emojiName)
+            .subscribeOn(Schedulers.io())
             .subscribe(
                 { complete.onComplete() },
                 { e -> complete.onError(e) }
-            ).let { } //TODO
+            ).addTo(compositeDisposable)
         return complete
     }
 
-    fun deleteEmoji(messageId: Int, emoji: Reaction): Completable {
+    fun deleteEmoji(messageId: Int, emojiName: String): Completable {
         val complete = CompletableSubject.create()
-        service.deleteEmojiReacction(messageId, name = emoji.name).subscribeOn(Schedulers.io())
+        service.deleteEmojiReacction(messageId, name = emojiName)
+            .subscribeOn(Schedulers.io())
             .subscribe(
                 { complete.onComplete() },
                 { e -> complete.onError(e) }
-            ).let { } //TODO
+            ).addTo(compositeDisposable)
         return complete
     }
 

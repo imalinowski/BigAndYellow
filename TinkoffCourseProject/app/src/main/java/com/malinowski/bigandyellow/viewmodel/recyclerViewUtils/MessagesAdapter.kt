@@ -4,12 +4,14 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.malinowski.bigandyellow.EmojiClickParcel
 import com.malinowski.bigandyellow.databinding.MessageItemBinding
 import com.malinowski.bigandyellow.model.data.Message
 
 
 class MessagesAdapter(
     private val dataSet: MutableList<Message>,
+    val emojiClickListener: (EmojiClickParcel) -> Unit,
     val longClickListener: (position: Int) -> Unit
 ) :
     RecyclerView.Adapter<MessagesAdapter.ViewHolder>() {
@@ -26,6 +28,7 @@ class MessagesAdapter(
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         dataSet[position].apply {
             viewHolder.binding.messageItem.setMessage(this)
+            viewHolder.binding.messageItem.setOnEmojiClickListener(emojiClickListener)
             viewHolder.binding.messageItem.setMessageOnLongClick {
                 longClickListener(position)
             }

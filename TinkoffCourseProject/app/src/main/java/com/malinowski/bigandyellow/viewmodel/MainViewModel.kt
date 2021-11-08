@@ -153,14 +153,14 @@ class MainViewModel : ViewModel() {
         sendMessage(Repository.SendType.STREAM, "[$stream]", content, topic)
     }
 
-    fun addReaction(messageId: Int, emoji: Reaction) {
-        dataProvider.addEmoji(messageId, emoji).subscribeBy(
+    fun addReaction(messageId: Int, emojiName: String) {
+        dataProvider.addEmoji(messageId, emojiName).subscribeBy(
             onComplete = {}, onError = { error(it) }
         ).addTo(compositeDisposable)
     }
 
-    fun deleteReaction(messageId: Int, emoji: Reaction) {
-        dataProvider.deleteEmoji(messageId, emoji).subscribeBy(
+    fun deleteReaction(messageId: Int, emojiName: String) {
+        dataProvider.deleteEmoji(messageId, emojiName).subscribeBy(
             onComplete = {}, onError = { error(it) }
         ).addTo(compositeDisposable)
     }
