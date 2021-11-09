@@ -1,12 +1,14 @@
 package com.malinowski.bigandyellow.viewmodel
 
 import android.os.Bundle
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.model.Repository
-import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.StreamTopicItem
+import com.malinowski.bigandyellow.model.data.Topic
+import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.usecase.ISearchTopicsUseCase
 import com.malinowski.bigandyellow.usecase.ISearchUsersUseCase
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
@@ -37,6 +39,7 @@ class MainViewModel : ViewModel() {
 
     private val searchTopicsUseCase: ISearchTopicsUseCase = SearchTopicsUseCase()
     private val searchUserUseCase: ISearchUsersUseCase = SearchUsersUseCase()
+
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()
@@ -139,22 +142,16 @@ class MainViewModel : ViewModel() {
 
     private fun sendMessage(
         type: Repository.SendType, to: String, content: String, topic: String = ""
-    ) {
-        dataProvider.sendMessage(type, to, content, topic).subscribeBy(
-            onComplete = { }, onError = {
-                error(it)
-                Log.e("SendMessageError", it.message.toString())
-            }
-        ).addTo(compositeDisposable)
+    ): Single<Int> {
+        return dataProvider.sendMessage(type, to, content, topic)
     }
 
-    fun sendMessageToUser(userEmail: String, content: String) {
+    fun sendMessageToUser(userEmail: String, content: String) =
         sendMessage(Repository.SendType.PRIVATE, userEmail, content)
-    }
 
-    fun sendMessageToTopic(stream: Int, topic: String, content: String) {
+
+    fun sendMessageToTopic(stream: Int, topic: String, content: String) =
         sendMessage(Repository.SendType.STREAM, "[$stream]", content, topic)
-    }
 
     fun addReaction(messageId: Int, emojiName: String) {
         dataProvider.addEmoji(messageId, emojiName).subscribeBy(

@@ -1,9 +1,11 @@
 package com.malinowski.bigandyellow.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -22,6 +24,8 @@ import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
 
 class ChatFragment : Fragment(R.layout.fragment_chat) {
 
@@ -33,6 +37,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private lateinit var messages: MutableList<Message>
 
     private val modalBottomSheet = SmileBottomSheet()
+
+    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     private val adapter: MessagesAdapter by lazy {
         MessagesAdapter(messages,
@@ -75,11 +81,14 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             flow.observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     messages = it.toMutableList()
+                    for(i in messages){
+                        Log.i("new message",i.toString())
+                    }
                     model.result()
                     initUI()
                 }, { e ->
                     model.error(e)
-                }).let { } // TODO
+                }).addTo(compositeDisposable)
         }
         model.loading()
     }
@@ -109,12 +118,9 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         binding.sendMessageButton.setOnClickListener {
             binding.sendMessageText.apply {
                 if (this.length() == 0) return@apply
-                messages.add(Message(messages.size, text.toString(), true))
                 sendMessage(text.toString())
                 setText("")
-                layoutManager.scrollToPosition(messages.size - 1)
             }
-            binding.messageRecycler.adapter?.notifyItemInserted(messages.size)
         }
 
         binding.sendMessageText.doAfterTextChanged {
@@ -148,14 +154,26 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private fun sendMessage(content: String) {
         val bundle = requireArguments()
-        if (bundle.containsKey(USER)) {
+        model.loading()
+        val singleId: Single<Int> = if (bundle.containsKey(USER)) {
             val userEmail = bundle.getString(USER)!!
             model.sendMessageToUser(userEmail, content)
-        } else if (bundle.containsKey(STREAM) && bundle.containsKey(TOPIC)) {
+        } else {
             val streamId = bundle.getInt(STREAM)
             val topicName = bundle.getString(TOPIC)!!
             model.sendMessageToTopic(streamId, topicName, content)
         }
+        singleId
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                { id ->
+                    messages.add(Message(id, content, User.ME.id))
+                    adapter.notifyItemInserted(messages.size - 1)
+                    layoutManager.scrollToPosition(messages.size - 1)
+                    model.result()
+                },
+                { model.error(it) }
+            ).addTo(compositeDisposable)
     }
 
     companion object {

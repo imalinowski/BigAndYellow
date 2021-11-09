@@ -156,16 +156,17 @@ object Repository : IRepository {
         STREAM("stream")
     }
 
-    fun sendMessage(type: SendType, to: String, content: String, topic: String = ""): Completable {
-        val complete = CompletableSubject.create()
+    fun sendMessage(type: SendType, to: String, content: String, topic: String = ""): Single<Int> =
         service.sendMessage(type.type, to, content, topic)
             .subscribeOn(Schedulers.io())
-            .subscribe(
-                { complete.onComplete() },
-                { e -> complete.onError(e) }
-            ).addTo(compositeDisposable)
-        return complete
-    }
+            .map { body ->
+                Json.decodeFromString<JsonObject>(body.string())["id"]
+                    ?.jsonPrimitive
+                    ?.content.let {
+                        it?.toInt()
+                    } ?: -1
+            }
+
 
     fun addEmoji(messageId: Int, emojiName: String): Completable {
         val complete = CompletableSubject.create()

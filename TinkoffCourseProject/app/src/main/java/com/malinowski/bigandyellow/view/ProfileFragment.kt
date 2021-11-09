@@ -6,20 +6,24 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentProfileBinding
 import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.model.data.UserStatus
+import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private val compositeDisposable = CompositeDisposable()
+    private val model: MainViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -33,9 +37,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.userName.text = User.ME.name
         updateStatus(User.ME)
-        Repository.loadStatus(User.ME).observeOn(AndroidSchedulers.mainThread()).subscribe { _ ->
-            updateStatus(User.ME)
-        }.addTo(compositeDisposable)
+        Repository.loadStatus(User.ME).observeOn(AndroidSchedulers.mainThread()).subscribeBy(
+            onSuccess = { updateStatus(User.ME) }, onError = { model.error(it) }
+        ).addTo(compositeDisposable)
         binding.image.apply {
             Glide.with(this).load(User.ME.avatarUrl).into(this)
         }

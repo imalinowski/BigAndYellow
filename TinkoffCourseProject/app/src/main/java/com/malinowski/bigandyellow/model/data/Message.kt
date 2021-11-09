@@ -10,7 +10,8 @@ import kotlin.collections.HashMap
 data class Message(
     @SerialName("id") val id: Int,
     @SerialName("content") val message: String,
-    @SerialName("is_me_message") val isMine: Boolean = false,
+    @SerialName("sender_id") val userId: Int,
+    @SerialName("is_me_message") var isMine: Boolean = false,
     @SerialName("sender_full_name") val senderName: String = "",
     @SerialName("timestamp") val timestamp: Int = (Date().time / 1000).toInt(),
     @SerialName("avatar_url") val avatarUrl: String = "",
@@ -22,6 +23,7 @@ data class Message(
     init {
         for (reaction in reactions)
             addEmoji(reaction)
+        isMine = userId == User.ME.id
     }
 
     fun addEmoji(reaction: Reaction) {
