@@ -15,6 +15,7 @@ import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.usecase.SearchUsersUseCase
 import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.MainScreenState
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -129,7 +130,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun getTopics(streamId: Int): Single<List<Topic>> =
+    fun getTopics(streamId: Int): Observable<List<Topic>> =
         dataProvider.loadTopics(streamId)
 
     fun getMessages(stream: Int, topic: String): Single<List<Message>> =

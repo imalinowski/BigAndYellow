@@ -1,13 +1,17 @@
 package com.malinowski.bigandyellow.model
 
 import android.util.Log
+import androidx.room.Room
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.malinowski.bigandyellow.App
 import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.db.AppDatabase
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowInt
 import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowStr
 import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -38,6 +42,12 @@ object Repository : IRepository {
 
     private var service = retrofit.create(ZulipChat::class.java)
     private val format = Json { ignoreUnknownKeys = true }
+
+    private val db = Room.databaseBuilder(
+        App.appContext,
+        AppDatabase::class.java, AppDatabase.DB_NAME
+    ).build()
+
     private val compositeDisposable = CompositeDisposable()
 
     override fun loadStreams(): Single<List<Stream>> {
@@ -76,14 +86,22 @@ object Repository : IRepository {
         return single
     }
 
-    override fun loadTopics(id: Int): Single<List<Topic>> {
-        return service.getTopicsInStream(id)
+    override fun loadTopics(id: Int): Observable<List<Topic>> {
+
+        val netCall = service.getTopicsInStream(id)
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val topicsJSA =
                     format.decodeFromString<JsonObject>(body.string())["topics"]
                 format.decodeFromString<List<Topic>>(topicsJSA.toString())
+            }.doOnSuccess {
+                it.forEach { db.topicDao().insert(it) }
             }
+
+        val dbCall = db.topicDao().getTopicsInStream(id)
+
+        return netCall.concatWith(dbCall).toObservable()
+
     }
 
     override fun loadUsers(): Single<List<User>> {

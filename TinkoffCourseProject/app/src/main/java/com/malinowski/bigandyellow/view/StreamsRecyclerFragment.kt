@@ -88,7 +88,7 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
         model.getTopics(stream.streamId)
             .map { topicToItemMapper(it, stream.streamId) }
-            .doOnSuccess { topics ->
+            .doOnNext { topics ->
                 stream.topics = topics
                 topics.onEachIndexed { index, topic ->
                     model.getMessagesCount(stream.streamId, topic.name)
