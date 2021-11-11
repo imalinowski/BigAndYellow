@@ -1,5 +1,6 @@
 package com.malinowski.bigandyellow.model.data
 
+import android.util.Log
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -21,6 +22,7 @@ data class UnitedReaction(
 }
 
 private fun processUnicode(code: String): String {
+    Log.i("RASP", code)
     return try {
         val hex = code.toInt(16)
         String(Character.toChars(hex))

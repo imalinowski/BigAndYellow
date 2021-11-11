@@ -3,7 +3,6 @@ package com.malinowski.bigandyellow.model.network
 import io.reactivex.Single
 import kotlinx.serialization.Serializable
 import okhttp3.ResponseBody
-import retrofit2.Call
 import retrofit2.http.*
 
 @Suppress("SpellCheckingInspection")
@@ -58,10 +57,13 @@ interface ZulipChat {
     ): Single<ResponseBody>
 
     @Serializable
-    data class NarrowElement(val operator: String, val operand: String)
+    sealed class Narrow()
 
     @Serializable
-    data class NarrowElementInt(val operator: String, val operand: Int)
+    data class NarrowStr(val operator: String, val operand: String) : Narrow()
+
+    @Serializable
+    data class NarrowInt(val operator: String, val operand: Int) : Narrow()
 
 
 }

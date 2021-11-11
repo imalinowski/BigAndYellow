@@ -11,7 +11,9 @@ import com.malinowski.bigandyellow.databinding.UserItemBinding
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.model.data.UserStatus
 
-class UserAdapter() :
+class UserAdapter(
+    val callback: (User)->Unit
+) :
     ListAdapter<User, UserAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
     class ViewHolder(val binding: UserItemBinding) : RecyclerView.ViewHolder(binding.root) {}
@@ -39,6 +41,9 @@ class UserAdapter() :
         )
         holder.binding.image.apply {
             Glide.with(context).load(user.avatarUrl).into(this)
+        }
+        holder.binding.root.setOnClickListener{
+            callback(user)
         }
     }
 

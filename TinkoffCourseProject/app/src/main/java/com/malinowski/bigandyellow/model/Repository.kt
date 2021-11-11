@@ -5,8 +5,8 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
-import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowElement
-import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowElementInt
+import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowInt
+import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowStr
 import io.reactivex.Completable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -124,11 +124,14 @@ object Repository : IRepository {
     }
 
     fun loadMessages(stream: Int, topic: String): Single<List<Message>> {
-        val streamFilter = NarrowElementInt(operator = "stream", operand = stream)
-            .let { Json.encodeToJsonElement(it) }
-        val topicFilter = NarrowElement(operator = "topic", operand = topic)
-            .let { Json.encodeToJsonElement(it) }
-        val narrow = JsonArray(listOf(streamFilter, topicFilter)).toString()
+        val narrow = listOf(
+            NarrowInt("stream", stream),
+            NarrowStr("topic", topic)
+        ).map {
+            Json.encodeToJsonElement(it)
+        }.let {
+            JsonArray(it).toString()
+        }
 
         return service.getMessages(narrow = narrow)
             .subscribeOn(Schedulers.io())
@@ -139,9 +142,13 @@ object Repository : IRepository {
     }
 
     fun loadMessages(userEmail: String): Single<List<Message>> {
-        val streamFilter = NarrowElement(operator = "pm-with", operand = userEmail)
-            .let { Json.encodeToJsonElement(it) }
-        val narrow = JsonArray(listOf(streamFilter)).toString()
+        val narrow = listOf(
+            NarrowStr("pm-with", userEmail)
+        ).map {
+            Json.encodeToJsonElement(it)
+        }.let {
+            JsonArray(it).toString()
+        }
 
         return service.getMessages(narrow = narrow)
             .subscribeOn(Schedulers.io())

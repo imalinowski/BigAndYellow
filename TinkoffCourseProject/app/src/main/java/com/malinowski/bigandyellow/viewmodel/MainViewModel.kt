@@ -121,9 +121,10 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun openChat(userEmail: String) {
+    fun openChat(user: User) {
         Bundle().apply {
-            putString(ChatFragment.USER, userEmail)
+            putString(ChatFragment.USER, user.email )
+            putString(ChatFragment.USER_NAME, user.name )
             chat.postValue(this)
         }
     }

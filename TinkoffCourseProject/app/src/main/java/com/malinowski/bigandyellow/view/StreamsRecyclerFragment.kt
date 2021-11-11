@@ -70,6 +70,11 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         return viewBinding.root
     }
 
+    override fun onStop() {
+        super.onStop()
+        closeStreams()
+    }
+
     private fun closeStreams() {
         for (item in items)
             if (item is StreamItem)

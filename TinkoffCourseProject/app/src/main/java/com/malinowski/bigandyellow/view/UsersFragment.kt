@@ -24,7 +24,9 @@ class UsersFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val model: MainViewModel by activityViewModels()
-    private var adapter = UserAdapter()
+    private var adapter = UserAdapter(){
+        model.openChat(it)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,

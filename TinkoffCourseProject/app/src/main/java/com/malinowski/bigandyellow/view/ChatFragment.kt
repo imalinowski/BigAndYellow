@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -81,8 +80,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             flow.observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     messages = it.toMutableList()
-                    for(i in messages){
-                        Log.i("new message",i.toString())
+                    for (i in messages) {
+                        Log.i("new message", i.toString())
                     }
                     model.result()
                     initUI()
@@ -103,7 +102,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private fun initUI() {
         binding.chatName.text = "#%s".format(
-            arguments?.getString(TOPIC) ?: arguments?.getString(USER)
+            arguments?.getString(TOPIC) ?: arguments?.getString(USER_NAME)
         )
 
         binding.back.setOnClickListener {
@@ -178,6 +177,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     companion object {
         const val USER = "user_email"
+        const val USER_NAME = "user_name"
         const val STREAM = "stream"
         const val TOPIC = "topic"
 

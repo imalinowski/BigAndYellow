@@ -40,7 +40,7 @@ class ChannelsFragment : Fragment() {
         }
 
         binding.searchLoop.setOnLongClickListener {
-            model.openChat(User.ME.email)
+            model.openChat(User.ME)
             false
         }
 
