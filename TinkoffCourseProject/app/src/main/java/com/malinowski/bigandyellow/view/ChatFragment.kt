@@ -1,7 +1,6 @@
 package com.malinowski.bigandyellow.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -80,9 +79,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             flow.observeOn(AndroidSchedulers.mainThread())
                 .subscribe({
                     messages = it.toMutableList()
-                    for (i in messages) {
-                        Log.i("new message", i.toString())
-                    }
                     model.result()
                     initUI()
                 }, { e ->

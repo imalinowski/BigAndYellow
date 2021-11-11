@@ -38,9 +38,9 @@
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_gravity="end|center"
-            android:scaleType="center"
             android:indeterminateTint="@color/custom_purple"
-            android:visibility="visible"/>
+            android:scaleType="center"
+            android:visibility="visible" />
 
     </FrameLayout>
 

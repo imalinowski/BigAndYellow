@@ -123,8 +123,8 @@ class MainViewModel : ViewModel() {
 
     fun openChat(user: User) {
         Bundle().apply {
-            putString(ChatFragment.USER, user.email )
-            putString(ChatFragment.USER_NAME, user.name )
+            putString(ChatFragment.USER, user.email)
+            putString(ChatFragment.USER_NAME, user.name)
             chat.postValue(this)
         }
     }

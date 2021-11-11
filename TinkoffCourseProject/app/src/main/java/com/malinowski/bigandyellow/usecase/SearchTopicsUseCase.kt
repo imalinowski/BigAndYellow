@@ -4,8 +4,8 @@ import com.malinowski.bigandyellow.model.data.Stream
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.TopicItem
-import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
 import com.malinowski.bigandyellow.model.mapper.StreamToItemMapper
+import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
 import io.reactivex.Observable
 import io.reactivex.Single
 
@@ -39,9 +39,9 @@ internal class SearchTopicsUseCase : ISearchTopicsUseCase {
         val streamTopicItem = mutableListOf<StreamTopicItem>()
         this.forEach { stream ->
             val topics = stream.search(query)
-            if(topics.isNotEmpty() || stream.name.contains(query, ignoreCase = true)) {
+            if (topics.isNotEmpty() || stream.name.contains(query, ignoreCase = true)) {
                 streamTopicItem.add(streamToItemMapper(stream).apply {
-                    if(topics.isNotEmpty())
+                    if (topics.isNotEmpty())
                         expanded = true
                 })
                 streamTopicItem.addAll(topics)

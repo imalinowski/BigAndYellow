@@ -4,7 +4,6 @@ import com.malinowski.bigandyellow.model.data.Stream
 import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.User
 import io.reactivex.Single
-import retrofit2.Call
 
 
 interface IRepository {

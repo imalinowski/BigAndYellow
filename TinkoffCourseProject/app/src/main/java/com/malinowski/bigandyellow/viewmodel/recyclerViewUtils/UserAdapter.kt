@@ -12,7 +12,7 @@ import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.model.data.UserStatus
 
 class UserAdapter(
-    val callback: (User)->Unit
+    val callback: (User) -> Unit
 ) :
     ListAdapter<User, UserAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
@@ -42,7 +42,7 @@ class UserAdapter(
         holder.binding.image.apply {
             Glide.with(context).load(user.avatarUrl).into(this)
         }
-        holder.binding.root.setOnClickListener{
+        holder.binding.root.setOnClickListener {
             callback(user)
         }
     }
