@@ -7,16 +7,9 @@ import com.malinowski.bigandyellow.model.data.TopicItem
 import com.malinowski.bigandyellow.model.mapper.StreamToItemMapper
 import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
 import io.reactivex.Observable
-import io.reactivex.Single
 
 interface ISearchTopicsUseCase :
-        (String, Single<List<Stream>>) -> Observable<List<StreamTopicItem>> {
-
-    override fun invoke(
-        searchQuery: String,
-        streams: Single<List<Stream>>
-    ): Observable<List<StreamTopicItem>>
-}
+        (String, Observable<List<Stream>>) -> Observable<List<StreamTopicItem>>
 
 internal class SearchTopicsUseCase : ISearchTopicsUseCase {
 
@@ -25,14 +18,14 @@ internal class SearchTopicsUseCase : ISearchTopicsUseCase {
 
     override fun invoke(
         searchQuery: String,
-        streams: Single<List<Stream>>
+        streams: Observable<List<Stream>>
     ): Observable<List<StreamTopicItem>> {
         return streams.map { topics ->
             if (searchQuery.isNotEmpty())
                 topics.search(searchQuery)
             else
                 topics.map(streamToItemMapper)
-        }.toObservable()
+        }
     }
 
     private fun List<Stream>.search(query: String): List<StreamTopicItem> {
@@ -50,7 +43,6 @@ internal class SearchTopicsUseCase : ISearchTopicsUseCase {
         return streamTopicItem
     }
 
-    //TODO make topic search
     private fun Stream.search(query: String): List<TopicItem> {
         val satisfyChats = mutableListOf<Topic>()
         this.topics.forEach { topic ->

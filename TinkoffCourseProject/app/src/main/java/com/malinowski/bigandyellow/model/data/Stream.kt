@@ -1,14 +1,34 @@
 package com.malinowski.bigandyellow.model.data
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
+import androidx.room.*
+import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-@Entity
+private const val TABLE_NAME = "Streams"
+@Entity(tableName = TABLE_NAME)
 @Serializable
 data class Stream(
-    @ColumnInfo(name = "name") @SerialName("name") val name: String,
-    @ColumnInfo(name = "stream_id") @SerialName("stream_id") val id: Int,
+    @PrimaryKey
+    @SerialName("stream_id") val id: Int,
+    @SerialName("name") val name: String,
+    var subscribed: Boolean = true,
+) {
+    @Ignore
     var topics: MutableList<Topic> = mutableListOf()
-)
+}
+
+
+@Dao
+interface StreamDao {
+    @Query("SELECT * FROM $TABLE_NAME")
+    fun getAll(): Single<List<Stream>>
+
+    @Query("SELECT * FROM $TABLE_NAME WHERE subscribed = 1")
+    fun getSubscribed(): Single<List<Stream>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(streams: List<Stream>)
+
+    @Delete
+    fun delete(topic: Stream): Single<Int>
+}

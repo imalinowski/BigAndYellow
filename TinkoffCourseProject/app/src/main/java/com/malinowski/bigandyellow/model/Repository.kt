@@ -17,7 +17,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.CompletableSubject
-import io.reactivex.subjects.SingleSubject
+import io.reactivex.subjects.PublishSubject
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -50,58 +50,86 @@ object Repository : IRepository {
 
     private val compositeDisposable = CompositeDisposable()
 
-    override fun loadStreams(): Single<List<Stream>> {
-        return service.getStreams()
+    override fun loadStreams(): Observable<List<Stream>> {
+        val netCall = service.getStreams()
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val streamsJSA =
                     format.decodeFromString<JsonObject>(body.string())["streams"]
                 format.decodeFromString<List<Stream>>(streamsJSA.toString())
-            }.flatMap { topicsPreload(it) }
+            }.doOnSuccess {
+                Log.d("STREAMS_NET", "$it")
+                db.streamDao().insert(it)
+            }
+            .toObservable()
+            .flatMap { topicsPreload(it) }
+
+        val dbCall = db.streamDao().getAll()
+            .observeOn(Schedulers.io())
+            .doOnSuccess { Log.d("STREAMS_DB", "$it") }
+            .toObservable()
+
+        return Observable.concat(dbCall, netCall)
     }
 
-    override fun loadSubscribedStreams(): Single<List<Stream>> {
-        return service.getSubscribedStreams()
+    override fun loadSubscribedStreams(): Observable<List<Stream>> {
+        val netCall = service.getSubscribedStreams()
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val subscriptionsJSA =
                     format.decodeFromString<JsonObject>(body.string())["subscriptions"]
                 format.decodeFromString<List<Stream>>(subscriptionsJSA.toString())
-            }.flatMap { topicsPreload(it) }
+            }.doOnSuccess { streams ->
+                streams.onEach { it.subscribed = true }
+                db.streamDao().insert(streams)
+            }.toObservable()
+            .flatMap { topicsPreload(it) }
+
+        val dbCall = db.streamDao().getSubscribed()
+            .observeOn(Schedulers.io())
+            .toObservable()
+
+        return Observable.concat(dbCall, netCall)
     }
 
-    private fun topicsPreload(streams: List<Stream>): Single<List<Stream>> {
-        val single = SingleSubject.create<List<Stream>>()
+    private fun topicsPreload(streams: List<Stream>): Observable<List<Stream>> {
+        val subject = PublishSubject.create<List<Stream>>()
         var count = 0
         streams.onEach { stream ->
             loadTopics(stream.id)
                 .doFinally {
                     count += 1
-                    if (count == streams.size) single.onSuccess(streams)
+                    if (count % streams.size == 0)
+                        subject.onNext(streams)
                 }.subscribe({
                     stream.topics = it.toMutableList()
                 }, { Log.e("TopicsPreload", it.message.toString()) }
                 ).addTo(compositeDisposable)
         }
-        return single
+        if (streams.isEmpty()) subject.onNext(streams)
+        return subject
     }
 
     override fun loadTopics(id: Int): Observable<List<Topic>> {
-
         val netCall = service.getTopicsInStream(id)
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val topicsJSA =
                     format.decodeFromString<JsonObject>(body.string())["topics"]
-                format.decodeFromString<List<Topic>>(topicsJSA.toString())
+                format.decodeFromString<List<Topic>>(topicsJSA.toString()).apply {
+                    map { it.streamId = id }
+                }
             }.doOnSuccess {
-                it.forEach { db.topicDao().insert(it) }
+                Log.d("TOPICS_NET", "stream $id > $it")
+                db.topicDao().insert(it)
             }
 
-        val dbCall = db.topicDao().getTopicsInStream(id)
+        val dbCall = db.topicDao()
+            .getTopicsInStream(id)
+            .subscribeOn(Schedulers.io())
+            .doOnSuccess { Log.d("TOPICS_DB", "stream $id > $it") }
 
-        return netCall.concatWith(dbCall).toObservable()
-
+        return dbCall.concatWith(netCall).toObservable()
     }
 
     override fun loadUsers(): Single<List<User>> {
@@ -150,6 +178,8 @@ object Repository : IRepository {
         }.let {
             JsonArray(it).toString()
         }
+
+        //TODO message preload
 
         return service.getMessages(narrow = narrow)
             .subscribeOn(Schedulers.io())

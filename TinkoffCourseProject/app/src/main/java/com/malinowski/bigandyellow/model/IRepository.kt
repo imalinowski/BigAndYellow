@@ -9,9 +9,9 @@ import io.reactivex.Single
 
 interface IRepository {
 
-    fun loadStreams(): Single<List<Stream>>
+    fun loadStreams(): Observable<List<Stream>>
 
-    fun loadSubscribedStreams(): Single<List<Stream>>
+    fun loadSubscribedStreams(): Observable<List<Stream>>
 
     fun loadTopics(id: Int): Observable<List<Topic>>
 

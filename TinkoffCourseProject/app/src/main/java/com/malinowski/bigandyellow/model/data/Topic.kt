@@ -5,15 +5,13 @@ import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-const val TABLE_NAME = "topic"
+private const val TABLE_NAME = "topic"
 
 @Entity(tableName = TABLE_NAME)
 @Serializable
 data class Topic(
-    @kotlinx.serialization.Transient
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    @ColumnInfo(name = "name") @SerialName("name") val name: String,
-    @ColumnInfo(name = "stream_id") val streamId: Int = 0
+    @PrimaryKey @ColumnInfo(name = "name") @SerialName("name") val name: String,
+    @ColumnInfo(name = "stream_id") var streamId: Int = 0
 )
 
 @Dao
@@ -24,8 +22,8 @@ interface TopicDao {
     @Query("SELECT * FROM $TABLE_NAME WHERE stream_id = :streamId")
     fun getTopicsInStream(streamId: Int): Single<List<Topic>>
 
-    @Insert
-    fun insert(topic: Topic): Single<Long>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(topic: List<Topic>)
 
     @Delete
     fun delete(topic: Topic): Single<Int>
