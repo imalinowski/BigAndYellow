@@ -2,6 +2,7 @@ package com.malinowski.bigandyellow.view
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -57,7 +58,7 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         (if (streamType == Streams.SubscribedStreams) model.streamsSubscribed else model.streams)
             .observe(viewLifecycleOwner) {
                 items = it.toMutableList()
-                adapter.submitList(items) {
+                adapter.submitList(it) {
                     viewBinding.topicsChatsRecycler.scrollToPosition(0)
                 }
             }
@@ -85,29 +86,24 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
     private fun addItems(stream: StreamItem, listPosition: Int) {
         stream.loading = true
         adapter.notifyItemChanged(listPosition)
-
+        val itemsCopy = items.toMutableList()
         model.getTopics(stream.streamId)
             .map { topicToItemMapper(it, stream.streamId) }
-            .doOnNext { topics ->
-                stream.topics = topics
-                topics.onEachIndexed { index, topic ->
-                    model.getMessagesCount(stream.streamId, topic.name)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({ messageNum ->
-                            topic.messageNum = messageNum
-                            adapter.notifyItemChanged(listPosition + index + 1)
-                        }, { e -> model.error(e) })
-                }
-            }
+            .doOnNext { topics -> stream.topics = topics }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ chats ->
+            .doOnEach {
                 stream.loading = false
-                items.addAll(listPosition + 1, chats)
                 adapter.notifyItemChanged(listPosition)
-                adapter.notifyItemRangeInserted(listPosition + 1, chats.size)
-                adapter.notifyItemRangeChanged(listPosition + chats.size + 1, adapter.itemCount)
-            }, { e ->
+            }
+            .subscribe({ chats ->
+                Log.d("RASP", chats.toString())
+                items = itemsCopy.toMutableList().apply {
+                    addAll(listPosition + 1, chats)
+                }
                 stream.loading = false
+                adapter.notifyItemChanged(listPosition)
+                adapter.submitList(items)
+            }, { e ->
                 model.error(e)
             })
     }

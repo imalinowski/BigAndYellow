@@ -111,7 +111,9 @@ class MainViewModel : ViewModel() {
                     streams.value = it
                     _mainScreenState.value = MainScreenState.Result
                 },
-                onError = { _mainScreenState.value = MainScreenState.Error(it) }
+                onError = {
+                    _mainScreenState.value = MainScreenState.Error(it)
+                }
             )
             .addTo(compositeDisposable)
     }

@@ -25,6 +25,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import java.util.concurrent.TimeUnit
 
 object Repository : IRepository {
 
@@ -62,7 +63,9 @@ object Repository : IRepository {
                 db.streamDao().insert(it)
             }
             .toObservable()
+            .onErrorReturnItem(listOf())
             .flatMap { topicsPreload(it) }
+            .onExceptionResumeNext {  } // todo error handling
 
         val dbCall = db.streamDao().getAll()
             .observeOn(Schedulers.io())
@@ -73,6 +76,11 @@ object Repository : IRepository {
     }
 
     override fun loadSubscribedStreams(): Observable<List<Stream>> {
+
+        val dbCall = db.streamDao().getSubscribed()
+            .observeOn(Schedulers.io())
+            .toObservable()
+
         val netCall = service.getSubscribedStreams()
             .subscribeOn(Schedulers.io())
             .map { body ->
@@ -83,11 +91,9 @@ object Repository : IRepository {
                 streams.onEach { it.subscribed = true }
                 db.streamDao().insert(streams)
             }.toObservable()
+            .onErrorReturnItem(listOf())
             .flatMap { topicsPreload(it) }
-
-        val dbCall = db.streamDao().getSubscribed()
-            .observeOn(Schedulers.io())
-            .toObservable()
+            .onExceptionResumeNext {  } // todo error handling
 
         return Observable.concat(dbCall, netCall)
     }
@@ -111,25 +117,29 @@ object Repository : IRepository {
     }
 
     override fun loadTopics(id: Int): Observable<List<Topic>> {
-        val netCall = service.getTopicsInStream(id)
+
+        val dbCall = db.topicDao()
+            .getTopicsInStream(id)
             .subscribeOn(Schedulers.io())
+            .doOnSuccess { Log.d("TOPICS_DB", "stream $id > $it") }
+            .toObservable()
+
+        val netCall = service.getTopicsInStream(id)
+            .subscribeOn(Schedulers.newThread())
             .map { body ->
                 val topicsJSA =
                     format.decodeFromString<JsonObject>(body.string())["topics"]
                 format.decodeFromString<List<Topic>>(topicsJSA.toString()).apply {
                     map { it.streamId = id }
                 }
-            }.doOnSuccess {
+            }.flatMap {
                 Log.d("TOPICS_NET", "stream $id > $it")
                 db.topicDao().insert(it)
-            }
+                Single.just(it)
+            }.toObservable()
+            .onExceptionResumeNext {  } // todo error handling
 
-        val dbCall = db.topicDao()
-            .getTopicsInStream(id)
-            .subscribeOn(Schedulers.io())
-            .doOnSuccess { Log.d("TOPICS_DB", "stream $id > $it") }
-
-        return dbCall.concatWith(netCall).toObservable()
+        return Observable.concat(dbCall, netCall)
     }
 
     override fun loadUsers(): Single<List<User>> {
