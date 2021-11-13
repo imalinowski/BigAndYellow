@@ -53,10 +53,16 @@ data class Message(
             emoji[code]?.usersId?.add(reaction.userId)
         } else {
             emoji[code] = UnitedReaction(
+                reaction.name,
                 mutableListOf(reaction.userId),
-                reaction.getUnicode(),
-                reaction.name
+                reaction.getUnicode()
             )
+        }
+    }
+
+    fun initEmoji(emojis : List<UnitedReaction>){
+        emojis.onEach {
+            emoji[it.name] = it
         }
     }
 

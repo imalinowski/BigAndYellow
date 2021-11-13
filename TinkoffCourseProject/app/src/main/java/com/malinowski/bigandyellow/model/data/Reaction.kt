@@ -1,5 +1,7 @@
 package com.malinowski.bigandyellow.model.data
 
+import androidx.room.*
+import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -12,12 +14,17 @@ data class Reaction(
     fun getUnicode() = processUnicode(code)
 }
 
+private const val TABLE_NAME = "UnitedReactions"
+
+@Entity(tableName = TABLE_NAME)
+@TypeConverters(ListStringConverter::class)
 data class UnitedReaction(
-    val usersId: MutableList<Int>,
-    private val code: String,
-    val name: String
+    @PrimaryKey val name: String,
+    @ColumnInfo(name = "users_id") val usersId: MutableList<Int>,
+    private val unicode: String
 ) {
-    fun getUnicode() = processUnicode(code)
+    var messageId = 0
+    fun getUnicode() = processUnicode(unicode)
 }
 
 private fun processUnicode(code: String): String {
@@ -26,6 +33,39 @@ private fun processUnicode(code: String): String {
         String(Character.toChars(hex))
     } catch (e: NumberFormatException) {
         code
+    }
+}
+
+//TODO ADD REACTIONS TO DB AND INIT IN MESSAGES
+
+@Dao
+interface ReactionDao {
+    @Query("SELECT * FROM $TABLE_NAME")
+    fun getAll(): Single<List<UnitedReaction>>
+
+    @Query("SELECT * FROM $TABLE_NAME WHERE messageId = :id")
+    fun getByMessageId(id: Int): Single<List<UnitedReaction>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(users: List<UnitedReaction>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(users: UnitedReaction)
+
+    @Delete
+    fun delete(topic: UnitedReaction): Single<Int>
+}
+
+
+class ListStringConverter() {
+    @TypeConverter
+    fun listToString(value: MutableList<Int>?): String? {
+        return value?.joinToString()
+    }
+
+    @TypeConverter
+    fun stringToList(value: String?): MutableList<Int>? {
+        return value?.replace(" ", "")?.split(",")?.map { Integer.valueOf(it) }?.toMutableList()
     }
 }
 

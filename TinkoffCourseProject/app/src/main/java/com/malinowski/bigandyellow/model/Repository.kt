@@ -168,7 +168,7 @@ object Repository : IRepository {
             }.doOnSuccess {
                 db.userDao().insert(it)
                 db.userDao().insert(User.ME)
-            } .onErrorResumeNext { error: Throwable ->
+            }.onErrorResumeNext { error: Throwable ->
                 Log.e("USERS_NET", "${error.message}")
                 dbCall
             }
@@ -230,7 +230,10 @@ object Repository : IRepository {
 
         val dbCall = db.messageDao()
             .getMessages(stream, topicName)
-            .doOnSuccess { Log.i("MESSAGES_DB", "$it") }
+            .doOnSuccess {
+                Log.i("MESSAGES_DB", "$it")
+                loadReactionsDB(it)
+            }
 
         val netCall = service.getMessages(narrow = narrow)
             .subscribeOn(Schedulers.io())
@@ -239,7 +242,7 @@ object Repository : IRepository {
                 format.decodeFromString<List<Message>>(jso.toString())
             }.doOnSuccess {
                 setMessageNum(topicName, it.size)
-                db.messageDao().insert(it)
+                saveMessagesToDB(it)
             }
 
         return Single.concat(dbCall, netCall)
@@ -258,20 +261,44 @@ object Repository : IRepository {
 
         val dbCall = db.messageDao()
             .getMessages(userEmail)
-            .doOnSuccess { Log.i("MESSAGES_DB", "$it") }
+            .doOnSuccess {
+                Log.i("MESSAGES_DB", "$it")
+                loadReactionsDB(it)
+            }
 
         val netCall = service.getMessages(narrow = narrow)
             .map { body ->
                 val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
                 format.decodeFromString<List<Message>>(jso.toString())
-            }.doOnSuccess {
-                Log.i("MESSAGES_NET", "$it")
-                db.messageDao().insert(it)
+            }.doOnSuccess { messages ->
+                Log.i("MESSAGES_NET", "$messages")
+                saveMessagesToDB(messages)
             }
 
         return Single.concat(dbCall, netCall)
             .subscribeOn(Schedulers.io())
             .toObservable()
+    }
+
+    private fun loadReactionsDB(messages: List<Message>) {
+        messages.onEach { message ->
+            db.reactionDao().getByMessageId(message.id).subscribeBy(
+                onSuccess = {
+                    Log.d("REACTIONS_DB", "$it")
+                    message.initEmoji(it)
+                },
+                onError = { Log.e("REACTIONS_DB", "${it.message}") }
+            ).addTo(compositeDisposable)
+        }
+    }
+
+    private fun saveMessagesToDB(messages: List<Message>) {
+        db.messageDao().insert(messages)
+        messages.onEach { message -> // reactions init
+            message.emoji.values
+                .map { it.apply { messageId = message.id } }
+                .let { db.reactionDao().insert(it) }
+        }
     }
 
     enum class SendType(val type: String) {
