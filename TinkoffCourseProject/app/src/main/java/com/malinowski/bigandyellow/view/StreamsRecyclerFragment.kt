@@ -1,6 +1,5 @@
 package com.malinowski.bigandyellow.view
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,6 +18,9 @@ import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.Streams
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
 
 class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
@@ -29,6 +31,7 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
     private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
     private val model: MainViewModel by activityViewModels()
     private var items: MutableList<StreamTopicItem> = mutableListOf()
+    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     private val adapter = TopicsChatsAdapter { position -> // on item click
         when (val item = items[position]) {
@@ -82,30 +85,35 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
                 item.expanded = false
     }
 
-    @SuppressLint("CheckResult")
     private fun addItems(stream: StreamItem, listPosition: Int) {
+        //compositeDisposable.dispose()
         stream.loading = true
         adapter.notifyItemChanged(listPosition)
         val itemsCopy = items.toMutableList()
         model.getTopics(stream.streamId)
             .map { topicToItemMapper(it, stream.streamId) }
+            .observeOn(AndroidSchedulers.mainThread(), true)
             .doOnNext { topics -> stream.topics = topics }
-            .observeOn(AndroidSchedulers.mainThread())
             .doOnEach {
                 stream.loading = false
                 adapter.notifyItemChanged(listPosition)
             }
-            .subscribe({ chats ->
-                Log.d("RASP", chats.toString())
-                items = itemsCopy.toMutableList().apply {
-                    addAll(listPosition + 1, chats)
+            .subscribeBy(
+                onNext = { chats ->
+                    Log.d("GET_TOPICS_DEBUG", "ON NEXT $chats")
+                    items = itemsCopy.toMutableList().apply {
+                        addAll(listPosition + 1, chats)
+                    }
+                    stream.loading = false
+                    adapter.notifyItemChanged(listPosition)
+                    adapter.submitList(items)
+
+                },
+                onError = { e ->
+                    Log.d("GET_TOPICS_DEBUG", "ON ERROR ${e.message}")
+                    model.error(e)
                 }
-                stream.loading = false
-                adapter.notifyItemChanged(listPosition)
-                adapter.submitList(items)
-            }, { e ->
-                model.error(e)
-            })
+            ).addTo(compositeDisposable)
     }
 
     private fun deleteItems(listPosition: Int) {
