@@ -14,7 +14,7 @@ internal class SearchUsersUseCase : ISearchUsersUseCase {
     private val dataProvider = Repository
 
     override fun invoke(searchQuery: String): Observable<List<User>> {
-        return dataProvider.loadUsers().toObservable()
+        return dataProvider.loadUsers()
             .map { users ->
                 if (searchQuery.isNotEmpty())
                     users.filter { user -> user.name.contains(searchQuery, ignoreCase = true) }

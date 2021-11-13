@@ -155,14 +155,24 @@ object Repository : IRepository {
         }
     }
 
-    override fun loadUsers(): Single<List<User>> {
-        return service.getUsers()
+    override fun loadUsers(): Observable<List<User>> {
+        val dbCall = db.userDao()
+            .getAll()
+            .subscribeOn(Schedulers.io())
+        val netCall = service.getUsers()
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val membersJSA =
                     format.decodeFromString<JsonObject>(body.string())["members"]
                 format.decodeFromString<List<User>>(membersJSA.toString())
+            }.doOnSuccess {
+                db.userDao().insert(it)
+                db.userDao().insert(User.ME)
+            } .onErrorResumeNext { error: Throwable ->
+                Log.e("USERS_NET", "${error.message}")
+                dbCall
             }
+        return Single.concat(dbCall, netCall).toObservable()
     }
 
     fun loadStatus(user: User) =

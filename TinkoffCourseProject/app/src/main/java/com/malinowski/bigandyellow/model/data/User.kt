@@ -46,6 +46,9 @@ interface UserDao {
     @Query("SELECT * FROM $TABLE_NAME WHERE is_me = 1")
     fun getOwnUser(): Single<User>
 
+    @Query("SELECT * FROM $TABLE_NAME WHERE id = :id")
+    fun getById(id: Int): Single<User>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(users: List<User>)
 

@@ -15,6 +15,6 @@ interface IRepository {
 
     fun loadTopics(id: Int): Observable<List<Topic>>
 
-    fun loadUsers(): Single<List<User>>
+    fun loadUsers(): Observable<List<User>>
 
 }
