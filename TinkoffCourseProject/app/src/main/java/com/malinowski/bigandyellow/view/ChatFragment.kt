@@ -1,6 +1,7 @@
 package com.malinowski.bigandyellow.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,10 +21,12 @@ import com.malinowski.bigandyellow.model.data.UnitedReaction
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
 
 class ChatFragment : Fragment(R.layout.fragment_chat) {
 
@@ -32,14 +35,14 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private val model: MainViewModel by activityViewModels()
-    private lateinit var messages: MutableList<Message>
+    private var messages: MutableList<Message> = mutableListOf()
 
     private val modalBottomSheet = SmileBottomSheet()
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     private val adapter: MessagesAdapter by lazy {
-        MessagesAdapter(messages,
+        MessagesAdapter(
             { parcel: EmojiClickParcel ->
                 when (parcel) {
                     is EmojiAddParcel ->
@@ -62,7 +65,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         super.onCreate(savedInstanceState)
         arguments?.let { bundle ->
 
-            val flow: Single<List<Message>> =
+            val flow: Observable<List<Message>> =
                 if (bundle.containsKey(USER))
                     model.getMessages(bundle.getString(USER)!!)
                 else if (bundle.containsKey(STREAM) && bundle.containsKey(TOPIC))
@@ -76,14 +79,23 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                     return@let
                 }
 
-            flow.observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
-                    messages = it.toMutableList()
-                    model.result()
-                    initUI()
-                }, { e ->
-                    model.error(e)
-                }).addTo(compositeDisposable)
+            flow
+                .observeOn(AndroidSchedulers.mainThread(), true)
+                .subscribeBy(
+                    onNext = {
+                        Log.d("MESSAGES_DEBUG", "$it")
+                        messages = it.toMutableList()
+                        model.result()
+                        adapter.submitList(it){
+                            binding.messageRecycler.scrollToPosition(it.size - 1)
+                        }
+                    },
+                    onError = { e ->
+                        Log.d("MESSAGES_DEBUG", "${e.message}")
+                        model.error(e)
+                    }
+                ).addTo(compositeDisposable)
+
         }
         model.loading()
     }
@@ -94,6 +106,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         savedInstanceState: Bundle?
     ): View {
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        initUI()
     }
 
     private fun initUI() {
@@ -163,6 +179,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             .subscribe(
                 { id ->
                     messages.add(Message(id, content, User.ME.id))
+                    adapter.submitList(messages)
                     adapter.notifyItemInserted(messages.size - 1)
                     layoutManager.scrollToPosition(messages.size - 1)
                     model.result()

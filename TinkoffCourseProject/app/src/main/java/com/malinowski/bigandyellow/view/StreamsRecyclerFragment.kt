@@ -86,7 +86,6 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
     }
 
     private fun addItems(stream: StreamItem, listPosition: Int) {
-        //compositeDisposable.dispose()
         stream.loading = true
         adapter.notifyItemChanged(listPosition)
         val itemsCopy = items.toMutableList()

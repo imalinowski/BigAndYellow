@@ -127,7 +127,7 @@ object Repository : IRepository {
             .getTopicsInStream(id)
             .doOnSuccess { Log.d("TOPICS_DB", "stream $id > $it") }
 
-        val netCall = Single.defer { service.getTopicsInStream(id) }
+        val netCall = service.getTopicsInStream(id)
             .map { body ->
                 val topicsJSA =
                     format.decodeFromString<JsonObject>(body.string())["topics"]
@@ -180,36 +180,22 @@ object Repository : IRepository {
             }
 
     fun loadOwnUser() {
-        val format = Json { ignoreUnknownKeys = true }
+        db.userDao().getOwnUser()
+            .subscribeOn(Schedulers.io())
+            .subscribe(
+                { User.ME = it },
+                { Log.e("LoadOwnUser", it.message.toString()) }
+            ).addTo(compositeDisposable)
+
         service.getOwnUser()
             .subscribeOn(Schedulers.io())
             .subscribe(
                 { body ->
                     User.ME = format.decodeFromString(body.string())
-                }, {
-                    Log.e("LoadOwnUser", it.message.toString())
-                }
+                    db.userDao().insert(User.ME.apply { isMe = true })
+                },
+                { Log.e("LoadOwnUser", it.message.toString()) }
             ).addTo(compositeDisposable)
-    }
-
-    fun loadMessages(stream: Int, topicName: String): Single<List<Message>> {
-        val narrow = listOf(
-            NarrowInt("stream", stream),
-            NarrowStr("topic", topicName)
-        ).map {
-            Json.encodeToJsonElement(it)
-        }.let {
-            JsonArray(it).toString()
-        }
-
-        return service.getMessages(narrow = narrow)
-            .subscribeOn(Schedulers.io())
-            .map { body ->
-                val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
-                format.decodeFromString<List<Message>>(jso.toString())
-            }.doOnSuccess {
-                setMessageNum(topicName, it.size)
-            }
     }
 
     private fun setMessageNum(topicName: String, messageNum: Int) {
@@ -222,7 +208,36 @@ object Repository : IRepository {
         ).addTo(compositeDisposable)
     }
 
-    fun loadMessages(userEmail: String): Single<List<Message>> {
+    fun loadMessages(stream: Int, topicName: String): Observable<List<Message>> {
+        val narrow = listOf(
+            NarrowInt("stream", stream),
+            NarrowStr("topic", topicName)
+        ).map {
+            Json.encodeToJsonElement(it)
+        }.let {
+            JsonArray(it).toString()
+        }
+
+        val dbCall = db.messageDao()
+            .getMessages(stream, topicName)
+            .doOnSuccess { Log.i("MESSAGES_DB", "$it") }
+
+        val netCall = service.getMessages(narrow = narrow)
+            .subscribeOn(Schedulers.io())
+            .map { body ->
+                val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
+                format.decodeFromString<List<Message>>(jso.toString())
+            }.doOnSuccess {
+                setMessageNum(topicName, it.size)
+                db.messageDao().insert(it)
+            }
+
+        return Single.concat(dbCall, netCall)
+            .subscribeOn(Schedulers.io())
+            .toObservable()
+    }
+
+    fun loadMessages(userEmail: String): Observable<List<Message>> {
         val narrow = listOf(
             NarrowStr("pm-with", userEmail)
         ).map {
@@ -231,12 +246,22 @@ object Repository : IRepository {
             JsonArray(it).toString()
         }
 
-        return service.getMessages(narrow = narrow)
-            .subscribeOn(Schedulers.io())
+        val dbCall = db.messageDao()
+            .getMessages(userEmail)
+            .doOnSuccess { Log.i("MESSAGES_DB", "$it") }
+
+        val netCall = service.getMessages(narrow = narrow)
             .map { body ->
                 val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
                 format.decodeFromString<List<Message>>(jso.toString())
+            }.doOnSuccess {
+                Log.i("MESSAGES_NET", "$it")
+                db.messageDao().insert(it)
             }
+
+        return Single.concat(dbCall, netCall)
+            .subscribeOn(Schedulers.io())
+            .toObservable()
     }
 
     enum class SendType(val type: String) {

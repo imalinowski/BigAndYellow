@@ -137,10 +137,10 @@ class MainViewModel : ViewModel() {
     fun getTopics(streamId: Int): Observable<List<Topic>> =
         dataProvider.loadTopics(streamId)
 
-    fun getMessages(stream: Int, topicName: String): Single<List<Message>> =
+    fun getMessages(stream: Int, topicName: String): Observable<List<Message>> =
         dataProvider.loadMessages(stream, topicName)
 
-    fun getMessages(user: String): Single<List<Message>> =
+    fun getMessages(user: String): Observable<List<Message>> =
         dataProvider.loadMessages(user)
 
     private fun sendMessage(
