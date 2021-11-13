@@ -15,6 +15,7 @@ import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.CompletableSubject
 import io.reactivex.subjects.PublishSubject
@@ -133,15 +134,25 @@ object Repository : IRepository {
                 format.decodeFromString<List<Topic>>(topicsJSA.toString()).apply {
                     map { it.streamId = id }
                 }
-            }.flatMap {
-                Log.d("TOPICS_NET", "stream $id > $it")
-                db.topicDao().insert(it)
-                Single.just(it)
+            }.flatMap { topics ->
+                Log.d("TOPICS_NET", "stream $id > $topics")
+                db.topicDao().insert(topics)
+                messageNumPreload(topics)
+                Single.just(topics)
             }
 
         return Single.concat(dbCall, netCall)
             .toObservable()
             .subscribeOn(Schedulers.io())
+    }
+
+    private fun messageNumPreload(topics: List<Topic>) {
+        topics.onEach { topic ->
+            db.topicDao().getTopicByName(topic.name).subscribeBy(
+                onSuccess = { topic.messageNum = it.messageNum },
+                onError = { Log.e("TOPICS_NET", "topic ${topic.name} error message preload") }
+            ).addTo(compositeDisposable)
+        }
     }
 
     override fun loadUsers(): Single<List<User>> {
@@ -181,24 +192,34 @@ object Repository : IRepository {
             ).addTo(compositeDisposable)
     }
 
-    fun loadMessages(stream: Int, topic: String): Single<List<Message>> {
+    fun loadMessages(stream: Int, topicName: String): Single<List<Message>> {
         val narrow = listOf(
             NarrowInt("stream", stream),
-            NarrowStr("topic", topic)
+            NarrowStr("topic", topicName)
         ).map {
             Json.encodeToJsonElement(it)
         }.let {
             JsonArray(it).toString()
         }
 
-        //TODO message preload
-
         return service.getMessages(narrow = narrow)
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
                 format.decodeFromString<List<Message>>(jso.toString())
+            }.doOnSuccess {
+                setMessageNum(topicName, it.size)
             }
+    }
+
+    private fun setMessageNum(topicName: String, messageNum: Int) {
+        db.topicDao().getTopicByName(topicName).subscribeBy(
+            onSuccess = {
+                it.messageNum = messageNum
+                db.topicDao().update(it)
+            },
+            onError = { Log.e("LOAD_TOPIC_BY_NAME", "${it.message}") }
+        ).addTo(compositeDisposable)
     }
 
     fun loadMessages(userEmail: String): Single<List<Message>> {

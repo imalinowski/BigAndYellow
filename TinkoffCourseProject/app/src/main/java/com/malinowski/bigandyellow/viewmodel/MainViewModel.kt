@@ -118,10 +118,10 @@ class MainViewModel : ViewModel() {
             .addTo(compositeDisposable)
     }
 
-    fun openChat(streamId: Int, topic: String) {
+    fun openChat(streamId: Int, topicName: String) {
         Bundle().apply {
             putInt(ChatFragment.STREAM, streamId)
-            putString(ChatFragment.TOPIC, topic)
+            putString(ChatFragment.TOPIC, topicName)
             chat.postValue(this)
         }
     }
@@ -137,11 +137,8 @@ class MainViewModel : ViewModel() {
     fun getTopics(streamId: Int): Observable<List<Topic>> =
         dataProvider.loadTopics(streamId)
 
-    fun getMessages(stream: Int, topic: String): Single<List<Message>> =
-        dataProvider.loadMessages(stream, topic)
-
-    fun getMessagesCount(stream: Int, topic: String): Single<Int> =
-        Repository.loadMessages(stream, topic).map { it.size }
+    fun getMessages(stream: Int, topicName: String): Single<List<Message>> =
+        dataProvider.loadMessages(stream, topicName)
 
     fun getMessages(user: String): Single<List<Message>> =
         dataProvider.loadMessages(user)

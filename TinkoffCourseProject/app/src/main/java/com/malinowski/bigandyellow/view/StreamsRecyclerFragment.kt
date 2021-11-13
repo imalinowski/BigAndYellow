@@ -91,7 +91,7 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         adapter.notifyItemChanged(listPosition)
         val itemsCopy = items.toMutableList()
         model.getTopics(stream.streamId)
-            .map { topicToItemMapper(it, stream.streamId) }
+            .map { topics -> topicToItemMapper(topics, stream.streamId) }
             .observeOn(AndroidSchedulers.mainThread(), true)
             .doOnNext { topics -> stream.topics = topics }
             .doOnEach {

@@ -11,7 +11,7 @@ internal class TopicToItemMapper : (List<Topic>, Int) -> (List<TopicItem>) {
                 topicId = index,
                 streamId = streamId,
                 name = topic.name,
-                messageNum = 0
+                messageNum = topic.messageNum
             )
         }
     }

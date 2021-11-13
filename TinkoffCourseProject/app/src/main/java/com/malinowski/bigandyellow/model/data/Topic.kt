@@ -11,7 +11,8 @@ private const val TABLE_NAME = "topic"
 @Serializable
 data class Topic(
     @PrimaryKey @ColumnInfo(name = "name") @SerialName("name") val name: String,
-    @ColumnInfo(name = "stream_id") var streamId: Int = 0
+    @ColumnInfo(name = "stream_id") var streamId: Int = 0,
+    @ColumnInfo(name = "message_num") var messageNum: Int = 0,
 )
 
 @Dao
@@ -22,8 +23,17 @@ interface TopicDao {
     @Query("SELECT * FROM $TABLE_NAME WHERE stream_id = :streamId")
     fun getTopicsInStream(streamId: Int): Single<List<Topic>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Query("SELECT * FROM $TABLE_NAME WHERE name = :name")
+    fun getTopicByName(name: String): Single<Topic>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(topic: List<Topic>)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insert(topic: Topic)
+
+    @Update
+    fun update(topic: Topic)
 
     @Delete
     fun delete(topic: Topic): Single<Int>
