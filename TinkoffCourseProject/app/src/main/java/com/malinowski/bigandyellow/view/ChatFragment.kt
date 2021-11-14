@@ -57,7 +57,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 modalBottomSheet.arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position)
             },
             onBind = { position ->
-                //Log.d("MESSAGES_DEBUG", "pos > $position && mes size > ${messages.size}")
                 if (position == 5 && !messagesLoaded) loadMessages()
             }
         )
@@ -94,7 +93,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         binding.messageRecycler.apply {
             adapter = this@ChatFragment.adapter
             layoutManager = this@ChatFragment.layoutManager
-            //adapter.stateRestorationPolicy = PREVENT_WHEN_EMPTY
         }
 
         binding.sendMessageButton.setOnClickListener {
@@ -136,10 +134,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private fun loadMessages() {
         val anchor = if (messages.size > 0) "${messages[0].id}" else ZulipChat.NEWEST_MES
-        Log.d(
-            "MESSAGES_DEBUG",
-            "-------------------- LOAD MESSAGES FOR > $anchor with ${messages.size} mes ----------------------------------"
-        )
 
         val flow: Observable<List<Message>> =
             if (userEmail != null)
@@ -157,9 +151,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             .subscribeBy(
                 onNext = { messagesPage ->
                     model.result()
-                    for ((i, message) in messagesPage.withIndex()) {
-                        Log.d("MESSAGES_DEBUG", "$i > ${message.message}")
-                    }
                     messagesLoaded = messagesPage.isEmpty()
                     if (!messagesLoaded) {
                         messages = itemsCopy.toMutableList().apply { addAll(0, messagesPage) }
@@ -178,16 +169,12 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private fun sendMessage(content: String) {
-        val bundle = requireArguments()
         model.loading()
-        val singleId: Single<Int> = if (bundle.containsKey(USER_EMAIL)) {
-            val userEmail = bundle.getString(USER_EMAIL)!!
-            model.sendMessageToUser(userEmail, content)
-        } else {
-            val streamId = bundle.getInt(STREAM)
-            val topicName = bundle.getString(TOPIC)!!
-            model.sendMessageToTopic(streamId, topicName, content)
-        }
+        val singleId: Single<Int> =
+            if (userEmail != null)
+                model.sendMessageToUser(userEmail!!, content)
+            else
+                model.sendMessageToTopic(streamId!!, topicName!!, content)
         singleId
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(

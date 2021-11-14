@@ -51,7 +51,10 @@ interface ReactionDao {
     fun insert(users: UnitedReaction)
 
     @Delete
-    fun delete(topic: UnitedReaction): Single<Int>
+    fun delete(reaction: UnitedReaction): Single<Int>
+
+    @Query("DELETE FROM $TABLE_NAME WHERE messageId = :id")
+    fun deleteByMessageId(id: Int)
 }
 
 

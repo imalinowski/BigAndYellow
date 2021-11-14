@@ -88,5 +88,5 @@ interface MessageDao {
     fun insert(streams: List<Message>)
 
     @Delete
-    fun delete(topic: Message): Single<Int>
+    fun delete(message: Message): Single<Int>
 }

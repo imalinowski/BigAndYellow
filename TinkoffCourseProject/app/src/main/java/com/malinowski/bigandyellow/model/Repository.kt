@@ -209,7 +209,6 @@ object Repository : IRepository {
             ).addTo(compositeDisposable)
     }
 
-    // TODO UPDATE TOPIC MES NUM WHEN LOAD ALL
     fun setMessageNum(topicName: String, messageNum: Int) {
         db.topicDao().getTopicByName(topicName)
             .subscribeOn(Schedulers.io())
@@ -238,6 +237,7 @@ object Repository : IRepository {
 
         val dbCall = db.messageDao()
             .getMessages(stream, topicName)
+            .map { clearMessages(it) }
             .doOnSuccess {
                 Log.i("MESSAGES_DB", "$it")
                 loadReactionsDB(it)
@@ -276,6 +276,7 @@ object Repository : IRepository {
 
         val dbCall = db.messageDao()
             .getMessages(userEmail)
+            .map { clearMessages(it) }
             .doOnSuccess {
                 Log.i("MESSAGES_DB", "$it")
                 loadReactionsDB(it)
@@ -318,11 +319,21 @@ object Repository : IRepository {
 
     private fun saveMessagesToDB(messages: List<Message>) {
         db.messageDao().insert(messages)
-        messages.onEach { message -> // reactions init
-            message.emoji.values
+        messages.onEach { message ->
+            message.emoji.values  // reactions save
                 .map { it.apply { messageId = message.id } }
                 .let { db.reactionDao().insert(it) }
         }
+
+    }
+
+    private fun clearMessages(messages: List<Message>): List<Message> {
+        if (messages.size <= 50) return messages
+        messages.subList(0, messages.size - 50).onEach { message ->
+            Log.i("CLEAR_MESSAGES", db.messageDao().delete(message).toString())
+            Log.i("CLEAR_MESSAGES", db.reactionDao().deleteByMessageId(message.id).toString())
+        }
+        return messages.subList(messages.size - 50, messages.size)
     }
 
     enum class SendType(val type: String) {
