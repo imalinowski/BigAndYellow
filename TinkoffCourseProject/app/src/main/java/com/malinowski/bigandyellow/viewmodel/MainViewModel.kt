@@ -138,10 +138,17 @@ class MainViewModel : ViewModel() {
     fun getTopics(streamId: Int): Observable<List<Topic>> =
         dataProvider.loadTopics(streamId)
 
-    fun getMessages(stream: Int, topicName: String, anchor: String = ZulipChat.NEWEST_MES): Observable<List<Message>> =
+    fun getMessages(
+        stream: Int,
+        topicName: String,
+        anchor: String = ZulipChat.NEWEST_MES
+    ): Observable<List<Message>> =
         dataProvider.loadMessages(stream, topicName, anchor)
 
-    fun getMessages(user: String, anchor: String = ZulipChat.NEWEST_MES): Observable<List<Message>> =
+    fun getMessages(
+        user: String,
+        anchor: String = ZulipChat.NEWEST_MES
+    ): Observable<List<Message>> =
         dataProvider.loadMessages(user, anchor)
 
     fun setMessageNum(topicName: String, messageNum: Int) =
@@ -155,7 +162,6 @@ class MainViewModel : ViewModel() {
 
     fun sendMessageToUser(userEmail: String, content: String) =
         sendMessage(Repository.SendType.PRIVATE, userEmail, content)
-
 
     fun sendMessageToTopic(stream: Int, topic: String, content: String) =
         sendMessage(Repository.SendType.STREAM, "[$stream]", content, topic)

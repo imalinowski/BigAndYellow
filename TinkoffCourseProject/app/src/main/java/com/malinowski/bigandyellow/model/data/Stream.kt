@@ -4,7 +4,9 @@ import androidx.room.*
 import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
 private const val TABLE_NAME = "Streams"
+
 @Entity(tableName = TABLE_NAME)
 @Serializable
 data class Stream(

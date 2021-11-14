@@ -58,6 +58,7 @@ object Repository : IRepository {
             .observeOn(Schedulers.io())
             .doOnSuccess { Log.d("STREAMS_DB", "$it") }
             .toObservable()
+            .flatMap { topicsPreload(it) }
 
         val netCall = service.getStreams()
             .subscribeOn(Schedulers.io())
@@ -84,6 +85,7 @@ object Repository : IRepository {
         val dbCall = db.streamDao().getSubscribed()
             .observeOn(Schedulers.io())
             .toObservable()
+            .flatMap { topicsPreload(it) }
 
         val netCall = service.getSubscribedStreams()
             .subscribeOn(Schedulers.io())

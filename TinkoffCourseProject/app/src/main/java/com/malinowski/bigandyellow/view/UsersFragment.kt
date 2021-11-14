@@ -24,9 +24,11 @@ class UsersFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val model: MainViewModel by activityViewModels()
-    private var adapter = UserAdapter() {
-        model.openChat(it)
-    }
+    private var adapter = UserAdapter(
+        onClick = {
+            model.openChat(it)
+        }
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,7 +49,7 @@ class UsersFragment : Fragment() {
         if (savedInstanceState == null)
             model.searchUsers("")
         model.users.observe(viewLifecycleOwner) { users ->
-            updateUsersStatus(users)
+            users.onEachIndexed { i, user -> updateUsersStatus(user, i) }
             adapter.submitList(users) {
                 binding.usersRecycler.scrollToPosition(0)
             }
@@ -60,17 +62,17 @@ class UsersFragment : Fragment() {
     }
 
     private val compositeDisposable = CompositeDisposable()
-    private fun updateUsersStatus(users: List<User>) {
-        users.forEachIndexed { index, user ->
-            Repository.loadStatus(user).observeOn(AndroidSchedulers.mainThread()).subscribeBy(
+    private fun updateUsersStatus(user: User, position: Int) {
+        Repository.loadStatus(user)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
                 onSuccess = {
-                    adapter.notifyItemChanged(index)
+                    adapter.notifyItemChanged(position)
                 },
                 onError = {
                     Log.e("LoadUserError", it.message.toString())
                 }
             ).addTo(compositeDisposable)
-        }
     }
 
     override fun onDestroyView() {

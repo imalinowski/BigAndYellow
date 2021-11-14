@@ -14,6 +14,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun messageDao(): MessageDao
     abstract fun userDao(): UserDao
     abstract fun reactionDao(): ReactionDao
+
     companion object {
         const val DB_NAME = "app_db"
     }

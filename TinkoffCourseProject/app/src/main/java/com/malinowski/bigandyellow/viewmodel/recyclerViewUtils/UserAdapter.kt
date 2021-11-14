@@ -12,7 +12,7 @@ import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.model.data.UserStatus
 
 class UserAdapter(
-    val callback: (User) -> Unit
+    val onClick: (User) -> Unit
 ) :
     ListAdapter<User, UserAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
@@ -30,6 +30,7 @@ class UserAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val user = getItem(position)
+
         holder.binding.name.text = user.name
         holder.binding.email.text = user.email
         holder.binding.userStatus.setImageResource(
@@ -43,14 +44,14 @@ class UserAdapter(
             Glide.with(context).load(user.avatarUrl).into(this)
         }
         holder.binding.root.setOnClickListener {
-            callback(user)
+            onClick(user)
         }
     }
 
     class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<User>() {
 
         override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
-            return oldItem.hashCode() == newItem.hashCode()
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
