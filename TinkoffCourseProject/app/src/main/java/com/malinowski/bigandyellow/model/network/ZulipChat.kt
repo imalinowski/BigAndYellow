@@ -50,9 +50,17 @@ interface ZulipChat {
 
     @GET("messages")
     fun getMessages(
-        @Query("anchor") anchor: String = "newest",
-        @Query("num_before") numBefore: Int = 1000,
-        @Query("num_after") numAfter: Int = 1000,
+        @Query("anchor") anchor: String = NEWEST_MES,  // newest / oldest / first_unread
+        @Query("num_before") numBefore: Int = 20,
+        @Query("num_after") numAfter: Int = 0,
+        @Query("narrow") narrow: String,
+    ): Single<ResponseBody>
+
+    @GET("messages")
+    fun getMessages(
+        @Query("anchor") anchor: Int,  // message ID
+        @Query("num_before") numBefore: Int = 20,
+        @Query("num_after") numAfter: Int = 0,
         @Query("narrow") narrow: String,
     ): Single<ResponseBody>
 
@@ -65,5 +73,8 @@ interface ZulipChat {
     @Serializable
     data class NarrowInt(val operator: String, val operand: Int) : Narrow()
 
+    companion object {
+        const val NEWEST_MES = "newest"
+    }
 
 }

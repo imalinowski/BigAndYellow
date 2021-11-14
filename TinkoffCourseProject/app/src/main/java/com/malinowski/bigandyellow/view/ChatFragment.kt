@@ -19,6 +19,7 @@ import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.Reaction
 import com.malinowski.bigandyellow.model.data.UnitedReaction
 import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 import io.reactivex.Observable
@@ -30,31 +31,36 @@ import io.reactivex.rxkotlin.subscribeBy
 
 class ChatFragment : Fragment(R.layout.fragment_chat) {
 
-    private val binding by lazy {
-        FragmentChatBinding.inflate(layoutInflater)
-    }
-
+    private val binding by lazy { FragmentChatBinding.inflate(layoutInflater) }
     private val model: MainViewModel by activityViewModels()
     private var messages: MutableList<Message> = mutableListOf()
-
+    private var messagesLoaded = false
     private val modalBottomSheet = SmileBottomSheet()
-
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private val topicName: String? by lazy { arguments?.getString(TOPIC) }
+    private val userName: String? by lazy { arguments?.getString(USER_NAME) }
+    private val userEmail: String? by lazy { arguments?.getString(USER_EMAIL) }
+    private val streamId: Int? by lazy { arguments?.getInt(STREAM) }
 
     private val adapter: MessagesAdapter by lazy {
         MessagesAdapter(
-            { parcel: EmojiClickParcel ->
+            onEmojiClick = { parcel: EmojiClickParcel ->
                 when (parcel) {
                     is EmojiAddParcel ->
                         model.addReaction(parcel.messageId, parcel.name)
                     is EmojiDeleteParcel ->
                         model.deleteReaction(parcel.messageId, parcel.name)
                 }
-            })
-        { position ->
-            modalBottomSheet.show(childFragmentManager, SmileBottomSheet.TAG)
-            modalBottomSheet.arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position)
-        }
+            },
+            onLongClick = { position ->
+                modalBottomSheet.show(childFragmentManager, SmileBottomSheet.TAG)
+                modalBottomSheet.arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position)
+            },
+            onBind = { position ->
+                //Log.d("MESSAGES_DEBUG", "pos > $position && mes size > ${messages.size}")
+                if (position == 5 && !messagesLoaded) loadMessages()
+            }
+        )
     }
 
     private val layoutManager = LinearLayoutManager(context).apply {
@@ -63,41 +69,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let { bundle ->
-
-            val flow: Observable<List<Message>> =
-                if (bundle.containsKey(USER))
-                    model.getMessages(bundle.getString(USER)!!)
-                else if (bundle.containsKey(STREAM) && bundle.containsKey(TOPIC))
-                    model.getMessages(
-                        bundle.getInt(STREAM),
-                        bundle.getString(TOPIC)!!
-                    )
-                else {
-                    model.error(IllegalArgumentException("open chat -> Invalid arguments"))
-                    parentFragmentManager.popBackStack()
-                    return@let
-                }
-
-            flow
-                .observeOn(AndroidSchedulers.mainThread(), true)
-                .subscribeBy(
-                    onNext = {
-                        Log.d("MESSAGES_DEBUG", "$it")
-                        messages = it.toMutableList()
-                        model.result()
-                        adapter.submitList(it){
-                            binding.messageRecycler.scrollToPosition(it.size - 1)
-                        }
-                    },
-                    onError = { e ->
-                        Log.d("MESSAGES_DEBUG", "${e.message}")
-                        model.error(e)
-                    }
-                ).addTo(compositeDisposable)
-
-        }
-        model.loading()
+        loadMessages()
     }
 
     override fun onCreateView(
@@ -113,9 +85,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private fun initUI() {
-        binding.chatName.text = "#%s".format(
-            arguments?.getString(TOPIC) ?: arguments?.getString(USER_NAME)
-        )
+        binding.chatName.text = "#%s".format(topicName ?: userName)
 
         binding.back.setOnClickListener {
             parentFragmentManager.popBackStack()
@@ -124,6 +94,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         binding.messageRecycler.apply {
             adapter = this@ChatFragment.adapter
             layoutManager = this@ChatFragment.layoutManager
+            //adapter.stateRestorationPolicy = PREVENT_WHEN_EMPTY
         }
 
         binding.sendMessageButton.setOnClickListener {
@@ -163,11 +134,54 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         }
     }
 
+    private fun loadMessages() {
+        val anchor = if (messages.size > 0) "${messages[0].id}" else ZulipChat.NEWEST_MES
+        Log.d(
+            "MESSAGES_DEBUG",
+            "-------------------- LOAD MESSAGES FOR > $anchor with ${messages.size} mes ----------------------------------"
+        )
+
+        val flow: Observable<List<Message>> =
+            if (userEmail != null)
+                model.getMessages(userEmail!!, anchor)
+            else if (streamId != null && topicName != null)
+                model.getMessages(streamId!!, topicName!!, anchor)
+            else {
+                model.error(IllegalArgumentException("open chat -> Invalid arguments"))
+                parentFragmentManager.popBackStack()
+                return
+            }
+
+        val itemsCopy = messages.toMutableList()
+        flow.observeOn(AndroidSchedulers.mainThread(), true)
+            .subscribeBy(
+                onNext = { messagesPage ->
+                    model.result()
+                    for ((i, message) in messagesPage.withIndex()) {
+                        Log.d("MESSAGES_DEBUG", "$i > ${message.message}")
+                    }
+                    messagesLoaded = messagesPage.isEmpty()
+                    if (!messagesLoaded) {
+                        messages = itemsCopy.toMutableList().apply { addAll(0, messagesPage) }
+                        adapter.submitList(messages)
+                    } else topicName?.let { topicName ->
+                        model.setMessageNum(topicName, messages.size)
+                    }
+                },
+                onError = { e ->
+                    Log.d("MESSAGES_DEBUG", "${e.message}")
+                    model.error(e)
+                }
+            ).addTo(compositeDisposable)
+
+        model.loading()
+    }
+
     private fun sendMessage(content: String) {
         val bundle = requireArguments()
         model.loading()
-        val singleId: Single<Int> = if (bundle.containsKey(USER)) {
-            val userEmail = bundle.getString(USER)!!
+        val singleId: Single<Int> = if (bundle.containsKey(USER_EMAIL)) {
+            val userEmail = bundle.getString(USER_EMAIL)!!
             model.sendMessageToUser(userEmail, content)
         } else {
             val streamId = bundle.getInt(STREAM)
@@ -189,7 +203,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     companion object {
-        const val USER = "user_email"
+        const val USER_EMAIL = "user_email"
         const val USER_NAME = "user_name"
         const val STREAM = "stream"
         const val TOPIC = "topic"

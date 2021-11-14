@@ -9,6 +9,7 @@ import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.usecase.ISearchTopicsUseCase
 import com.malinowski.bigandyellow.usecase.ISearchUsersUseCase
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
@@ -128,7 +129,7 @@ class MainViewModel : ViewModel() {
 
     fun openChat(user: User) {
         Bundle().apply {
-            putString(ChatFragment.USER, user.email)
+            putString(ChatFragment.USER_EMAIL, user.email)
             putString(ChatFragment.USER_NAME, user.name)
             chat.postValue(this)
         }
@@ -137,11 +138,14 @@ class MainViewModel : ViewModel() {
     fun getTopics(streamId: Int): Observable<List<Topic>> =
         dataProvider.loadTopics(streamId)
 
-    fun getMessages(stream: Int, topicName: String): Observable<List<Message>> =
-        dataProvider.loadMessages(stream, topicName)
+    fun getMessages(stream: Int, topicName: String, anchor: String = ZulipChat.NEWEST_MES): Observable<List<Message>> =
+        dataProvider.loadMessages(stream, topicName, anchor)
 
-    fun getMessages(user: String): Observable<List<Message>> =
-        dataProvider.loadMessages(user)
+    fun getMessages(user: String, anchor: String = ZulipChat.NEWEST_MES): Observable<List<Message>> =
+        dataProvider.loadMessages(user, anchor)
+
+    fun setMessageNum(topicName: String, messageNum: Int) =
+        dataProvider.setMessageNum(topicName, messageNum)
 
     private fun sendMessage(
         type: Repository.SendType, to: String, content: String, topic: String = ""

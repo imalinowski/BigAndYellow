@@ -36,8 +36,6 @@ private fun processUnicode(code: String): String {
     }
 }
 
-//TODO ADD REACTIONS TO DB AND INIT IN MESSAGES
-
 @Dao
 interface ReactionDao {
     @Query("SELECT * FROM $TABLE_NAME")

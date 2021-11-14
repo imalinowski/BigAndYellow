@@ -8,6 +8,7 @@ import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.db.AppDatabase
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
+import com.malinowski.bigandyellow.model.network.ZulipChat.Companion.NEWEST_MES
 import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowInt
 import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowStr
 import io.reactivex.Completable
@@ -208,17 +209,24 @@ object Repository : IRepository {
             ).addTo(compositeDisposable)
     }
 
-    private fun setMessageNum(topicName: String, messageNum: Int) {
-        db.topicDao().getTopicByName(topicName).subscribeBy(
-            onSuccess = {
-                it.messageNum = messageNum
-                db.topicDao().update(it)
-            },
-            onError = { Log.e("LOAD_TOPIC_BY_NAME", "${it.message}") }
-        ).addTo(compositeDisposable)
+    // TODO UPDATE TOPIC MES NUM WHEN LOAD ALL
+    fun setMessageNum(topicName: String, messageNum: Int) {
+        db.topicDao().getTopicByName(topicName)
+            .subscribeOn(Schedulers.io())
+            .subscribeBy(
+                onSuccess = {
+                    it.messageNum = messageNum
+                    db.topicDao().update(it)
+                },
+                onError = { Log.e("LOAD_TOPIC_BY_NAME", "${it.message}") }
+            ).addTo(compositeDisposable)
     }
 
-    fun loadMessages(stream: Int, topicName: String): Observable<List<Message>> {
+    fun loadMessages(
+        stream: Int,
+        topicName: String,
+        anchor: String = NEWEST_MES
+    ): Observable<List<Message>> {
         val narrow = listOf(
             NarrowInt("stream", stream),
             NarrowStr("topic", topicName)
@@ -235,22 +243,29 @@ object Repository : IRepository {
                 loadReactionsDB(it)
             }
 
-        val netCall = service.getMessages(narrow = narrow)
-            .subscribeOn(Schedulers.io())
-            .map { body ->
-                val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
-                format.decodeFromString<List<Message>>(jso.toString())
-            }.doOnSuccess {
-                setMessageNum(topicName, it.size)
-                saveMessagesToDB(it)
-            }
+        val netCall = service.getMessages(
+            anchor = anchor,
+            narrow = narrow
+        ).map { body ->
+            val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
+            format.decodeFromString<List<Message>>(jso.toString())
+        }.map {
+            if (anchor != NEWEST_MES) // api send n+1 message
+                it.subList(0, it.size - 1)
+            else it
+        }.doOnSuccess {
+            saveMessagesToDB(it)
+        }
 
-        return Single.concat(dbCall, netCall)
-            .subscribeOn(Schedulers.io())
-            .toObservable()
+        val flow = if (anchor == NEWEST_MES) // when paging no db call needed
+            Single.concat(dbCall, netCall).toObservable()
+        else
+            netCall.toObservable()
+
+        return flow.subscribeOn(Schedulers.io())
     }
 
-    fun loadMessages(userEmail: String): Observable<List<Message>> {
+    fun loadMessages(userEmail: String, anchor: String = NEWEST_MES): Observable<List<Message>> {
         val narrow = listOf(
             NarrowStr("pm-with", userEmail)
         ).map {
@@ -266,18 +281,27 @@ object Repository : IRepository {
                 loadReactionsDB(it)
             }
 
-        val netCall = service.getMessages(narrow = narrow)
-            .map { body ->
-                val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
-                format.decodeFromString<List<Message>>(jso.toString())
-            }.doOnSuccess { messages ->
-                Log.i("MESSAGES_NET", "$messages")
-                saveMessagesToDB(messages)
-            }
+        val netCall = service.getMessages(
+            anchor = anchor,
+            narrow = narrow
+        ).map { body ->
+            val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
+            format.decodeFromString<List<Message>>(jso.toString())
+        }.map {
+            if (anchor != NEWEST_MES)
+                it.subList(0, it.size - 1) // api send n+1 message
+            else it
+        }.doOnSuccess { messages ->
+            Log.i("MESSAGES_NET", "$messages")
+            saveMessagesToDB(messages)
+        }
 
-        return Single.concat(dbCall, netCall)
-            .subscribeOn(Schedulers.io())
-            .toObservable()
+        val flow = if (anchor == NEWEST_MES) // when paging no db call needed
+            Single.concat(dbCall, netCall).toObservable()
+        else
+            netCall.toObservable()
+
+        return flow.subscribeOn(Schedulers.io())
     }
 
     private fun loadReactionsDB(messages: List<Message>) {

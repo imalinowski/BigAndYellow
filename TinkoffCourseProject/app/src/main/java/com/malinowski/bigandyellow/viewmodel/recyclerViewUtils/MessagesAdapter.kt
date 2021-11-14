@@ -9,12 +9,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.EmojiClickParcel
 import com.malinowski.bigandyellow.databinding.MessageItemBinding
 import com.malinowski.bigandyellow.model.data.Message
-import com.malinowski.bigandyellow.model.data.StreamTopicItem
 
 
 class MessagesAdapter(
-    private val emojiClickListener: (EmojiClickParcel) -> Unit,
-    private val longClickListener: (position: Int) -> Unit
+    private val onEmojiClick: (EmojiClickParcel) -> Unit = {},
+    private val onLongClick: (position: Int) -> Unit = {},
+    private val onBind: (position: Int) -> Unit = {}
 ) : ListAdapter<Message, MessagesAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
     class ViewHolder(val binding: MessageItemBinding) :
@@ -27,11 +27,12 @@ class MessagesAdapter(
     }
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        onBind(position)
         getItem(position).apply {
             viewHolder.binding.messageItem.setMessage(this)
-            viewHolder.binding.messageItem.setOnEmojiClickListener(emojiClickListener)
+            viewHolder.binding.messageItem.setOnEmojiClickListener(onEmojiClick)
             viewHolder.binding.messageItem.setMessageOnLongClick {
-                longClickListener(position)
+                onLongClick(position)
             }
             viewHolder.binding.date.text = getItem(position).getDate()
             viewHolder.binding.date.isVisible = isPlaceForDate(position)
@@ -48,7 +49,7 @@ class MessagesAdapter(
     class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<Message>() {
 
         override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
-            return oldItem.hashCode() == newItem.hashCode()
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(

@@ -34,9 +34,10 @@ data class Message(
     @ColumnInfo(name = "topic_name") @SerialName("subject")
     val topicName: String = "",
 ) {
-    @Ignore // todo load reactions from db
+    @Ignore
     @SerialName("reactions")
     private val reactions: List<Reaction> = listOf() // init all reactions by one
+
     @Ignore
     @kotlinx.serialization.Transient
     val emoji: HashMap<String, UnitedReaction> = HashMap() // united reactions unicode to reaction
@@ -60,7 +61,7 @@ data class Message(
         }
     }
 
-    fun initEmoji(emojis : List<UnitedReaction>){
+    fun initEmoji(emojis: List<UnitedReaction>) {
         emojis.onEach {
             emoji[it.name] = it
         }
