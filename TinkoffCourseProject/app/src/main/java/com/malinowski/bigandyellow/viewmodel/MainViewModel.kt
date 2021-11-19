@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.malinowski.bigandyellow.model.Repository
+import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.Topic
@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit
 
 class MainViewModel : ViewModel() {
 
-    private val dataProvider = Repository
+    private val dataProvider = RepositoryImpl
     val chat = MutableLiveData<Bundle>()
 
     private val _mainScreenState: MutableLiveData<MainScreenState> = MutableLiveData()
@@ -155,16 +155,16 @@ class MainViewModel : ViewModel() {
         dataProvider.setMessageNum(topicName, messageNum)
 
     private fun sendMessage(
-        type: Repository.SendType, to: String, content: String, topic: String = ""
+        type: RepositoryImpl.SendType, to: String, content: String, topic: String = ""
     ): Single<Int> {
         return dataProvider.sendMessage(type, to, content, topic)
     }
 
     fun sendMessageToUser(userEmail: String, content: String) =
-        sendMessage(Repository.SendType.PRIVATE, userEmail, content)
+        sendMessage(RepositoryImpl.SendType.PRIVATE, userEmail, content)
 
     fun sendMessageToTopic(stream: Int, topic: String, content: String) =
-        sendMessage(Repository.SendType.STREAM, "[$stream]", content, topic)
+        sendMessage(RepositoryImpl.SendType.STREAM, "[$stream]", content, topic)
 
     fun addReaction(messageId: Int, emojiName: String) {
         dataProvider.addEmoji(messageId, emojiName).subscribeBy(
