@@ -5,10 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.model.RepositoryImpl
-import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.MessageItem
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.mapper.MessageToItemMapper
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCaseImpl
@@ -46,6 +47,8 @@ class MainViewModel : ViewModel() {
 
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()
     private val searchUsersSubject: BehaviorSubject<String> = BehaviorSubject.create()
+
+    private val messageToItemMapper: MessageToItemMapper = MessageToItemMapper()
 
     fun searchStreams(query: String) {
         searchStreamSubject.onNext(query)
@@ -142,14 +145,18 @@ class MainViewModel : ViewModel() {
         stream: Int,
         topicName: String,
         anchor: String = ZulipChat.NEWEST_MES
-    ): Observable<List<Message>> =
-        dataProvider.loadMessages(stream, topicName, anchor)
+    ): Observable<List<MessageItem>> =
+        dataProvider.loadMessages(stream, topicName, anchor).map {
+            messageToItemMapper(it)
+        }
 
     fun getMessages(
         user: String,
         anchor: String = ZulipChat.NEWEST_MES
-    ): Observable<List<Message>> =
-        dataProvider.loadMessages(user, anchor)
+    ): Observable<List<MessageItem>> =
+        dataProvider.loadMessages(user, anchor).map {
+            messageToItemMapper(it)
+        }
 
     fun setMessageNum(topicName: String, messageNum: Int) =
         dataProvider.setMessageNum(topicName, messageNum)

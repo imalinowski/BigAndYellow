@@ -4,9 +4,7 @@ import androidx.room.*
 import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 private const val TABLE_NAME = "Messages"
 
@@ -19,8 +17,6 @@ data class Message(
     val message: String,
     @ColumnInfo(name = "user_id") @SerialName("sender_id")
     val userId: Int,
-    @ColumnInfo(name = "is_mine") @SerialName("is_me_message")
-    var isMine: Boolean = false,
     @ColumnInfo(name = "sender_name") @SerialName("sender_full_name")
     val senderName: String = "",
     @SerialName("timestamp")
@@ -36,40 +32,10 @@ data class Message(
 ) {
     @Ignore
     @SerialName("reactions")
-    val reactions: List<Reaction> = listOf() // init all reactions by one
-
-    @Ignore
-    @kotlinx.serialization.Transient
-    val emoji: HashMap<String, UnitedReaction> = HashMap() // united reactions unicode to reaction
-
-    init {
-        for (reaction in reactions)
-            addEmoji(reaction)
-        isMine = userId == User.ME.id
-    }
-
-    fun addEmoji(reaction: Reaction) {
-        val code = reaction.getUnicode()
-        if (code in emoji) {
-            emoji[code]?.usersId?.add(reaction.userId)
-        } else {
-            emoji[code] = UnitedReaction(
-                reaction.name,
-                mutableListOf(reaction.userId),
-                reaction.getUnicode()
-            )
-        }
-    }
+    var reactions: List<Reaction> = listOf() // init all reactions by one
 
     fun initEmoji(reactions: List<Reaction>) {
-        reactions.onEach {
-            addEmoji(it)
-        }
-    }
-
-    fun getDate(): String {
-        val date = Date(timestamp.toLong() * 1000)
-        return SimpleDateFormat("d MMM", Locale("ru", "RU")).format(date)
+        this.reactions = reactions
     }
 }
 

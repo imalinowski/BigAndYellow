@@ -15,10 +15,7 @@ import com.malinowski.bigandyellow.EmojiClickParcel
 import com.malinowski.bigandyellow.EmojiDeleteParcel
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
-import com.malinowski.bigandyellow.model.data.Message
-import com.malinowski.bigandyellow.model.data.Reaction
-import com.malinowski.bigandyellow.model.data.UnitedReaction
-import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
@@ -28,12 +25,16 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
+import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.Reaction
+import com.malinowski.bigandyellow.model.data.UnitedReaction
+import com.malinowski.bigandyellow.model.data.User
 
 class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private val binding by lazy { FragmentChatBinding.inflate(layoutInflater) }
     private val model: MainViewModel by activityViewModels()
-    private var messages: MutableList<Message> = mutableListOf()
+    private var messages: MutableList<MessageItem> = mutableListOf()
     private var messagesLoaded = false
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
@@ -145,7 +146,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private fun loadMessages() {
         val anchor = if (messages.size > 0) "${messages[0].id}" else ZulipChat.NEWEST_MES
 
-        val flow: Observable<List<Message>> =
+        val flow: Observable<List<MessageItem>> =
             if (userEmail != null)
                 model.getMessages(userEmail!!, anchor)
             else if (streamId != null && topicName != null)
@@ -189,7 +190,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { id ->
-                    messages.add(Message(id, content, User.ME.id))
+                    messages.add(MessageItem(id, content, User.ME.id, true))
                     adapter.submitList(messages)
                     adapter.notifyItemInserted(messages.size - 1)
                     layoutManager.scrollToPosition(messages.size - 1)

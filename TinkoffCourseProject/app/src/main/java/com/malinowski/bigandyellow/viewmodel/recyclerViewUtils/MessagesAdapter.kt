@@ -8,14 +8,14 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.EmojiClickParcel
 import com.malinowski.bigandyellow.databinding.MessageItemBinding
-import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.MessageItem
 
 
 class MessagesAdapter(
     private val onEmojiClick: (EmojiClickParcel) -> Unit = {},
     private val onLongClick: (position: Int) -> Unit = {},
     private val onBind: (position: Int) -> Unit = {}
-) : ListAdapter<Message, MessagesAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
+) : ListAdapter<MessageItem, MessagesAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
     class ViewHolder(val binding: MessageItemBinding) :
         RecyclerView.ViewHolder(binding.root) {}
@@ -46,15 +46,15 @@ class MessagesAdapter(
         return prevDay < curDay
     }
 
-    class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<Message>() {
+    class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<MessageItem>() {
 
-        override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
+        override fun areItemsTheSame(oldItem: MessageItem, newItem: MessageItem): Boolean {
             return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(
-            oldItem: Message,
-            newItem: Message
+            oldItem: MessageItem,
+            newItem: MessageItem
         ): Boolean {
             return oldItem == newItem && (oldItem.emoji == newItem.emoji)
         }
