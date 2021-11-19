@@ -18,6 +18,7 @@ import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.Streams
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.subscribeBy
 
 class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
@@ -100,16 +101,18 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
                 }
             }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({ chats ->
-                stream.loading = false
-                items.addAll(listPosition + 1, chats)
-                adapter.notifyItemChanged(listPosition)
-                adapter.notifyItemRangeInserted(listPosition + 1, chats.size)
-                adapter.notifyItemRangeChanged(listPosition + chats.size + 1, adapter.itemCount)
-            }, { e ->
-                stream.loading = false
-                model.error(e)
-            })
+            .subscribeBy(
+                onSuccess = { chats ->
+                    stream.loading = false
+                    items.addAll(listPosition + 1, chats)
+                    adapter.notifyItemChanged(listPosition)
+                    adapter.notifyItemRangeInserted(listPosition + 1, chats.size)
+                    adapter.notifyItemRangeChanged(listPosition + chats.size + 1, adapter.itemCount)
+                },
+                onError = { error ->
+                    stream.loading = false
+                    model.error(error)
+                })
     }
 
     private fun deleteItems(listPosition: Int) {

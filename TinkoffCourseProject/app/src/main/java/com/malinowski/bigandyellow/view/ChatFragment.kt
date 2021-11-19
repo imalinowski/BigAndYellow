@@ -34,24 +34,16 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private val model: MainViewModel by activityViewModels()
     private lateinit var messages: MutableList<Message>
 
-    private val modalBottomSheet = SmileBottomSheet()
-
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     private val adapter: MessagesAdapter by lazy {
         MessagesAdapter(messages,
-            { parcel: EmojiClickParcel ->
-                when (parcel) {
-                    is EmojiAddParcel ->
-                        model.addReaction(parcel.messageId, parcel.name)
-                    is EmojiDeleteParcel ->
-                        model.deleteReaction(parcel.messageId, parcel.name)
-                }
+            emojiClickListener = { parcel: EmojiClickParcel ->
+                processEmojiClick(parcel)
+            },
+            longClickListener = { position ->
+                showBottomSheet(position)
             })
-        { position ->
-            modalBottomSheet.show(childFragmentManager, SmileBottomSheet.TAG)
-            modalBottomSheet.arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position)
-        }
     }
 
     private val layoutManager = LinearLayoutManager(context).apply {
@@ -94,6 +86,21 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         savedInstanceState: Bundle?
     ): View {
         return binding.root
+    }
+
+    private fun showBottomSheet(position: Int) {
+        SmileBottomSheet()
+            .apply { arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position) }
+            .show(childFragmentManager, SmileBottomSheet.TAG)
+    }
+
+    private fun processEmojiClick(parcel: EmojiClickParcel) {
+        when (parcel) {
+            is EmojiAddParcel ->
+                model.addReaction(parcel.messageId, parcel.name)
+            is EmojiDeleteParcel ->
+                model.deleteReaction(parcel.messageId, parcel.name)
+        }
     }
 
     private fun initUI() {

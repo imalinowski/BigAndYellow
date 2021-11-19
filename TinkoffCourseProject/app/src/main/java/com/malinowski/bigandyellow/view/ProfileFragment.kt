@@ -10,7 +10,7 @@ import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentProfileBinding
-import com.malinowski.bigandyellow.model.Repository
+import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.model.data.UserStatus
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
@@ -37,7 +37,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.userName.text = User.ME.name
         updateStatus(User.ME)
-        Repository.loadStatus(User.ME).observeOn(AndroidSchedulers.mainThread()).subscribeBy(
+        RepositoryImpl.loadStatus(User.ME).observeOn(AndroidSchedulers.mainThread()).subscribeBy(
             onSuccess = { updateStatus(User.ME) }, onError = { model.error(it) }
         ).addTo(compositeDisposable)
         binding.image.apply {

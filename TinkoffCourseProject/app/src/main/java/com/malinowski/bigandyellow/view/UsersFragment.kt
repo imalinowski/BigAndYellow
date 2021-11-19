@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.databinding.FragmentPeopleBinding
-import com.malinowski.bigandyellow.model.Repository
+import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.UserAdapter
@@ -62,7 +62,7 @@ class UsersFragment : Fragment() {
     private val compositeDisposable = CompositeDisposable()
     private fun updateUsersStatus(users: List<User>) {
         users.forEachIndexed { index, user ->
-            Repository.loadStatus(user).observeOn(AndroidSchedulers.mainThread()).subscribeBy(
+            RepositoryImpl.loadStatus(user).observeOn(AndroidSchedulers.mainThread()).subscribeBy(
                 onSuccess = {
                     adapter.notifyItemChanged(index)
                 },

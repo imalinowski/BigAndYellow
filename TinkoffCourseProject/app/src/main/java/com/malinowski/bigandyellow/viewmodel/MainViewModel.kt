@@ -4,15 +4,15 @@ import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.malinowski.bigandyellow.model.Repository
+import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.User
-import com.malinowski.bigandyellow.usecase.ISearchTopicsUseCase
-import com.malinowski.bigandyellow.usecase.ISearchUsersUseCase
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.usecase.SearchUsersUseCase
+import com.malinowski.bigandyellow.usecase.SearchTopicsUseCaseImpl
+import com.malinowski.bigandyellow.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.MainScreenState
 import io.reactivex.Single
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
 
 class MainViewModel : ViewModel() {
 
-    private val dataProvider = Repository
+    private val dataProvider = RepositoryImpl
     val chat = MutableLiveData<Bundle>()
 
     private val _mainScreenState: MutableLiveData<MainScreenState> = MutableLiveData()
@@ -37,8 +37,8 @@ class MainViewModel : ViewModel() {
     val streams = MutableLiveData<List<StreamTopicItem>>()
     val users = MutableLiveData<List<User>>()
 
-    private val searchTopicsUseCase: ISearchTopicsUseCase = SearchTopicsUseCase()
-    private val searchUserUseCase: ISearchUsersUseCase = SearchUsersUseCase()
+    private val searchTopicsUseCase: SearchTopicsUseCase = SearchTopicsUseCaseImpl()
+    private val searchUserUseCase: SearchUsersUseCase = SearchUsersUseCaseImpl()
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
@@ -136,23 +136,23 @@ class MainViewModel : ViewModel() {
         dataProvider.loadMessages(stream, topic)
 
     fun getMessagesCount(stream: Int, topic: String): Single<Int> =
-        Repository.loadMessages(stream, topic).map { it.size }
+        RepositoryImpl.loadMessages(stream, topic).map { it.size }
 
     fun getMessages(user: String): Single<List<Message>> =
         dataProvider.loadMessages(user)
 
     private fun sendMessage(
-        type: Repository.SendType, to: String, content: String, topic: String = ""
+        type: RepositoryImpl.SendType, to: String, content: String, topic: String = ""
     ): Single<Int> {
         return dataProvider.sendMessage(type, to, content, topic)
     }
 
     fun sendMessageToUser(userEmail: String, content: String) =
-        sendMessage(Repository.SendType.PRIVATE, userEmail, content)
+        sendMessage(RepositoryImpl.SendType.PRIVATE, userEmail, content)
 
 
     fun sendMessageToTopic(stream: Int, topic: String, content: String) =
-        sendMessage(Repository.SendType.STREAM, "[$stream]", content, topic)
+        sendMessage(RepositoryImpl.SendType.STREAM, "[$stream]", content, topic)
 
     fun addReaction(messageId: Int, emojiName: String) {
         dataProvider.addEmoji(messageId, emojiName).subscribeBy(

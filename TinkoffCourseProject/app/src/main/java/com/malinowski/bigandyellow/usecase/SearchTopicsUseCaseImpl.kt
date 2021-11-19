@@ -9,7 +9,7 @@ import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
 import io.reactivex.Observable
 import io.reactivex.Single
 
-interface ISearchTopicsUseCase :
+interface SearchTopicsUseCase :
         (String, Single<List<Stream>>) -> Observable<List<StreamTopicItem>> {
 
     override fun invoke(
@@ -18,7 +18,7 @@ interface ISearchTopicsUseCase :
     ): Observable<List<StreamTopicItem>>
 }
 
-internal class SearchTopicsUseCase : ISearchTopicsUseCase {
+internal class SearchTopicsUseCaseImpl : SearchTopicsUseCase {
 
     private val streamToItemMapper: StreamToItemMapper = StreamToItemMapper()
     private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
@@ -50,11 +50,9 @@ internal class SearchTopicsUseCase : ISearchTopicsUseCase {
         return streamTopicItem
     }
 
-    //TODO make topic search
     private fun Stream.search(query: String): List<TopicItem> {
-        val satisfyChats = mutableListOf<Topic>()
-        this.topics.forEach { topic ->
-            if (topic.name.contains(query, ignoreCase = true)) satisfyChats.add(topic)
+        val satisfyChats = topics.filter { topic ->
+            topic.name.contains(query, ignoreCase = true)
         }
         return topicToItemMapper(satisfyChats, this.id)
     }
