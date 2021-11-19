@@ -5,15 +5,9 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
-import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowInt
-import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowStr
 import io.reactivex.Completable
 import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.CompletableSubject
-import io.reactivex.subjects.SingleSubject
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -24,13 +18,22 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 
 object RepositoryImpl : Repository {
 
+    private const val URL = "https://tinkoff-android-fall21.zulipchat.com/api/v1/"
+    private const val idRoute: String = "id"
+    private const val messagesRoute: String = "messages"
+    private const val statusRoute: String = "status"
+    private const val membersRoute: String = "members"
+    private const val topicsRoute: String = "topics"
+    private const val subscriptionsRoute: String = "subscriptions"
+    private const val streamsRoute: String = "streams"
+
     private val client = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
         .addInterceptor(AuthInterceptor())
         .build()
 
     private var retrofit = Retrofit.Builder()
-        .baseUrl("https://tinkoff-android-fall21.zulipchat.com/api/v1/") // http://192.168.0.21:8081/
+        .baseUrl(URL)
         .client(client)
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
@@ -38,14 +41,13 @@ object RepositoryImpl : Repository {
 
     private var service = retrofit.create(ZulipChat::class.java)
     private val format = Json { ignoreUnknownKeys = true }
-    private val compositeDisposable = CompositeDisposable()
 
     override fun loadStreams(): Single<List<Stream>> {
         return service.getStreams()
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val streamsJSA =
-                    format.decodeFromString<JsonObject>(body.string())["streams"]
+                    format.decodeFromString<JsonObject>(body.string())[streamsRoute]
                 format.decodeFromString<List<Stream>>(streamsJSA.toString())
             }.flatMap { topicsPreload(it) }
     }
@@ -55,25 +57,20 @@ object RepositoryImpl : Repository {
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val subscriptionsJSA =
-                    format.decodeFromString<JsonObject>(body.string())["subscriptions"]
+                    format.decodeFromString<JsonObject>(body.string())[subscriptionsRoute]
                 format.decodeFromString<List<Stream>>(subscriptionsJSA.toString())
             }.flatMap { topicsPreload(it) }
     }
 
     private fun topicsPreload(streams: List<Stream>): Single<List<Stream>> {
-        val single = SingleSubject.create<List<Stream>>()
-        var count = 0
-        streams.onEach { stream ->
+        val topicLoaders = streams.map { stream ->
             loadTopics(stream.id)
-                .doFinally {
-                    count += 1
-                    if (count == streams.size) single.onSuccess(streams)
-                }.subscribe({
-                    stream.topics = it.toMutableList()
-                }, { Log.e("TopicsPreload", it.message.toString()) }
-                ).addTo(compositeDisposable)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    stream.apply { topics = it.toMutableList() }
+                }
         }
-        return single
+        return Single.concatEager(topicLoaders).toList()
     }
 
     override fun loadTopics(id: Int): Single<List<Topic>> {
@@ -81,7 +78,7 @@ object RepositoryImpl : Repository {
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val topicsJSA =
-                    format.decodeFromString<JsonObject>(body.string())["topics"]
+                    format.decodeFromString<JsonObject>(body.string())[topicsRoute]
                 format.decodeFromString<List<Topic>>(topicsJSA.toString())
             }
     }
@@ -91,7 +88,7 @@ object RepositoryImpl : Repository {
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val membersJSA =
-                    format.decodeFromString<JsonObject>(body.string())["members"]
+                    format.decodeFromString<JsonObject>(body.string())[membersRoute]
                 format.decodeFromString<List<User>>(membersJSA.toString())
             }
     }
@@ -101,7 +98,9 @@ object RepositoryImpl : Repository {
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val jso = Json.decodeFromString<JsonObject>(body.string())
-                    .jsonObject["presence"]?.jsonObject?.get("aggregated")?.jsonObject?.get("status")
+                    .jsonObject["presence"]?.jsonObject?.get("aggregated")?.jsonObject?.get(
+                    statusRoute
+                )
                 jso?.jsonPrimitive?.content?.let { status ->
                     user.status = UserStatus.decodeFromString(status)
                     user.status
@@ -110,17 +109,13 @@ object RepositoryImpl : Repository {
                 Log.e("LoadUserStatus", "${user.name} ${it.message}")
             }
 
-    fun loadOwnUser() {
+    fun loadOwnUser(): Single<User> {
         val format = Json { ignoreUnknownKeys = true }
-        service.getOwnUser()
+        return service.getOwnUser()
             .subscribeOn(Schedulers.io())
-            .subscribe(
-                { body ->
-                    User.ME = format.decodeFromString(body.string())
-                }, {
-                    Log.e("LoadOwnUser", it.message.toString())
-                }
-            ).addTo(compositeDisposable)
+            .map { body ->
+                format.decodeFromString<User>(body.string())
+            }
     }
 
     fun loadMessages(stream: Int, topic: String): Single<List<Message>> {
@@ -136,7 +131,7 @@ object RepositoryImpl : Repository {
         return service.getMessages(narrow = narrow)
             .subscribeOn(Schedulers.io())
             .map { body ->
-                val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
+                val jso = Json.decodeFromString<JsonObject>(body.string())[messagesRoute]
                 format.decodeFromString<List<Message>>(jso.toString())
             }
     }
@@ -153,7 +148,7 @@ object RepositoryImpl : Repository {
         return service.getMessages(narrow = narrow)
             .subscribeOn(Schedulers.io())
             .map { body ->
-                val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
+                val jso = Json.decodeFromString<JsonObject>(body.string())[messagesRoute]
                 format.decodeFromString<List<Message>>(jso.toString())
             }
     }
@@ -167,7 +162,7 @@ object RepositoryImpl : Repository {
         service.sendMessage(type.type, to, content, topic)
             .subscribeOn(Schedulers.io())
             .map { body ->
-                Json.decodeFromString<JsonObject>(body.string())["id"]
+                Json.decodeFromString<JsonObject>(body.string())[idRoute]
                     ?.jsonPrimitive
                     ?.content.let {
                         it?.toInt()
@@ -175,26 +170,12 @@ object RepositoryImpl : Repository {
             }
 
 
-    fun addEmoji(messageId: Int, emojiName: String): Completable {
-        val complete = CompletableSubject.create()
+    fun addEmoji(messageId: Int, emojiName: String): Completable =
         service.addEmojiReaction(messageId, name = emojiName)
             .subscribeOn(Schedulers.io())
-            .subscribe(
-                { complete.onComplete() },
-                { e -> complete.onError(e) }
-            ).addTo(compositeDisposable)
-        return complete
-    }
 
-    fun deleteEmoji(messageId: Int, emojiName: String): Completable {
-        val complete = CompletableSubject.create()
+    fun deleteEmoji(messageId: Int, emojiName: String): Completable =
         service.deleteEmojiReacction(messageId, name = emojiName)
             .subscribeOn(Schedulers.io())
-            .subscribe(
-                { complete.onComplete() },
-                { e -> complete.onError(e) }
-            ).addTo(compositeDisposable)
-        return complete
-    }
 
 }

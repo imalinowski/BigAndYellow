@@ -2,9 +2,7 @@ package com.malinowski.bigandyellow.model.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 @Serializable
 data class Message(

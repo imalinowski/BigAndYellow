@@ -5,12 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.model.RepositoryImpl
-import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.data.MessageItem
+import com.malinowski.bigandyellow.model.data.StreamTopicItem
+import com.malinowski.bigandyellow.model.data.Topic
+import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.model.mapper.MessageToItemMapper
-import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
-import com.malinowski.bigandyellow.usecase.SearchUsersUseCase
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCaseImpl
+import com.malinowski.bigandyellow.usecase.SearchUsersUseCase
 import com.malinowski.bigandyellow.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.MainScreenState
@@ -57,6 +59,14 @@ class MainViewModel : ViewModel() {
     init {
         subscribeToSearchStreams()
         subscribeToSearchUser()
+        initUser()
+    }
+
+    private fun initUser() {
+        dataProvider.loadOwnUser().subscribeBy(
+            onSuccess = { user -> User.ME = user },
+            onError = { error(it) }
+        ).addTo(compositeDisposable)
     }
 
     private fun subscribeToSearchUser() {
@@ -161,7 +171,9 @@ class MainViewModel : ViewModel() {
 
     fun addReaction(messageId: Int, emojiName: String) {
         dataProvider.addEmoji(messageId, emojiName).subscribeBy(
-            onComplete = {}, onError = { error(it) }
+            onComplete = {
+
+            }, onError = { error(it) }
         ).addTo(compositeDisposable)
     }
 
@@ -181,6 +193,11 @@ class MainViewModel : ViewModel() {
 
     fun loading() {
         _mainScreenState.postValue(MainScreenState.Loading)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        compositeDisposable.dispose()
     }
 
 }

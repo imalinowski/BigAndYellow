@@ -2,7 +2,6 @@ package com.malinowski.bigandyellow.usecase
 
 import com.malinowski.bigandyellow.model.data.Stream
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
-import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.TopicItem
 import com.malinowski.bigandyellow.model.mapper.StreamToItemMapper
 import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper

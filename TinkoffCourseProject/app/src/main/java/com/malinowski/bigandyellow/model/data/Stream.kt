@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Stream(
-    val name: String,
+    @SerialName("name") val name: String,
     @SerialName("stream_id") val id: Int,
     var topics: MutableList<Topic> = mutableListOf()
 )

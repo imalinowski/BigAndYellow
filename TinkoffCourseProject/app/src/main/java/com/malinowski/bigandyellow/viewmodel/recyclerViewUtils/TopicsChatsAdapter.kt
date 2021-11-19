@@ -83,9 +83,9 @@ class TopicsChatsAdapter(
     class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<StreamTopicItem>() {
 
         override fun areItemsTheSame(oldItem: StreamTopicItem, newItem: StreamTopicItem): Boolean {
-            if(oldItem is TopicItem && newItem is TopicItem)
+            if (oldItem is TopicItem && newItem is TopicItem)
                 return oldItem.topicId == newItem.topicId
-            if(oldItem is StreamItem && newItem is StreamItem)
+            if (oldItem is StreamItem && newItem is StreamItem)
                 return oldItem.streamId == newItem.streamId
             return false
         }
