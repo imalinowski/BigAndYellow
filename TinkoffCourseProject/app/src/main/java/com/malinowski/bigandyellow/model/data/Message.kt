@@ -11,36 +11,8 @@ data class Message(
     @SerialName("id") val id: Int,
     @SerialName("content") val message: String,
     @SerialName("sender_id") val userId: Int,
-    @SerialName("is_me_message") var isMine: Boolean = false,
     @SerialName("sender_full_name") val senderName: String = "",
     @SerialName("timestamp") val timestamp: Int = (Date().time / 1000).toInt(),
     @SerialName("avatar_url") val avatarUrl: String = "",
-    @SerialName("reactions") private val reactions: List<Reaction> = listOf(), // init all reactions by one
-) {
-    @kotlinx.serialization.Transient
-    val emoji: HashMap<String, UnitedReaction> = HashMap() // united reactions unicode to reaction
-
-    init {
-        for (reaction in reactions)
-            addEmoji(reaction)
-        isMine = userId == User.ME.id
-    }
-
-    fun addEmoji(reaction: Reaction) {
-        val code = reaction.getUnicode()
-        if (code in emoji) {
-            emoji[code]?.usersId?.add(reaction.userId)
-        } else {
-            emoji[code] = UnitedReaction(
-                mutableListOf(reaction.userId),
-                reaction.getUnicode(),
-                reaction.name
-            )
-        }
-    }
-
-    fun getDate(): String {
-        val date = Date(timestamp.toLong() * 1000)
-        return SimpleDateFormat("d MMM", Locale("ru", "RU")).format(date)
-    }
-}
+    @SerialName("reactions") val reactions: List<Reaction> = listOf(), // init all reactions by one
+)

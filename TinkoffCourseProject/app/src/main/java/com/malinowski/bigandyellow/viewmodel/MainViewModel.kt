@@ -5,10 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.model.RepositoryImpl
-import com.malinowski.bigandyellow.model.data.Message
-import com.malinowski.bigandyellow.model.data.StreamTopicItem
-import com.malinowski.bigandyellow.model.data.Topic
-import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.mapper.MessageToItemMapper
+import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.usecase.SearchUsersUseCase
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCaseImpl
@@ -44,6 +43,8 @@ class MainViewModel : ViewModel() {
 
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()
     private val searchUsersSubject: BehaviorSubject<String> = BehaviorSubject.create()
+
+    private val messageToItemMapper: MessageToItemMapper = MessageToItemMapper()
 
     fun searchStreams(query: String) {
         searchStreamSubject.onNext(query)
@@ -132,14 +133,18 @@ class MainViewModel : ViewModel() {
     fun getTopics(streamId: Int): Single<List<Topic>> =
         dataProvider.loadTopics(streamId)
 
-    fun getMessages(stream: Int, topic: String): Single<List<Message>> =
-        dataProvider.loadMessages(stream, topic)
+    fun getMessages(stream: Int, topic: String): Single<List<MessageItem>> =
+        dataProvider.loadMessages(stream, topic).map {
+            messageToItemMapper(it)
+        }
 
     fun getMessagesCount(stream: Int, topic: String): Single<Int> =
         RepositoryImpl.loadMessages(stream, topic).map { it.size }
 
-    fun getMessages(user: String): Single<List<Message>> =
-        dataProvider.loadMessages(user)
+    fun getMessages(user: String): Single<List<MessageItem>> =
+        dataProvider.loadMessages(user).map {
+            messageToItemMapper(it)
+        }
 
     private fun sendMessage(
         type: RepositoryImpl.SendType, to: String, content: String, topic: String = ""

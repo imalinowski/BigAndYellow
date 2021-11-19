@@ -12,7 +12,7 @@ import com.malinowski.bigandyellow.EmojiAddParcel
 import com.malinowski.bigandyellow.EmojiClickParcel
 import com.malinowski.bigandyellow.EmojiDeleteParcel
 import com.malinowski.bigandyellow.R
-import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.MessageItem
 import com.malinowski.bigandyellow.model.data.UnitedReaction
 import com.malinowski.bigandyellow.model.data.User
 
@@ -36,9 +36,9 @@ class MessageViewGroup @JvmOverloads constructor(
         visibility = GONE
     }
 
-    private lateinit var message: Message
+    private lateinit var message: MessageItem
 
-    fun setMessage(message: Message) {
+    fun setMessage(message: MessageItem) {
         this.message = message
 
         this.messageTextView.text =

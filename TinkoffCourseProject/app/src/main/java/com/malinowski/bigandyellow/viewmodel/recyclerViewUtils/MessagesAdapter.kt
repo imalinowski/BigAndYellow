@@ -6,11 +6,11 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.EmojiClickParcel
 import com.malinowski.bigandyellow.databinding.MessageItemBinding
-import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.MessageItem
 
 
 class MessagesAdapter(
-    private val dataSet: MutableList<Message>,
+    private val dataSet: MutableList<MessageItem>,
     val emojiClickListener: (EmojiClickParcel) -> Unit,
     val longClickListener: (position: Int) -> Unit
 ) :

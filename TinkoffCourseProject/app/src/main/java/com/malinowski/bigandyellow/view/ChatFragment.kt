@@ -14,10 +14,7 @@ import com.malinowski.bigandyellow.EmojiClickParcel
 import com.malinowski.bigandyellow.EmojiDeleteParcel
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
-import com.malinowski.bigandyellow.model.data.Message
-import com.malinowski.bigandyellow.model.data.Reaction
-import com.malinowski.bigandyellow.model.data.UnitedReaction
-import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 import io.reactivex.Single
@@ -32,7 +29,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private val model: MainViewModel by activityViewModels()
-    private lateinit var messages: MutableList<Message>
+    private lateinit var messages: MutableList<MessageItem>
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
@@ -54,7 +51,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         super.onCreate(savedInstanceState)
         arguments?.let { bundle ->
 
-            val flow: Single<List<Message>> =
+            val flow: Single<List<MessageItem>> =
                 if (bundle.containsKey(USER))
                     model.getMessages(bundle.getString(USER)!!)
                 else if (bundle.containsKey(STREAM) && bundle.containsKey(TOPIC))
@@ -169,7 +166,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 { id ->
-                    messages.add(Message(id, content, User.ME.id))
+                    messages.add(MessageItem(id, content, User.ME.id, true))
                     adapter.notifyItemInserted(messages.size - 1)
                     layoutManager.scrollToPosition(messages.size - 1)
                     model.result()
