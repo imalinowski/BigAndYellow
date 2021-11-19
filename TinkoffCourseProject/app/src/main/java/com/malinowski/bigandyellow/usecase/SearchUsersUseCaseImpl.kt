@@ -4,12 +4,12 @@ import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.User
 import io.reactivex.Observable
 
-interface ISearchUsersUseCase : (String) -> Observable<List<User>> {
+interface SearchUsersUseCase : (String) -> Observable<List<User>> {
 
     override fun invoke(searchQuery: String): Observable<List<User>>
 }
 
-internal class SearchUsersUseCase : ISearchUsersUseCase {
+internal class SearchUsersUseCaseImpl : SearchUsersUseCase {
 
     private val dataProvider = RepositoryImpl
 

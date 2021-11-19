@@ -5,7 +5,6 @@ import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.User
 import io.reactivex.Observable
 
-
 interface Repository {
 
     fun loadStreams(): Observable<List<Stream>>

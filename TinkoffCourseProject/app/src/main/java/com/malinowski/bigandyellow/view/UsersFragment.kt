@@ -62,6 +62,7 @@ class UsersFragment : Fragment() {
     }
 
     private val compositeDisposable = CompositeDisposable()
+
     private fun updateUsersStatus(user: User, position: Int) {
         RepositoryImpl.loadStatus(user)
             .observeOn(AndroidSchedulers.mainThread())

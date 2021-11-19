@@ -2,16 +2,21 @@ package com.malinowski.bigandyellow.usecase
 
 import com.malinowski.bigandyellow.model.data.Stream
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
-import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.TopicItem
 import com.malinowski.bigandyellow.model.mapper.StreamToItemMapper
 import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
 import io.reactivex.Observable
 
-interface ISearchTopicsUseCase :
-        (String, Observable<List<Stream>>) -> Observable<List<StreamTopicItem>>
+interface SearchTopicsUseCase :
+        (String, Observable<List<Stream>>) -> Observable<List<StreamTopicItem>> {
 
-internal class SearchTopicsUseCase : ISearchTopicsUseCase {
+    override fun invoke(
+        searchQuery: String,
+        streams: Observable<List<Stream>>
+    ): Observable<List<StreamTopicItem>>
+}
+
+internal class SearchTopicsUseCaseImpl : SearchTopicsUseCase {
 
     private val streamToItemMapper: StreamToItemMapper = StreamToItemMapper()
     private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
@@ -44,9 +49,8 @@ internal class SearchTopicsUseCase : ISearchTopicsUseCase {
     }
 
     private fun Stream.search(query: String): List<TopicItem> {
-        val satisfyChats = mutableListOf<Topic>()
-        this.topics.forEach { topic ->
-            if (topic.name.contains(query, ignoreCase = true)) satisfyChats.add(topic)
+        val satisfyChats = topics.filter { topic ->
+            topic.name.contains(query, ignoreCase = true)
         }
         return topicToItemMapper(satisfyChats, this.id)
     }

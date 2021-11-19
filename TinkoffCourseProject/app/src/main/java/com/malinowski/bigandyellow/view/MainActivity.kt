@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null)
             supportFragmentManager.beginTransaction()
                 .replace(R.id.activity_fragment_container_view, MainFragment.newInstance())
-                .commitAllowingStateLoss()
+                .commit()
 
         model.mainScreenState.observe(this) {
             when (it) {
@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                     ChatFragment.newInstance(bundle)
                 )
                 .addToBackStack(null)
-                .commitAllowingStateLoss()
+                .commit()
         }
     }
 

@@ -10,10 +10,10 @@ import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.model.network.ZulipChat
-import com.malinowski.bigandyellow.usecase.ISearchTopicsUseCase
-import com.malinowski.bigandyellow.usecase.ISearchUsersUseCase
 import com.malinowski.bigandyellow.usecase.SearchTopicsUseCase
+import com.malinowski.bigandyellow.usecase.SearchTopicsUseCaseImpl
 import com.malinowski.bigandyellow.usecase.SearchUsersUseCase
+import com.malinowski.bigandyellow.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.MainScreenState
 import io.reactivex.Observable
@@ -39,8 +39,8 @@ class MainViewModel : ViewModel() {
     val streams = MutableLiveData<List<StreamTopicItem>>()
     val users = MutableLiveData<List<User>>()
 
-    private val searchTopicsUseCase: ISearchTopicsUseCase = SearchTopicsUseCase()
-    private val searchUserUseCase: ISearchUsersUseCase = SearchUsersUseCase()
+    private val searchTopicsUseCase: SearchTopicsUseCase = SearchTopicsUseCaseImpl()
+    private val searchUserUseCase: SearchUsersUseCase = SearchUsersUseCaseImpl()
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 

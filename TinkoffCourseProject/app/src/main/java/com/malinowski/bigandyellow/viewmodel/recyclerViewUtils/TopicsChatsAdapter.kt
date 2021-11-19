@@ -27,21 +27,21 @@ class TopicsChatsAdapter(
 
         fun bind(item: StreamTopicItem) {
             when (item) {
-                is StreamItem -> {
-                    viewBinding.chatLinear.visibility = GONE
-                    viewBinding.topicConstraint.visibility = VISIBLE
-                    viewBinding.topicName.text = item.name
-                    viewBinding.topicArrow.rotation = if (item.expanded) 180f else 0f
-                    viewBinding.progressBar.isVisible = item.loading
-                    viewBinding.topicArrow.isVisible = !item.loading
+                is StreamItem -> with(viewBinding) {
+                    chatLinear.visibility = GONE
+                    topicConstraint.visibility = VISIBLE
+                    topicName.text = item.name
+                    topicArrow.rotation = if (item.expanded) 180f else 0f
+                    progressBar.isVisible = item.loading
+                    topicArrow.isVisible = !item.loading
                 }
-                is TopicItem -> {
-                    viewBinding.chatLinear.visibility = VISIBLE
-                    viewBinding.topicConstraint.visibility = GONE
-                    viewBinding.chatName.text = item.name
-                    viewBinding.messagesNum.text =
-                        item.messageNum.let { if (it > 0) "$it mes" else "" }
-                    viewBinding.chatLinear.setBackgroundResource(
+                is TopicItem -> with(viewBinding) {
+                    chatLinear.visibility = VISIBLE
+                    topicConstraint.visibility = GONE
+                    chatName.text = item.name
+                    messagesNum.text =
+                        item.messageNum.let { if (it > 0) it.toString() else "" }
+                    chatLinear.setBackgroundResource(
                         if (item.topicId % 2 == 0) R.drawable.bg_green else R.drawable.bg_purple
                     )
                 }
@@ -83,7 +83,11 @@ class TopicsChatsAdapter(
     class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<StreamTopicItem>() {
 
         override fun areItemsTheSame(oldItem: StreamTopicItem, newItem: StreamTopicItem): Boolean {
-            return oldItem.hashCode() == newItem.hashCode()
+            if (oldItem is TopicItem && newItem is TopicItem)
+                return oldItem.topicId == newItem.topicId
+            if (oldItem is StreamItem && newItem is StreamItem)
+                return oldItem.streamId == newItem.streamId
+            return false
         }
 
         override fun areContentsTheSame(

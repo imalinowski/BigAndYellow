@@ -35,7 +35,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private val model: MainViewModel by activityViewModels()
     private var messages: MutableList<Message> = mutableListOf()
     private var messagesLoaded = false
-    private val modalBottomSheet = SmileBottomSheet()
+
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
     private val topicName: String? by lazy { arguments?.getString(TOPIC) }
     private val userName: String? by lazy { arguments?.getString(USER_NAME) }
@@ -45,16 +45,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private val adapter: MessagesAdapter by lazy {
         MessagesAdapter(
             onEmojiClick = { parcel: EmojiClickParcel ->
-                when (parcel) {
-                    is EmojiAddParcel ->
-                        model.addReaction(parcel.messageId, parcel.name)
-                    is EmojiDeleteParcel ->
-                        model.deleteReaction(parcel.messageId, parcel.name)
-                }
+                processEmojiClick(parcel)
             },
             onLongClick = { position ->
-                modalBottomSheet.show(childFragmentManager, SmileBottomSheet.TAG)
-                modalBottomSheet.arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position)
+                showBottomSheet(position)
             },
             onBind = { position ->
                 if (position == 5 && !messagesLoaded) loadMessages()
@@ -81,6 +75,21 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initUI()
+    }
+
+    private fun showBottomSheet(position: Int) {
+        SmileBottomSheet()
+            .apply { arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position) }
+            .show(childFragmentManager, SmileBottomSheet.TAG)
+    }
+
+    private fun processEmojiClick(parcel: EmojiClickParcel) {
+        when (parcel) {
+            is EmojiAddParcel ->
+                model.addReaction(parcel.messageId, parcel.name)
+            is EmojiDeleteParcel ->
+                model.deleteReaction(parcel.messageId, parcel.name)
+        }
     }
 
     private fun initUI() {
@@ -121,7 +130,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             val emoji = Reaction(userId = User.ME.id, code = unicode, name = name)
 
             // add emoji an case emoji haven't exist before or it has been added by other users
-            val emojiGroup: UnitedReaction? = messages[messagePosition].emoji[emoji.getUnicode()]
+            val emojiGroup: UnitedReaction? =
+                messages[messagePosition].emoji[emoji.getUnicode()]
             if (emojiGroup == null || !emojiGroup.usersId.contains(User.ME.id)) {
                 messages[messagePosition].addEmoji(emoji) // data update
                 model.addReaction(messages[messagePosition].id, emoji.name) // net call
