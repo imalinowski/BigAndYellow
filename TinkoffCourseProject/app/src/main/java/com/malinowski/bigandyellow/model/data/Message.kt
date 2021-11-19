@@ -36,7 +36,7 @@ data class Message(
 ) {
     @Ignore
     @SerialName("reactions")
-    private val reactions: List<Reaction> = listOf() // init all reactions by one
+    val reactions: List<Reaction> = listOf() // init all reactions by one
 
     @Ignore
     @kotlinx.serialization.Transient
@@ -61,9 +61,9 @@ data class Message(
         }
     }
 
-    fun initEmoji(emojis: List<UnitedReaction>) {
-        emojis.onEach {
-            emoji[it.name] = it
+    fun initEmoji(reactions: List<Reaction>) {
+        reactions.onEach {
+            addEmoji(it)
         }
     }
 

@@ -127,7 +127,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             val unicode = bundle.getString(SmileBottomSheet.SMILE_KEY)!!
             val name = bundle.getString(SmileBottomSheet.SMILE_NAME)!!
 
-            val emoji = Reaction(userId = User.ME.id, code = unicode, name = name)
+            val emoji = Reaction(userId = User.ME.id, unicode = unicode, name = name)
 
             // add emoji an case emoji haven't exist before or it has been added by other users
             val emojiGroup: UnitedReaction? =

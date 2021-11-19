@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import com.malinowski.bigandyellow.model.data.*
 
 @Database(
-    entities = [Stream::class, Topic::class, Message::class, User::class, UnitedReaction::class],
+    entities = [Stream::class, Topic::class, Message::class, User::class, Reaction::class],
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {

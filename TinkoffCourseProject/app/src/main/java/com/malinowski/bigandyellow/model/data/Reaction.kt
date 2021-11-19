@@ -5,25 +5,24 @@ import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Serializable
-data class Reaction(
-    @SerialName("user_id") var userId: Int,
-    @SerialName("emoji_code") private val code: String,
-    @SerialName("emoji_name") val name: String,
-) {
-    fun getUnicode() = processUnicode(code)
-}
-
 private const val TABLE_NAME = "UnitedReactions"
 
 @Entity(tableName = TABLE_NAME)
-@TypeConverters(ListStringConverter::class)
-data class UnitedReaction(
-    @PrimaryKey val name: String,
-    @ColumnInfo(name = "users_id") val usersId: MutableList<Int>,
-    private val unicode: String
+@Serializable
+data class Reaction(
+    @PrimaryKey @SerialName("emoji_name") val name: String,
+    @SerialName("user_id") var userId: Int,
+    @SerialName("emoji_code") private val unicode: String,
 ) {
     var messageId = 0
+    fun getUnicode() = processUnicode(unicode)
+}
+
+data class UnitedReaction(
+    val name: String,
+    val usersId: MutableList<Int>,
+    private val unicode: String
+) {
     fun getUnicode() = processUnicode(unicode)
 }
 
@@ -39,35 +38,22 @@ private fun processUnicode(code: String): String {
 @Dao
 interface ReactionDao {
     @Query("SELECT * FROM $TABLE_NAME")
-    fun getAll(): Single<List<UnitedReaction>>
+    fun getAll(): Single<List<Reaction>>
 
     @Query("SELECT * FROM $TABLE_NAME WHERE messageId = :id")
-    fun getByMessageId(id: Int): Single<List<UnitedReaction>>
+    fun getByMessageId(id: Int): Single<List<Reaction>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(users: List<UnitedReaction>)
+    fun insert(reaction: List<Reaction>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(users: UnitedReaction)
+    fun insert(reaction: Reaction)
 
     @Delete
-    fun delete(reaction: UnitedReaction): Single<Int>
+    fun delete(reaction: Reaction): Single<Int>
 
     @Query("DELETE FROM $TABLE_NAME WHERE messageId = :id")
     fun deleteByMessageId(id: Int)
-}
-
-
-class ListStringConverter() {
-    @TypeConverter
-    fun listToString(value: MutableList<Int>?): String? {
-        return value?.joinToString()
-    }
-
-    @TypeConverter
-    fun stringToList(value: String?): MutableList<Int>? {
-        return value?.replace(" ", "")?.split(",")?.map { Integer.valueOf(it) }?.toMutableList()
-    }
 }
 
 val emojiMap: HashMap<String, String> = hashMapOf(
