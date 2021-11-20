@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.ActivityMainBinding
+import com.malinowski.bigandyellow.view.states.MainScreenState
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {

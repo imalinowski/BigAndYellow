@@ -1,10 +1,10 @@
-package com.malinowski.bigandyellow.usecase
+package com.malinowski.bigandyellow.domain.usecase
 
 import com.malinowski.bigandyellow.model.data.Stream
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.TopicItem
-import com.malinowski.bigandyellow.model.mapper.StreamToItemMapper
-import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
+import com.malinowski.bigandyellow.domain.mapper.StreamToItemMapper
+import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
 import io.reactivex.Observable
 
 interface SearchTopicsUseCase :

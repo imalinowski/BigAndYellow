@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow.model.mapper
+package com.malinowski.bigandyellow.domain.mapper
 
 import com.malinowski.bigandyellow.model.data.Stream
 import com.malinowski.bigandyellow.model.data.StreamItem

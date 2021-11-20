@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow.model.mapper
+package com.malinowski.bigandyellow.domain.mapper
 
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.MessageItem

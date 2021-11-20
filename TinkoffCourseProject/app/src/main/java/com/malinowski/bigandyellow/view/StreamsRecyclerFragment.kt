@@ -13,7 +13,7 @@ import com.malinowski.bigandyellow.databinding.FragmentStreamsBinding
 import com.malinowski.bigandyellow.model.data.StreamItem
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.TopicItem
-import com.malinowski.bigandyellow.model.mapper.TopicToItemMapper
+import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.Streams
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter

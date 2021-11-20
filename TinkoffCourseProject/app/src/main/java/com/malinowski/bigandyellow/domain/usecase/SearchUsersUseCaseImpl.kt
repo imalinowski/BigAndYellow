@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow.usecase
+package com.malinowski.bigandyellow.domain.usecase
 
 import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.User
