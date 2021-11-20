@@ -11,8 +11,8 @@ private const val TABLE_NAME = "Streams"
 @Serializable
 data class Stream(
     @PrimaryKey
-    @SerialName("stream_id") val id: Int,
     @SerialName("name") val name: String,
+    @SerialName("stream_id") val id: Int,
     var subscribed: Boolean = true,
 ) {
     @Ignore

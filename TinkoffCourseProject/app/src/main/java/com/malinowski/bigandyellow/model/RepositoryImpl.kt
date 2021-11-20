@@ -9,17 +9,10 @@ import com.malinowski.bigandyellow.model.db.AppDatabase
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.model.network.ZulipChat.Companion.NEWEST_MES
-import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowInt
-import com.malinowski.bigandyellow.model.network.ZulipChat.NarrowStr
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.CompletableSubject
-import io.reactivex.subjects.PublishSubject
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -30,13 +23,22 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 
 object RepositoryImpl : Repository {
 
+    private const val URL = "https://tinkoff-android-fall21.zulipchat.com/api/v1/"
+    private const val idRoute: String = "id"
+    private const val messagesRoute: String = "messages"
+    private const val statusRoute: String = "status"
+    private const val membersRoute: String = "members"
+    private const val topicsRoute: String = "topics"
+    private const val subscriptionsRoute: String = "subscriptions"
+    private const val streamsRoute: String = "streams"
+
     private val client = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
         .addInterceptor(AuthInterceptor())
         .build()
 
     private var retrofit = Retrofit.Builder()
-        .baseUrl("https://tinkoff-android-fall21.zulipchat.com/api/v1/") // http://192.168.0.21:8081/
+        .baseUrl(URL)
         .client(client)
         .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
@@ -50,8 +52,6 @@ object RepositoryImpl : Repository {
         AppDatabase::class.java, AppDatabase.DB_NAME
     ).build()
 
-    private val compositeDisposable = CompositeDisposable()
-
     override fun loadStreams(): Observable<List<Stream>> {
 
         val dbCall = db.streamDao().getAll()
@@ -63,7 +63,7 @@ object RepositoryImpl : Repository {
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val streamsJSA =
-                    format.decodeFromString<JsonObject>(body.string())["streams"]
+                    format.decodeFromString<JsonObject>(body.string())[streamsRoute]
                 format.decodeFromString<List<Stream>>(streamsJSA.toString())
             }.doOnSuccess { streams ->
                 Log.d("STREAMS_NET", "$streams")
@@ -90,7 +90,7 @@ object RepositoryImpl : Repository {
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val subscriptionsJSA =
-                    format.decodeFromString<JsonObject>(body.string())["subscriptions"]
+                    format.decodeFromString<JsonObject>(body.string())[subscriptionsRoute]
                 format.decodeFromString<List<Stream>>(subscriptionsJSA.toString())
             }.doOnSuccess { streams ->
                 db.streamDao().insert(streams)
@@ -105,24 +105,17 @@ object RepositoryImpl : Repository {
     }
 
     private fun topicsPreload(streams: List<Stream>): Observable<List<Stream>> {
-        val subject = PublishSubject.create<List<Stream>>()
-        var count = 0
-        streams.onEach { stream ->
+        val topicLoaders = streams.map { stream ->
             loadTopics(stream.id)
-                .doFinally {
-                    count += 1
-                    if (count % streams.size == 0)
-                        subject.onNext(streams)
-                }.subscribe({
-                    stream.topics = it.toMutableList()
-                }, { Log.e("TopicsPreload", it.message.toString()) }
-                ).addTo(compositeDisposable)
+                .subscribeOn(Schedulers.io())
+                .map {
+                    stream.apply { topics = it.toMutableList() }
+                }
         }
-        if (streams.isEmpty()) subject.onNext(streams)
-        return subject
+        return Single.concatEager(topicLoaders).toList().toObservable()
     }
 
-    override fun loadTopics(id: Int): Observable<List<Topic>> {
+    override fun loadTopics(id: Int): Single<List<Topic>> {
 
         val dbCall = db.topicDao()
             .getTopicsInStream(id)
@@ -131,7 +124,7 @@ object RepositoryImpl : Repository {
         val netCall = service.getTopicsInStream(id)
             .map { body ->
                 val topicsJSA =
-                    format.decodeFromString<JsonObject>(body.string())["topics"]
+                    format.decodeFromString<JsonObject>(body.string())[topicsRoute]
                 format.decodeFromString<List<Topic>>(topicsJSA.toString()).apply {
                     map { it.streamId = id }
                 }
@@ -139,21 +132,21 @@ object RepositoryImpl : Repository {
                 Log.d("TOPICS_NET", "stream $id > $topics")
                 db.topicDao().insert(topics)
                 messageNumPreload(topics)
-                Single.just(topics)
+            }.onErrorResumeNext {
+                Log.e("TOPICS_NET", "${it.message}")
+                dbCall
             }
 
-        return Single.concat(dbCall, netCall)
-            .toObservable()
-            .subscribeOn(Schedulers.io())
+        return netCall.subscribeOn(Schedulers.io())
     }
 
-    private fun messageNumPreload(topics: List<Topic>) {
-        topics.onEach { topic ->
-            db.topicDao().getTopicByName(topic.name).subscribeBy(
-                onSuccess = { topic.messageNum = it.messageNum },
-                onError = { Log.e("TOPICS_NET", "topic ${topic.name} error message preload") }
-            ).addTo(compositeDisposable)
+    private fun messageNumPreload(topics: List<Topic>): Single<List<Topic>> {
+        val messageNumLoaders = topics.map { topic ->
+            db.topicDao().getTopicByName(topic.name).doOnSuccess {
+                topic.messageNum = it.messageNum
+            }
         }
+        return Single.concatEager(messageNumLoaders).toList()
     }
 
     override fun loadUsers(): Observable<List<User>> {
@@ -164,7 +157,7 @@ object RepositoryImpl : Repository {
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val membersJSA =
-                    format.decodeFromString<JsonObject>(body.string())["members"]
+                    format.decodeFromString<JsonObject>(body.string())[membersRoute]
                 format.decodeFromString<List<User>>(membersJSA.toString())
             }.doOnSuccess {
                 db.userDao().insert(it)
@@ -181,7 +174,9 @@ object RepositoryImpl : Repository {
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val jso = Json.decodeFromString<JsonObject>(body.string())
-                    .jsonObject["presence"]?.jsonObject?.get("aggregated")?.jsonObject?.get("status")
+                    .jsonObject["presence"]?.jsonObject?.get("aggregated")?.jsonObject?.get(
+                    statusRoute
+                )
                 jso?.jsonPrimitive?.content?.let { status ->
                     user.status = UserStatus.decodeFromString(status)
                     user.status
@@ -190,35 +185,32 @@ object RepositoryImpl : Repository {
                 Log.e("LoadUserStatus", "${user.name} ${it.message}")
             }
 
-    fun loadOwnUser() {
-        db.userDao().getOwnUser()
+    fun loadOwnUser(): Single<User> {
+        val dbCall = db.userDao().getOwnUser()
             .subscribeOn(Schedulers.io())
-            .subscribe(
-                { User.ME = it },
-                { Log.e("LoadOwnUser", it.message.toString()) }
-            ).addTo(compositeDisposable)
 
-        service.getOwnUser()
+        val netCall = service.getOwnUser()
             .subscribeOn(Schedulers.io())
-            .subscribe(
-                { body ->
-                    User.ME = format.decodeFromString(body.string())
-                    db.userDao().insert(User.ME.apply { isMe = true })
-                },
-                { Log.e("LoadOwnUser", it.message.toString()) }
-            ).addTo(compositeDisposable)
+            .map { body ->
+                format.decodeFromString<User>(body.string()).apply {
+                    this.isMe = true
+                    db.userDao().insert(this)
+                }
+            }.onErrorResumeNext {
+                Log.e("LoadOwnUser", it.message.toString())
+                dbCall
+            }
+
+        return netCall
     }
 
-    fun setMessageNum(topicName: String, messageNum: Int) {
-        db.topicDao().getTopicByName(topicName)
+    fun setMessageNum(topicName: String, messageNum: Int): Single<Topic> {
+        return db.topicDao().getTopicByName(topicName)
             .subscribeOn(Schedulers.io())
-            .subscribeBy(
-                onSuccess = {
-                    it.messageNum = messageNum
-                    db.topicDao().update(it)
-                },
-                onError = { Log.e("LOAD_TOPIC_BY_NAME", "${it.message}") }
-            ).addTo(compositeDisposable)
+            .doOnSuccess {
+                it.messageNum = messageNum
+                db.topicDao().update(it)
+            }
     }
 
     fun loadMessages(
@@ -238,7 +230,7 @@ object RepositoryImpl : Repository {
         val dbCall = db.messageDao()
             .getMessages(stream, topicName)
             .map { clearMessages(it) }
-            .doOnSuccess {
+            .flatMap {
                 Log.i("MESSAGES_DB", "$it")
                 loadReactionsDB(it)
             }
@@ -247,7 +239,7 @@ object RepositoryImpl : Repository {
             anchor = anchor,
             narrow = narrow
         ).map { body ->
-            val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
+            val jso = Json.decodeFromString<JsonObject>(body.string())[messagesRoute]
             format.decodeFromString<List<Message>>(jso.toString())
         }.map {
             if (anchor != NEWEST_MES) // api send n+1 message
@@ -265,7 +257,10 @@ object RepositoryImpl : Repository {
         return flow.subscribeOn(Schedulers.io())
     }
 
-    fun loadMessages(userEmail: String, anchor: String = NEWEST_MES): Observable<List<Message>> {
+    fun loadMessages(
+        userEmail: String,
+        anchor: String = NEWEST_MES
+    ): Observable<List<Message>> {
         val narrow = listOf(
             NarrowStr("pm-with", userEmail)
         ).map {
@@ -277,7 +272,7 @@ object RepositoryImpl : Repository {
         val dbCall = db.messageDao()
             .getMessages(userEmail)
             .map { clearMessages(it) }
-            .doOnSuccess {
+            .flatMap {
                 Log.i("MESSAGES_DB", "$it")
                 loadReactionsDB(it)
             }
@@ -286,7 +281,7 @@ object RepositoryImpl : Repository {
             anchor = anchor,
             narrow = narrow
         ).map { body ->
-            val jso = Json.decodeFromString<JsonObject>(body.string())["messages"]
+            val jso = Json.decodeFromString<JsonObject>(body.string())[messagesRoute]
             format.decodeFromString<List<Message>>(jso.toString())
         }.map {
             if (anchor != NEWEST_MES)
@@ -305,16 +300,16 @@ object RepositoryImpl : Repository {
         return flow.subscribeOn(Schedulers.io())
     }
 
-    private fun loadReactionsDB(messages: List<Message>) {
-        messages.onEach { message ->
-            db.reactionDao().getByMessageId(message.id).subscribeBy(
-                onSuccess = {
-                    Log.d("REACTIONS_DB", "$it")
-                    message.initEmoji(it)
-                },
-                onError = { Log.e("REACTIONS_DB", "${it.message}") }
-            ).addTo(compositeDisposable)
+    private fun loadReactionsDB(messages: List<Message>): Single<List<Message>> {
+        val messageReactionLoader = messages.map { message ->
+            db.reactionDao().getByMessageId(message.id).map {
+                Log.d("REACTIONS_DB", "$it")
+                message.apply { initEmoji(it) }
+            }.doOnError {
+                Log.e("REACTIONS_DB", "${it.message}")
+            }
         }
+        return Single.concatEager(messageReactionLoader).toList()
     }
 
     private fun saveMessagesToDB(messages: List<Message>) {
@@ -331,7 +326,10 @@ object RepositoryImpl : Repository {
         if (messages.size <= 50) return messages
         messages.subList(0, messages.size - 50).onEach { message ->
             Log.i("CLEAR_MESSAGES", db.messageDao().delete(message).toString())
-            Log.i("CLEAR_MESSAGES", db.reactionDao().deleteByMessageId(message.id).toString())
+            Log.i(
+                "CLEAR_MESSAGES",
+                db.reactionDao().deleteByMessageId(message.id).toString()
+            )
         }
         return messages.subList(messages.size - 50, messages.size)
     }
@@ -341,11 +339,16 @@ object RepositoryImpl : Repository {
         STREAM("stream")
     }
 
-    fun sendMessage(type: SendType, to: String, content: String, topic: String = ""): Single<Int> =
+    fun sendMessage(
+        type: SendType,
+        to: String,
+        content: String,
+        topic: String = ""
+    ): Single<Int> =
         service.sendMessage(type.type, to, content, topic)
             .subscribeOn(Schedulers.io())
             .map { body ->
-                Json.decodeFromString<JsonObject>(body.string())["id"]
+                Json.decodeFromString<JsonObject>(body.string())[idRoute]
                     ?.jsonPrimitive
                     ?.content.let {
                         it?.toInt()
@@ -353,26 +356,12 @@ object RepositoryImpl : Repository {
             }
 
 
-    fun addEmoji(messageId: Int, emojiName: String): Completable {
-        val complete = CompletableSubject.create()
+    fun addEmoji(messageId: Int, emojiName: String): Completable =
         service.addEmojiReaction(messageId, name = emojiName)
             .subscribeOn(Schedulers.io())
-            .subscribe(
-                { complete.onComplete() },
-                { e -> complete.onError(e) }
-            ).addTo(compositeDisposable)
-        return complete
-    }
 
-    fun deleteEmoji(messageId: Int, emojiName: String): Completable {
-        val complete = CompletableSubject.create()
+    fun deleteEmoji(messageId: Int, emojiName: String): Completable =
         service.deleteEmojiReacction(messageId, name = emojiName)
             .subscribeOn(Schedulers.io())
-            .subscribe(
-                { complete.onComplete() },
-                { e -> complete.onError(e) }
-            ).addTo(compositeDisposable)
-        return complete
-    }
 
 }

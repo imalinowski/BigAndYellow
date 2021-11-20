@@ -1,6 +1,7 @@
 package com.malinowski.bigandyellow.viewmodel
 
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -61,6 +62,14 @@ class MainViewModel : ViewModel() {
     init {
         subscribeToSearchStreams()
         subscribeToSearchUser()
+        initUser()
+    }
+
+    private fun initUser() {
+        dataProvider.loadOwnUser().subscribeBy(
+            onSuccess = { user -> User.ME = user },
+            onError = { error(it) }
+        ).addTo(compositeDisposable)
     }
 
     private fun subscribeToSearchUser() {
@@ -139,7 +148,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun getTopics(streamId: Int): Observable<List<Topic>> =
-        dataProvider.loadTopics(streamId)
+        dataProvider.loadTopics(streamId).toObservable()
 
     fun getMessages(
         stream: Int,
@@ -159,7 +168,10 @@ class MainViewModel : ViewModel() {
         }
 
     fun setMessageNum(topicName: String, messageNum: Int) =
-        dataProvider.setMessageNum(topicName, messageNum)
+        dataProvider.setMessageNum(topicName, messageNum).subscribeBy(
+            onSuccess = { },
+            onError = { Log.e("LOAD_TOPIC_BY_NAME", "${it.message}") }
+        ).addTo(compositeDisposable)
 
     private fun sendMessage(
         type: RepositoryImpl.SendType, to: String, content: String, topic: String = ""
@@ -175,7 +187,9 @@ class MainViewModel : ViewModel() {
 
     fun addReaction(messageId: Int, emojiName: String) {
         dataProvider.addEmoji(messageId, emojiName).subscribeBy(
-            onComplete = {}, onError = { error(it) }
+            onComplete = {
+
+            }, onError = { error(it) }
         ).addTo(compositeDisposable)
     }
 
@@ -195,6 +209,11 @@ class MainViewModel : ViewModel() {
 
     fun loading() {
         _mainScreenState.postValue(MainScreenState.Loading)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        compositeDisposable.dispose()
     }
 
 }

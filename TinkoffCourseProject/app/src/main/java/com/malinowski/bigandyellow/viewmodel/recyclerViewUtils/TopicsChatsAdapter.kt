@@ -40,7 +40,7 @@ class TopicsChatsAdapter(
                     topicConstraint.visibility = GONE
                     chatName.text = item.name
                     messagesNum.text =
-                        item.messageNum.let { if (it > 0) it.toString() else "" }
+                        item.messageNum.let { if (it > 0) "$it mes" else "" }
                     chatLinear.setBackgroundResource(
                         if (item.topicId % 2 == 0) R.drawable.bg_green else R.drawable.bg_purple
                     )

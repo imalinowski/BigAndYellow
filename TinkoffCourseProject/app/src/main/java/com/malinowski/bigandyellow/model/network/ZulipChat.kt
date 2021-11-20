@@ -1,7 +1,7 @@
 package com.malinowski.bigandyellow.model.network
 
+import io.reactivex.Completable
 import io.reactivex.Single
-import kotlinx.serialization.Serializable
 import okhttp3.ResponseBody
 import retrofit2.http.*
 
@@ -40,13 +40,13 @@ interface ZulipChat {
     fun addEmojiReaction(
         @Path("message_id") messageId: Int,
         @Field("emoji_name") name: String,
-    ): Single<ResponseBody>
+    ): Completable
 
     @DELETE("messages/{message_id}/reactions")
     fun deleteEmojiReacction(
         @Path("message_id") messageId: Int,
         @Query("emoji_name") name: String,
-    ): Single<ResponseBody>
+    ): Completable
 
     @GET("messages")
     fun getMessages(
@@ -64,17 +64,7 @@ interface ZulipChat {
         @Query("narrow") narrow: String,
     ): Single<ResponseBody>
 
-    @Serializable
-    sealed class Narrow()
-
-    @Serializable
-    data class NarrowStr(val operator: String, val operand: String) : Narrow()
-
-    @Serializable
-    data class NarrowInt(val operator: String, val operand: Int) : Narrow()
-
     companion object {
         const val NEWEST_MES = "newest"
     }
-
 }
