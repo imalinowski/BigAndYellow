@@ -7,13 +7,12 @@ import kotlinx.serialization.Serializable
 
 private const val TABLE_NAME = "Streams"
 
-@Entity(tableName = TABLE_NAME)
+@Entity(tableName = TABLE_NAME, primaryKeys = ["name", "subscribed"])
 @Serializable
 data class Stream(
-    @PrimaryKey
     @SerialName("name") val name: String,
     @SerialName("stream_id") val id: Int,
-    var subscribed: Boolean = true,
+    var subscribed: Boolean = false,
 ) {
     @Ignore
     var topics: MutableList<Topic> = mutableListOf()
@@ -22,13 +21,13 @@ data class Stream(
 
 @Dao
 interface StreamDao {
-    @Query("SELECT * FROM $TABLE_NAME")
+    @Query("SELECT * FROM $TABLE_NAME WHERE subscribed = 0")
     fun getAll(): Single<List<Stream>>
 
     @Query("SELECT * FROM $TABLE_NAME WHERE subscribed = 1")
     fun getSubscribed(): Single<List<Stream>>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(streams: List<Stream>)
 
     @Delete

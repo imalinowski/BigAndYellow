@@ -58,7 +58,7 @@ object RepositoryImpl : Repository {
             .observeOn(Schedulers.io())
             .doOnSuccess { Log.d("STREAMS_DB", "$it") }
             .toObservable()
-            .flatMap { topicsPreload(it) } //TODO offline topic search
+            .flatMap { topicsPreload(it) }
 
         val netCall = service.getStreams()
             .subscribeOn(Schedulers.io())
@@ -68,7 +68,6 @@ object RepositoryImpl : Repository {
                 format.decodeFromString<List<Stream>>(streamsJSA.toString())
             }.doOnSuccess { streams ->
                 Log.d("STREAMS_NET", "$streams")
-                streams.onEach { it.subscribed = false }
                 db.streamDao().insert(streams)
             }
             .toObservable()
@@ -85,16 +84,20 @@ object RepositoryImpl : Repository {
 
         val dbCall = db.streamDao().getSubscribed()
             .observeOn(Schedulers.io())
+            .doOnSuccess { Log.d("STREAMS_DB", "$it") }
             .toObservable()
-            .flatMap { topicsPreload(it) }//TODO offline topic search
+            .flatMap { topicsPreload(it) }
 
         val netCall = service.getSubscribedStreams()
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val subscriptionsJSA =
                     format.decodeFromString<JsonObject>(body.string())[subscriptionsRoute]
-                format.decodeFromString<List<Stream>>(subscriptionsJSA.toString())
+                format.decodeFromString<List<Stream>>(subscriptionsJSA.toString()).onEach {
+                    it.subscribed = true
+                }
             }.doOnSuccess { streams ->
+                Log.d("STREAMS_NET", "$streams")
                 db.streamDao().insert(streams)
             }.toObservable()
             .flatMap { topicsPreload(it) }
@@ -320,7 +323,7 @@ object RepositoryImpl : Repository {
         messages.onEach { message ->
             // update deleted reactions
             db.reactionDao().deleteByMessageId(message.id)
-            Log.d("REACTIONS_DB_SAVE","id > ${message.id} reactions > ${message.reactions}")
+            Log.d("REACTIONS_DB_SAVE", "id > ${message.id} reactions > ${message.reactions}")
             message.reactions  // reactions save
                 .map { it.apply { messageId = message.id } }
                 .let { db.reactionDao().insert(it) }
