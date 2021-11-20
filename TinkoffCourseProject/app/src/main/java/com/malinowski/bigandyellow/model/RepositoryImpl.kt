@@ -57,7 +57,8 @@ object RepositoryImpl : Repository {
         val dbCall = db.streamDao().getAll()
             .observeOn(Schedulers.io())
             .doOnSuccess { Log.d("STREAMS_DB", "$it") }
-            .toObservable() //TODO offline topic search
+            .toObservable()
+            .flatMap { topicsPreload(it) } //TODO offline topic search
 
         val netCall = service.getStreams()
             .subscribeOn(Schedulers.io())
@@ -84,7 +85,8 @@ object RepositoryImpl : Repository {
 
         val dbCall = db.streamDao().getSubscribed()
             .observeOn(Schedulers.io())
-            .toObservable() //TODO offline topic search
+            .toObservable()
+            .flatMap { topicsPreload(it) }//TODO offline topic search
 
         val netCall = service.getSubscribedStreams()
             .subscribeOn(Schedulers.io())
@@ -245,8 +247,9 @@ object RepositoryImpl : Repository {
             if (anchor != NEWEST_MES) // api send n+1 message
                 it.subList(0, it.size - 1)
             else it
-        }.doOnSuccess {
-            saveMessagesToDB(it)
+        }.doOnSuccess { messages ->
+            Log.i("MESSAGES_NET", "$messages")
+            saveMessagesToDB(messages)
         }
 
         val flow = if (anchor == NEWEST_MES)
@@ -303,7 +306,7 @@ object RepositoryImpl : Repository {
     private fun loadReactionsDB(messages: List<Message>): Single<List<Message>> {
         val messageReactionLoader = messages.map { message ->
             db.reactionDao().getByMessageId(message.id).map {
-                Log.d("REACTIONS_DB", "$it")
+                Log.d("REACTIONS_DB", "messageId > ${message.id} reactions > $it")
                 message.apply { initEmoji(it) }
             }.doOnError {
                 Log.e("REACTIONS_DB", "${it.message}")
@@ -317,6 +320,7 @@ object RepositoryImpl : Repository {
         messages.onEach { message ->
             // update deleted reactions
             db.reactionDao().deleteByMessageId(message.id)
+            Log.d("REACTIONS_DB_SAVE","id > ${message.id} reactions > ${message.reactions}")
             message.reactions  // reactions save
                 .map { it.apply { messageId = message.id } }
                 .let { db.reactionDao().insert(it) }

@@ -5,15 +5,19 @@ import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-private const val TABLE_NAME = "UnitedReactions"
+private const val TABLE_NAME = "Reactions"
 
-@Entity(tableName = TABLE_NAME)
+@Entity(tableName = TABLE_NAME, primaryKeys = ["user_id", "emoji_name", "message_id"])
 @Serializable
 data class Reaction(
-    @PrimaryKey @SerialName("emoji_name") val name: String,
-    @SerialName("user_id") var userId: Int,
-    @SerialName("emoji_code") private val unicode: String,
+    @ColumnInfo(name = "user_id") @SerialName("user_id")
+    var userId: Int,
+    @ColumnInfo(name = "emoji_name") @SerialName("emoji_name")
+    val name: String,
+    @ColumnInfo(name = "unicode") @SerialName("emoji_code")
+    private val unicode: String,
 ) {
+    @ColumnInfo(name = "message_id")
     var messageId = 0
     fun getUnicode() = processUnicode(unicode)
 }
@@ -40,7 +44,7 @@ interface ReactionDao {
     @Query("SELECT * FROM $TABLE_NAME")
     fun getAll(): Single<List<Reaction>>
 
-    @Query("SELECT * FROM $TABLE_NAME WHERE messageId = :id")
+    @Query("SELECT * FROM $TABLE_NAME WHERE message_id = :id")
     fun getByMessageId(id: Int): Single<List<Reaction>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -52,7 +56,7 @@ interface ReactionDao {
     @Delete
     fun delete(reaction: Reaction): Single<Int>
 
-    @Query("DELETE FROM $TABLE_NAME WHERE messageId = :id")
+    @Query("DELETE FROM $TABLE_NAME WHERE message_id = :id")
     fun deleteByMessageId(id: Int)
 }
 
