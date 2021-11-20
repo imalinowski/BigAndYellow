@@ -315,6 +315,8 @@ object RepositoryImpl : Repository {
     private fun saveMessagesToDB(messages: List<Message>) {
         db.messageDao().insert(messages)
         messages.onEach { message ->
+            // update deleted reactions
+            db.reactionDao().deleteByMessageId(message.id)
             message.reactions  // reactions save
                 .map { it.apply { messageId = message.id } }
                 .let { db.reactionDao().insert(it) }
