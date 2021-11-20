@@ -25,10 +25,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
-import com.malinowski.bigandyellow.model.data.Message
-import com.malinowski.bigandyellow.model.data.Reaction
-import com.malinowski.bigandyellow.model.data.UnitedReaction
-import com.malinowski.bigandyellow.model.data.User
 
 class ChatFragment : Fragment(R.layout.fragment_chat) {
 
@@ -127,7 +123,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             val messagePosition = bundle.getInt(SmileBottomSheet.MESSAGE_KEY)
             val unicode = bundle.getString(SmileBottomSheet.SMILE_KEY)!!
             val name = bundle.getString(SmileBottomSheet.SMILE_NAME)!!
-
+            if (messagePosition >= messages.size) { // since there two source of messages collisions happens
+                model.error(java.lang.IllegalStateException(getString(R.string.error_data_expired)))
+                return@setFragmentResultListener
+            }
             val emoji = Reaction(userId = User.ME.id, unicode = unicode, name = name)
 
             // add emoji an case emoji haven't exist before or it has been added by other users

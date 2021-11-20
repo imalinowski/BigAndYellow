@@ -249,9 +249,9 @@ object RepositoryImpl : Repository {
             saveMessagesToDB(it)
         }
 
-        val flow = if (anchor == NEWEST_MES) // when paging no db call needed
+        val flow = if (anchor == NEWEST_MES)
             Single.concat(dbCall, netCall).toObservable()
-        else
+        else // when paging no db call needed
             netCall.toObservable()
 
         return flow.subscribeOn(Schedulers.io())

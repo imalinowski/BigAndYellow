@@ -19,4 +19,5 @@
     <string name="subscribed">Subscribed</string>
     <string name="all_streams">All Streams</string>
     <string name="error_emoji_added">Emoji already added</string>
+    <string name="error_data_expired">Data key expired Try again</string>
 </resources>
