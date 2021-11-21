@@ -167,10 +167,9 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                     }
                     model.result()
                     messagesLoaded = messagesPage.isEmpty()
-                    if (!messagesLoaded) {
-                        messages = itemsCopy.toMutableList().apply { addAll(0, messagesPage) }
-                        adapter.submitList(messages)
-                    } else topicName?.let { topicName ->
+                    messages = itemsCopy.toMutableList().apply { addAll(0, messagesPage) }
+                    adapter.submitList(messages)
+                    if (messagesLoaded) topicName?.let { topicName ->
                         model.setMessageNum(topicName, messages.size)
                     }
                 },
