@@ -5,19 +5,21 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.malinowski.bigandyellow.domain.mapper.MessageToItemMapper
+import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
+import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCaseImpl
+import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCase
+import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.MessageItem
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.User
-import com.malinowski.bigandyellow.domain.mapper.MessageToItemMapper
 import com.malinowski.bigandyellow.model.network.ZulipChat
-import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
-import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCaseImpl
-import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCase
-import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.view.ChatFragment
+import com.malinowski.bigandyellow.view.events.Event
 import com.malinowski.bigandyellow.view.states.MainScreenState
+import com.malinowski.bigandyellow.view.states.State
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -39,7 +41,9 @@ class MainViewModel : ViewModel() {
 
     val streamsSubscribed = MutableLiveData<List<StreamTopicItem>>()
     val streams = MutableLiveData<List<StreamTopicItem>>()
-    val users = MutableLiveData<List<User>>()
+
+    // states
+    val usersState = MutableLiveData<State.Users>()
 
     private val searchTopicsUseCase: SearchTopicsUseCase = SearchTopicsUseCaseImpl()
     private val searchUserUseCase: SearchUsersUseCase = SearchUsersUseCaseImpl()
@@ -53,10 +57,6 @@ class MainViewModel : ViewModel() {
 
     fun searchStreams(query: String) {
         searchStreamSubject.onNext(query)
-    }
-
-    fun searchUsers(query: String) {
-        searchUsersSubject.onNext(query)
     }
 
     init {
@@ -83,7 +83,7 @@ class MainViewModel : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
-                    users.value = it
+                    usersState.value = State.Users(it)
                     _mainScreenState.value = MainScreenState.Result
                 },
                 onError = { _mainScreenState.value = MainScreenState.Error(it) }
@@ -129,6 +129,14 @@ class MainViewModel : ViewModel() {
                 }
             )
             .addTo(compositeDisposable)
+    }
+
+    fun processEvent(event: Event) {
+        when (event) {
+            is Event.SearchUsers -> searchUsersSubject.onNext(event.query)
+            is Event.OpenChat.WithUser -> openChat(event.user) // todo single live event
+            is Event.OpenChat.OfTopic -> openChat(event.streamId, event.topic) // todo single live event
+        }
     }
 
     fun openChat(streamId: Int, topicName: String) {

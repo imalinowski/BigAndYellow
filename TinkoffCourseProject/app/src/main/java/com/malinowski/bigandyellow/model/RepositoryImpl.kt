@@ -164,7 +164,8 @@ object RepositoryImpl : Repository {
                 val membersJSA =
                     format.decodeFromString<JsonObject>(body.string())[membersRoute]
                 format.decodeFromString<List<User>>(membersJSA.toString())
-            }.doOnSuccess {
+            }.flatMap { usersStatusPreload(it) }
+            .doOnSuccess {
                 db.userDao().insert(it)
                 db.userDao().insert(User.ME)
             }.onErrorResumeNext { error: Throwable ->
@@ -174,7 +175,14 @@ object RepositoryImpl : Repository {
         return Single.concat(dbCall, netCall).toObservable()
     }
 
-    fun loadStatus(user: User) =
+    private fun usersStatusPreload(users: List<User>): Single<List<User>> {
+        val statusLoaders = users.map { user ->
+            loadStatus(user)
+        }
+        return Single.concatEager(statusLoaders).toList()
+    }
+
+    private fun loadStatus(user: User) =
         service.getPresence(user.id)
             .subscribeOn(Schedulers.io())
             .map { body ->
@@ -183,10 +191,11 @@ object RepositoryImpl : Repository {
                     statusRoute
                 )
                 jso?.jsonPrimitive?.content?.let { status ->
-                    user.status = UserStatus.decodeFromString(status)
-                    user.status
+                    Log.d("LoadUserStatus","${user.name} $status")
+                    user.apply { this.status = UserStatus.decodeFromString(status) }
                 }
-            }.doOnError {
+            }.onErrorReturn { user }
+            .doOnError {
                 Log.e("LoadUserStatus", "${user.name} ${it.message}")
             }
 
@@ -201,7 +210,8 @@ object RepositoryImpl : Repository {
                     this.isMe = true
                     db.userDao().insert(this)
                 }
-            }.onErrorResumeNext {
+            }.flatMap { loadStatus(it) }
+            .onErrorResumeNext {
                 Log.e("LoadOwnUser", it.message.toString())
                 dbCall
             }

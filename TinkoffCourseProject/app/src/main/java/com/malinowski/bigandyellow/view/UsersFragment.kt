@@ -1,32 +1,28 @@
 package com.malinowski.bigandyellow.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.databinding.FragmentPeopleBinding
-import com.malinowski.bigandyellow.model.RepositoryImpl
-import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.view.events.Event
+import com.malinowski.bigandyellow.view.states.State
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.UserAdapter
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
 
-class UsersFragment : Fragment() {
+class UsersFragment : FragmentMVI() {
     private var _binding: FragmentPeopleBinding? = null
     private val binding get() = _binding!!
 
     private val model: MainViewModel by activityViewModels()
     private var adapter = UserAdapter(
-        onClick = {
-            model.openChat(it)
+        onClick = { user ->
+            model.processEvent(
+                Event.OpenChat.WithUser(user)
+            )
         }
     )
 
@@ -43,17 +39,17 @@ class UsersFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.searchQuery.doAfterTextChanged {
-            model.searchUsers(it.toString())
+            model.processEvent(
+                Event.SearchUsers(query = it.toString())
+            )
         }
 
         if (savedInstanceState == null)
-            model.searchUsers("")
-        model.users.observe(viewLifecycleOwner) { users ->
-            users.onEachIndexed { i, user -> updateUsersStatus(user, i) }
-            adapter.submitList(users) {
-                binding.usersRecycler.scrollToPosition(0)
-            }
-        }
+            model.processEvent(
+                Event.SearchUsers(query = "")
+            )
+
+        model.usersState.observe(viewLifecycleOwner) { state -> render(state) }
 
         binding.usersRecycler.apply {
             adapter = this@UsersFragment.adapter
@@ -61,25 +57,16 @@ class UsersFragment : Fragment() {
         }
     }
 
-    private val compositeDisposable = CompositeDisposable()
-
-    private fun updateUsersStatus(user: User, position: Int) {
-        RepositoryImpl.loadStatus(user)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onSuccess = {
-                    adapter.notifyItemChanged(position)
-                },
-                onError = {
-                    Log.e("LoadUserError", it.message.toString())
-                }
-            ).addTo(compositeDisposable)
-    }
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        compositeDisposable.dispose()
+    }
+
+    override fun render(state: State) {
+        if (state !is State.Users) return
+        adapter.submitList(state.users) {
+            binding.usersRecycler.scrollToPosition(0)
+        }
     }
 
 }

@@ -11,6 +11,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChannelsBinding
 import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.view.events.Event
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.PagerAdapter
 import com.malinowski.bigandyellow.viewmodel.Streams
@@ -40,7 +41,7 @@ class ChannelsFragment : Fragment() {
         }
 
         binding.searchLoop.setOnLongClickListener {
-            model.openChat(User.ME)
+            model.processEvent(Event.OpenChat.WithUser(User.ME))
             false
         }
 

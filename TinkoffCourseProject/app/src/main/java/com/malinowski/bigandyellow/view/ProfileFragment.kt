@@ -37,9 +37,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.userName.text = User.ME.name
         updateStatus(User.ME)
-        RepositoryImpl.loadStatus(User.ME).observeOn(AndroidSchedulers.mainThread()).subscribeBy(
-            onSuccess = { updateStatus(User.ME) }, onError = { model.error(it) }
-        ).addTo(compositeDisposable)
         binding.image.apply {
             Glide.with(this).load(User.ME.avatarUrl).into(this)
         }
