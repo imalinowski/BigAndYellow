@@ -8,12 +8,13 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.databinding.FragmentPeopleBinding
-import com.malinowski.bigandyellow.view.events.Event
-import com.malinowski.bigandyellow.view.states.State
+import com.malinowski.bigandyellow.view.mvi.FragmentMVI
+import com.malinowski.bigandyellow.view.mvi.events.Event
+import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.UserAdapter
 
-class UsersFragment : FragmentMVI() {
+class UsersFragment : FragmentMVI<State.Users>() {
     private var _binding: FragmentPeopleBinding? = null
     private val binding get() = _binding!!
 
@@ -62,8 +63,7 @@ class UsersFragment : FragmentMVI() {
         _binding = null
     }
 
-    override fun render(state: State) {
-        if (state !is State.Users) return
+    override fun render(state: State.Users) {
         adapter.submitList(state.users) {
             binding.usersRecycler.scrollToPosition(0)
         }

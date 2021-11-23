@@ -6,12 +6,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.malinowski.bigandyellow.view.StreamsRecyclerFragment
 
-enum class Streams {
+enum class StreamsType {
     SubscribedStreams, AllStreams
 }
 
 class PagerAdapter(
-    private val pages: List<Streams>,
+    private val pages: List<StreamsType>,
     fragmentManager: FragmentManager, lifecycle: Lifecycle
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
 

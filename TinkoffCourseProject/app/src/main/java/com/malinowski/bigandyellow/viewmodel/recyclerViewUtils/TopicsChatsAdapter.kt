@@ -86,7 +86,7 @@ class TopicsChatsAdapter(
             if (oldItem is TopicItem && newItem is TopicItem)
                 return oldItem.topicId == newItem.topicId
             if (oldItem is StreamItem && newItem is StreamItem)
-                return oldItem.streamId == newItem.streamId
+                return oldItem.id == newItem.id
             return false
         }
 

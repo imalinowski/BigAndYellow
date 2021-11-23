@@ -3,7 +3,7 @@ package com.malinowski.bigandyellow.model.data
 sealed class StreamTopicItem()
 
 data class StreamItem(
-    val streamId: Int,
+    val id: Int,
     val name: String,
     var topics: List<TopicItem>,
     var expanded: Boolean = false,

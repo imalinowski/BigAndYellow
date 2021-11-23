@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow.view.states
+package com.malinowski.bigandyellow.view.mvi.states
 
 sealed class MainScreenState {
 

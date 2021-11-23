@@ -9,7 +9,7 @@ internal class StreamToItemMapper : (Stream) -> (StreamItem) {
 
     override fun invoke(stream: Stream): StreamItem {
         return StreamItem(
-            streamId = stream.id,
+            id = stream.id,
             name = stream.name,
             topics = topicToItemMapper(stream.topics, stream.id),
             expanded = false

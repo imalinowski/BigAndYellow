@@ -11,10 +11,10 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChannelsBinding
 import com.malinowski.bigandyellow.model.data.User
-import com.malinowski.bigandyellow.view.events.Event
+import com.malinowski.bigandyellow.view.mvi.events.Event
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.PagerAdapter
-import com.malinowski.bigandyellow.viewmodel.Streams
+import com.malinowski.bigandyellow.viewmodel.StreamsType
 
 class ChannelsFragment : Fragment() {
     private val model: MainViewModel by activityViewModels()
@@ -49,7 +49,7 @@ class ChannelsFragment : Fragment() {
             listOf(getString(R.string.subscribed), getString(R.string.all_streams))
 
         val pagerAdapter = PagerAdapter(
-            pages = listOf(Streams.SubscribedStreams, Streams.AllStreams),
+            pages = listOf(StreamsType.SubscribedStreams, StreamsType.AllStreams),
             childFragmentManager, lifecycle
         )
         binding.fragmentViewPager.adapter = pagerAdapter

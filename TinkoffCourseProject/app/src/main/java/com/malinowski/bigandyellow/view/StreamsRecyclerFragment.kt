@@ -1,11 +1,9 @@
 package com.malinowski.bigandyellow.view
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.R
@@ -13,39 +11,47 @@ import com.malinowski.bigandyellow.databinding.FragmentStreamsBinding
 import com.malinowski.bigandyellow.model.data.StreamItem
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.TopicItem
-import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
+import com.malinowski.bigandyellow.view.mvi.FragmentMVI
+import com.malinowski.bigandyellow.view.mvi.events.Event
+import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
-import com.malinowski.bigandyellow.viewmodel.Streams
+import com.malinowski.bigandyellow.viewmodel.StreamsType
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
 
-class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
+class StreamsRecyclerFragment : FragmentMVI<State.Streams>(R.layout.fragment_streams) {
 
     private val viewBinding: FragmentStreamsBinding by lazy {
         FragmentStreamsBinding.inflate(layoutInflater)
     }
-
-    private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
     private val model: MainViewModel by activityViewModels()
     private var items: MutableList<StreamTopicItem> = mutableListOf()
-    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private val streamType =
+        arguments?.getSerializable(STREAMS_TYPE)?.let { it as StreamsType }
+            ?: StreamsType.AllStreams
 
     private val adapter = TopicsChatsAdapter { position -> // on item click
         when (val item = items[position]) {
             is TopicItem -> item.also {
-                model.openChat(item.streamId, item.name)
+                model.processEvent(
+                    Event.OpenChat.OfTopic(item.streamId, item.name)
+                )
                 closeStreams()
             }
             is StreamItem -> {
-                if (item.expanded)
-                    deleteItems(position)
-                else
-                    addItems(item, position)
-                item.expanded = !item.expanded
+                model.processEvent(
+                    if (item.expanded)
+                        Event.Remove.Topics(item, position, streamType)
+                    else
+                        Event.Load.Topics(item, position, streamType)
+                )
             }
+        }
+    }
+
+    override fun render(state: State.Streams) {
+        items = state.items.toMutableList()
+        adapter.submitList(items) {
+            viewBinding.topicsChatsRecycler.scrollToPosition(0)
         }
     }
 
@@ -55,16 +61,11 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         savedInstanceState: Bundle?
     ): View {
 
-        val streamType =
-            arguments?.getSerializable(SUBSCRIBED)?.let { it as Streams } ?: Streams.AllStreams
-
-        (if (streamType == Streams.SubscribedStreams) model.streamsSubscribed else model.streams)
-            .observe(viewLifecycleOwner) {
-                items = it.toMutableList()
-                adapter.submitList(it) {
-                    viewBinding.topicsChatsRecycler.scrollToPosition(0)
-                }
-            }
+        if (streamType == StreamsType.SubscribedStreams)
+            model.streamsSubscribedState
+                .observe(viewLifecycleOwner) { state -> render(state) }
+        else model.streamsAllState
+            .observe(viewLifecycleOwner) { state -> render(state) }
 
         viewBinding.topicsChatsRecycler.let { recycler ->
             recycler.adapter = adapter
@@ -85,53 +86,12 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
                 item.expanded = false
     }
 
-    private fun addItems(stream: StreamItem, listPosition: Int) {
-        stream.loading = true
-        adapter.notifyItemChanged(listPosition)
-        val itemsCopy = items.toMutableList()
-        model.getTopics(stream.streamId)
-            .map { topics -> topicToItemMapper(topics, stream.streamId) }
-            .observeOn(AndroidSchedulers.mainThread(), true)
-            .doOnNext { topics -> stream.topics = topics }
-            .doOnEach {
-                stream.loading = false
-                adapter.notifyItemChanged(listPosition)
-            }
-            .subscribeBy(
-                onNext = { chats ->
-                    Log.d("GET_TOPICS_DEBUG", "ON NEXT $chats")
-                    items = itemsCopy.toMutableList().apply {
-                        addAll(listPosition + 1, chats)
-                    }
-                    stream.loading = false
-                    adapter.notifyItemChanged(listPosition)
-                    adapter.submitList(items)
-
-                },
-                onError = { e ->
-                    Log.d("GET_TOPICS_DEBUG", "ON ERROR ${e.message}")
-                    model.error(e)
-                }
-            ).addTo(compositeDisposable)
-    }
-
-    private fun deleteItems(listPosition: Int) {
-        var count = 0
-        while (listPosition + 1 < items.size && items[listPosition + 1] is TopicItem) {
-            items.removeAt(listPosition + 1)
-            count += 1
-        }
-        adapter.notifyItemRangeRemoved(listPosition + 1, count)
-        adapter.notifyItemRangeChanged(listPosition + 1, adapter.itemCount)
-
-    }
-
     companion object {
-        private const val SUBSCRIBED = "subscribed"
-        fun newInstance(streamType: Streams) =
+        private const val STREAMS_TYPE = "subscribed"
+        fun newInstance(streamType: StreamsType) =
             StreamsRecyclerFragment().apply {
                 arguments = Bundle().apply {
-                    putSerializable(SUBSCRIBED, streamType)
+                    putSerializable(STREAMS_TYPE, streamType)
                 }
             }
     }

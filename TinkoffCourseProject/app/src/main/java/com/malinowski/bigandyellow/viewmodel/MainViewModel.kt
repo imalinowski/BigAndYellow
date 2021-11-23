@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.domain.mapper.MessageToItemMapper
+import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
 import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCaseImpl
 import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCase
@@ -13,13 +14,13 @@ import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.MessageItem
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
-import com.malinowski.bigandyellow.model.data.Topic
+import com.malinowski.bigandyellow.model.data.TopicItem
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.view.ChatFragment
-import com.malinowski.bigandyellow.view.events.Event
-import com.malinowski.bigandyellow.view.states.MainScreenState
-import com.malinowski.bigandyellow.view.states.State
+import com.malinowski.bigandyellow.view.mvi.events.Event
+import com.malinowski.bigandyellow.view.mvi.states.MainScreenState
+import com.malinowski.bigandyellow.view.mvi.states.State
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -44,16 +45,21 @@ class MainViewModel : ViewModel() {
 
     // states
     val usersState = MutableLiveData<State.Users>()
+    val streamsAllState = MutableLiveData(State.Streams(listOf()))
+    val streamsSubscribedState = MutableLiveData(State.Streams(listOf()))
 
+    // use case
     private val searchTopicsUseCase: SearchTopicsUseCase = SearchTopicsUseCaseImpl()
     private val searchUserUseCase: SearchUsersUseCase = SearchUsersUseCaseImpl()
-
-    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()
     private val searchUsersSubject: BehaviorSubject<String> = BehaviorSubject.create()
 
+    // mapper
     private val messageToItemMapper: MessageToItemMapper = MessageToItemMapper()
+    private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
+
+    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     fun searchStreams(query: String) {
         searchStreamSubject.onNext(query)
@@ -106,7 +112,7 @@ class MainViewModel : ViewModel() {
             }.observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
-                    streamsSubscribed.value = it
+                    streamsSubscribedState.value = State.Streams(it)
                     _mainScreenState.value = MainScreenState.Result
                 },
                 onError = {
@@ -121,7 +127,7 @@ class MainViewModel : ViewModel() {
             }.observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
-                    streams.value = it
+                    streamsAllState.value = State.Streams(it)
                     _mainScreenState.value = MainScreenState.Result
                 },
                 onError = {
@@ -135,11 +141,16 @@ class MainViewModel : ViewModel() {
         when (event) {
             is Event.SearchUsers -> searchUsersSubject.onNext(event.query)
             is Event.OpenChat.WithUser -> openChat(event.user) // todo single live event
-            is Event.OpenChat.OfTopic -> openChat(event.streamId, event.topic) // todo single live event
+            is Event.OpenChat.OfTopic -> openChat(
+                event.streamId,
+                event.topic
+            )
+            is Event.Load.Topics -> getTopics(event)
+            is Event.Remove.Topics -> removeTopics(event)
         }
     }
 
-    fun openChat(streamId: Int, topicName: String) {
+    private fun openChat(streamId: Int, topicName: String) {
         Bundle().apply {
             putInt(ChatFragment.STREAM, streamId)
             putString(ChatFragment.TOPIC, topicName)
@@ -147,7 +158,7 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun openChat(user: User) {
+    private fun openChat(user: User) {
         Bundle().apply {
             putString(ChatFragment.USER_EMAIL, user.email)
             putString(ChatFragment.USER_NAME, user.name)
@@ -155,8 +166,49 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun getTopics(streamId: Int): Observable<List<Topic>> =
-        dataProvider.loadTopics(streamId).toObservable()
+    private fun removeTopics(event: Event.Remove.Topics) = with(event) {
+        val liveData = when (type) {
+            StreamsType.AllStreams -> streamsAllState
+            StreamsType.SubscribedStreams -> streamsSubscribedState
+        }
+        val state = liveData.value!!
+        val items = state.items.toMutableList()
+        while (listPosition + 1 < items.size && items[listPosition + 1] is TopicItem) {
+            items.removeAt(listPosition + 1)
+        }
+        event.stream.expanded = false
+        liveData.value = state.copy(items = items)
+    }
+
+    private fun getTopics(event: Event.Load.Topics) {
+        val liveData = when (event.type) {
+            StreamsType.AllStreams -> streamsAllState
+            StreamsType.SubscribedStreams -> streamsSubscribedState
+        }
+        val state = liveData.value!!
+        liveData.value = state.copy().apply {
+            event.stream.loading = true
+        }
+        dataProvider.loadTopics(event.stream.id)
+            .map { topics -> topicToItemMapper(topics, event.stream.id) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onSuccess = { topics ->
+                    event.stream.apply {
+                        expanded = true
+                        loading = false
+                    }
+                    val items = state.items.toMutableList().apply {
+                        addAll(event.listPosition + 1, topics)
+                    }
+                    liveData.value = state.copy(items = items)
+                },
+                onError = { e ->
+                    error(e)
+                    Log.d("GET_TOPICS_DEBUG", "ON ERROR ${e.message}")
+                }
+            ).addTo(compositeDisposable)
+    }
 
     fun getMessages(
         stream: Int,
