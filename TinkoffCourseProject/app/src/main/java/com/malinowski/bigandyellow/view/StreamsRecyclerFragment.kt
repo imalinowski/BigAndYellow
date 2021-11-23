@@ -41,7 +41,6 @@ class StreamsRecyclerFragment : FragmentMVI<State.Streams>(R.layout.fragment_str
                 if (item.expanded)
                     deleteItems(position)
                 else {
-                    //model.processEvent(Event.Load.Topics(item, streamType))
                     addItems(item, position)
                 }
                 item.expanded = !item.expanded
@@ -67,6 +66,11 @@ class StreamsRecyclerFragment : FragmentMVI<State.Streams>(R.layout.fragment_str
         viewBinding.topicsChatsRecycler.let { recycler ->
             recycler.adapter = adapter
             recycler.layoutManager = LinearLayoutManager(context)
+        }
+
+        viewBinding.refresh.setOnRefreshListener {
+            model.searchStreams("")
+            viewBinding.refresh.isRefreshing = false
         }
 
         return viewBinding.root

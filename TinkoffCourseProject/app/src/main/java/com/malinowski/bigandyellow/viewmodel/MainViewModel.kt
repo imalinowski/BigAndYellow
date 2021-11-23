@@ -139,7 +139,6 @@ class MainViewModel : ViewModel() {
                 event.streamId,
                 event.topic
             )
-            //is Event.Load.Topics -> loadTopics(event)
         }
     }
 
