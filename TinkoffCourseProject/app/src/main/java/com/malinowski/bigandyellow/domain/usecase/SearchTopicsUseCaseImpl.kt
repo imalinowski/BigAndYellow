@@ -1,10 +1,11 @@
 package com.malinowski.bigandyellow.domain.usecase
 
-import com.malinowski.bigandyellow.model.data.Stream
-import com.malinowski.bigandyellow.model.data.StreamTopicItem
-import com.malinowski.bigandyellow.model.data.TopicItem
 import com.malinowski.bigandyellow.domain.mapper.StreamToItemMapper
 import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
+import com.malinowski.bigandyellow.model.data.Stream
+import com.malinowski.bigandyellow.model.data.StreamItem
+import com.malinowski.bigandyellow.model.data.StreamTopicItem
+import com.malinowski.bigandyellow.model.data.TopicItem
 import io.reactivex.Observable
 
 interface SearchTopicsUseCase :
@@ -25,12 +26,13 @@ internal class SearchTopicsUseCaseImpl : SearchTopicsUseCase {
         searchQuery: String,
         streams: Observable<List<Stream>>
     ): Observable<List<StreamTopicItem>> {
-        return streams.map { topics ->
-            if (searchQuery.isNotEmpty())
-                topics.search(searchQuery)
-            else
-                topics.map(streamToItemMapper)
-        }
+        return streams
+            .map { topics ->
+                if (searchQuery.isNotEmpty())
+                    topics.search(searchQuery)
+                else
+                    topics.map(streamToItemMapper)
+            }
     }
 
     private fun List<Stream>.search(query: String): List<StreamTopicItem> {
@@ -44,6 +46,7 @@ internal class SearchTopicsUseCaseImpl : SearchTopicsUseCase {
                 })
                 streamTopicItem.addAll(topics)
             }
+
         }
         return streamTopicItem
     }
@@ -54,5 +57,6 @@ internal class SearchTopicsUseCaseImpl : SearchTopicsUseCase {
         }
         return topicToItemMapper(satisfyChats, this.id)
     }
+
 
 }

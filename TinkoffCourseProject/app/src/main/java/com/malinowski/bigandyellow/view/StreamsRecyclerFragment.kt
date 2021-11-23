@@ -25,9 +25,9 @@ class StreamsRecyclerFragment : FragmentMVI<State.Streams>(R.layout.fragment_str
     }
     private val model: MainViewModel by activityViewModels()
     private var items: MutableList<StreamTopicItem> = mutableListOf()
-    private val streamType =
-        arguments?.getSerializable(STREAMS_TYPE)?.let { it as StreamsType }
-            ?: StreamsType.AllStreams
+    private lateinit var streamType: StreamsType
+
+    private var state = State.Streams(listOf())
 
     private val adapter = TopicsChatsAdapter { position -> // on item click
         when (val item = items[position]) {
@@ -38,20 +38,14 @@ class StreamsRecyclerFragment : FragmentMVI<State.Streams>(R.layout.fragment_str
                 closeStreams()
             }
             is StreamItem -> {
-                model.processEvent(
-                    if (item.expanded)
-                        Event.Remove.Topics(item, position, streamType)
-                    else
-                        Event.Load.Topics(item, position, streamType)
-                )
+                if (item.expanded)
+                    deleteItems(position)
+                else {
+                    //model.processEvent(Event.Load.Topics(item, streamType))
+                    addItems(item, position)
+                }
+                item.expanded = !item.expanded
             }
-        }
-    }
-
-    override fun render(state: State.Streams) {
-        items = state.items.toMutableList()
-        adapter.submitList(items) {
-            viewBinding.topicsChatsRecycler.scrollToPosition(0)
         }
     }
 
@@ -60,6 +54,9 @@ class StreamsRecyclerFragment : FragmentMVI<State.Streams>(R.layout.fragment_str
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+
+        streamType = arguments?.getSerializable(STREAMS_TYPE)?.let { it as StreamsType }
+            ?: StreamsType.AllStreams
 
         if (streamType == StreamsType.SubscribedStreams)
             model.streamsSubscribedState
@@ -80,10 +77,36 @@ class StreamsRecyclerFragment : FragmentMVI<State.Streams>(R.layout.fragment_str
         closeStreams()
     }
 
+    override fun render(state: State.Streams) {
+        this.state = state
+        items = state.items.toMutableList()
+        adapter.submitList(items) {
+            viewBinding.topicsChatsRecycler.scrollToPosition(0)
+        }
+    }
+
+    private fun addItems(streamItem: StreamItem, initPos: Int) {
+        items.addAll(initPos + 1, streamItem.topics)
+        adapter.notifyItemRangeInserted(initPos + 1, streamItem.topics.size)
+        adapter.notifyItemRangeChanged(initPos, items.size)
+    }
+
+    private fun deleteItems(listPosition: Int) {
+        var count = 0
+        while (listPosition + 1 < items.size && items[listPosition + 1] is TopicItem) {
+            items.removeAt(listPosition + 1)
+            count += 1
+        }
+        adapter.notifyItemRangeRemoved(listPosition + 1, count)
+        adapter.notifyItemRangeChanged(listPosition + 1, adapter.itemCount)
+
+    }
+
     private fun closeStreams() {
         for (item in items)
             if (item is StreamItem)
                 item.expanded = false
+        items = items.filterIsInstance<StreamItem>().toMutableList()
     }
 
     companion object {

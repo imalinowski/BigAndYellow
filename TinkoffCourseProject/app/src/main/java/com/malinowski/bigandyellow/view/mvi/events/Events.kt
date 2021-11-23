@@ -24,15 +24,6 @@ sealed class Event {
     sealed class Load : Event() {
         data class Topics(
             val stream: StreamItem,
-            val listPosition: Int,
-            val type: StreamsType
-        ) : Load()
-    }
-
-    sealed class Remove : Event() {
-        data class Topics(
-            val stream: StreamItem,
-            val listPosition: Int,
             val type: StreamsType
         ) : Load()
     }

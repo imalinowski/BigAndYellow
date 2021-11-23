@@ -12,10 +12,7 @@ import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCaseImpl
 import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCase
 import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.model.RepositoryImpl
-import com.malinowski.bigandyellow.model.data.MessageItem
-import com.malinowski.bigandyellow.model.data.StreamTopicItem
-import com.malinowski.bigandyellow.model.data.TopicItem
-import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.mvi.events.Event
@@ -39,9 +36,6 @@ class MainViewModel : ViewModel() {
     private val _mainScreenState: MutableLiveData<MainScreenState> = MutableLiveData()
     val mainScreenState: LiveData<MainScreenState>
         get() = _mainScreenState
-
-    val streamsSubscribed = MutableLiveData<List<StreamTopicItem>>()
-    val streams = MutableLiveData<List<StreamTopicItem>>()
 
     // states
     val usersState = MutableLiveData<State.Users>()
@@ -145,8 +139,7 @@ class MainViewModel : ViewModel() {
                 event.streamId,
                 event.topic
             )
-            is Event.Load.Topics -> getTopics(event)
-            is Event.Remove.Topics -> removeTopics(event)
+            //is Event.Load.Topics -> loadTopics(event)
         }
     }
 
@@ -164,50 +157,6 @@ class MainViewModel : ViewModel() {
             putString(ChatFragment.USER_NAME, user.name)
             chat.postValue(this)
         }
-    }
-
-    private fun removeTopics(event: Event.Remove.Topics) = with(event) {
-        val liveData = when (type) {
-            StreamsType.AllStreams -> streamsAllState
-            StreamsType.SubscribedStreams -> streamsSubscribedState
-        }
-        val state = liveData.value!!
-        val items = state.items.toMutableList()
-        while (listPosition + 1 < items.size && items[listPosition + 1] is TopicItem) {
-            items.removeAt(listPosition + 1)
-        }
-        event.stream.expanded = false
-        liveData.value = state.copy(items = items)
-    }
-
-    private fun getTopics(event: Event.Load.Topics) {
-        val liveData = when (event.type) {
-            StreamsType.AllStreams -> streamsAllState
-            StreamsType.SubscribedStreams -> streamsSubscribedState
-        }
-        val state = liveData.value!!
-        liveData.value = state.copy().apply {
-            event.stream.loading = true
-        }
-        dataProvider.loadTopics(event.stream.id)
-            .map { topics -> topicToItemMapper(topics, event.stream.id) }
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeBy(
-                onSuccess = { topics ->
-                    event.stream.apply {
-                        expanded = true
-                        loading = false
-                    }
-                    val items = state.items.toMutableList().apply {
-                        addAll(event.listPosition + 1, topics)
-                    }
-                    liveData.value = state.copy(items = items)
-                },
-                onError = { e ->
-                    error(e)
-                    Log.d("GET_TOPICS_DEBUG", "ON ERROR ${e.message}")
-                }
-            ).addTo(compositeDisposable)
     }
 
     fun getMessages(
