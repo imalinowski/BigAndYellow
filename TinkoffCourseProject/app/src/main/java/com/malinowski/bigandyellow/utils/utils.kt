@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow
+package com.malinowski.bigandyellow.utils
 
 sealed class EmojiClickParcel(val id: Int, open val name: String)
 data class EmojiAddParcel(

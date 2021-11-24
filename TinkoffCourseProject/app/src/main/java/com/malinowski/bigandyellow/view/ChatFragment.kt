@@ -7,37 +7,34 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.malinowski.bigandyellow.EmojiAddParcel
-import com.malinowski.bigandyellow.EmojiClickParcel
-import com.malinowski.bigandyellow.EmojiDeleteParcel
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.ZulipChat
+import com.malinowski.bigandyellow.utils.EmojiAddParcel
+import com.malinowski.bigandyellow.utils.EmojiClickParcel
+import com.malinowski.bigandyellow.utils.EmojiDeleteParcel
+import com.malinowski.bigandyellow.view.mvi.FragmentMVI
+import com.malinowski.bigandyellow.view.mvi.events.Event
+import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
-import io.reactivex.Observable
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import io.reactivex.rxkotlin.subscribeBy
 
-class ChatFragment : Fragment(R.layout.fragment_chat) {
+class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
 
     private val binding by lazy { FragmentChatBinding.inflate(layoutInflater) }
     private val model: MainViewModel by activityViewModels()
-    private var messages: MutableList<MessageItem> = mutableListOf()
-    private var messagesLoaded = false
 
-    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
     private val topicName: String? by lazy { arguments?.getString(TOPIC) }
     private val userName: String? by lazy { arguments?.getString(USER_NAME) }
     private val userEmail: String? by lazy { arguments?.getString(USER_EMAIL) }
     private val streamId: Int? by lazy { arguments?.getInt(STREAM) }
+
+    private var state = State.Chat("", listOf())
+    private val messages
+        get() = state.messages
 
     private val adapter: MessagesAdapter by lazy {
         MessagesAdapter(
@@ -48,7 +45,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 showBottomSheet(position)
             },
             onBind = { position ->
-                if (position == 5 && !messagesLoaded) loadMessages()
+                if (position == 5 && !state.loaded) loadMessages()
             }
         )
     }
@@ -72,6 +69,15 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initUI()
+        model.chatState.observe(viewLifecycleOwner) { render(it) }
+    }
+
+    override fun render(state: State.Chat) {
+        this.state = state
+        if (state.loaded && topicName != null)
+            model.processEvent(Event.SetMessageNum(topicName!!, messages.size))
+        binding.chatName.text = state.name
+        adapter.submitList(messages)
     }
 
     private fun showBottomSheet(position: Int) {
@@ -145,62 +151,28 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private fun loadMessages() {
-        val anchor = if (messages.size > 0) "${messages[0].id}" else ZulipChat.NEWEST_MES
-
-        val flow: Observable<List<MessageItem>> =
+        val anchor = if (messages.isNotEmpty()) "${messages[0].id}" else ZulipChat.NEWEST_MES
+        Log.d("LOAD_MESSAGES", anchor)
+        model.processEvent(
             if (userEmail != null)
-                model.getMessages(userEmail!!, anchor)
+                Event.LoadMessages.ForUser(userEmail!!, anchor)
             else if (streamId != null && topicName != null)
-                model.getMessages(streamId!!, topicName!!, anchor)
+                Event.LoadMessages.ForTopic(streamId!!, topicName!!, anchor)
             else {
                 model.error(IllegalArgumentException("open chat -> Invalid arguments"))
                 parentFragmentManager.popBackStack()
                 return
             }
-
-        val itemsCopy = messages.toMutableList()
-        flow.observeOn(AndroidSchedulers.mainThread(), true)
-            .subscribeBy(
-                onNext = { messagesPage ->
-                    messagesPage.onEach {
-                        Log.d("LOAD_MESSAGES", "${it.senderName} ${it.message}")
-                    }
-                    model.result()
-                    messagesLoaded = messagesPage.isEmpty()
-                    messages = itemsCopy.toMutableList().apply { addAll(0, messagesPage) }
-                    adapter.submitList(messages)
-                    if (messagesLoaded) topicName?.let { topicName ->
-                        model.setMessageNum(topicName, messages.size)
-                    }
-                },
-                onError = { e ->
-                    Log.d("MESSAGES_DEBUG", "${e.message}")
-                    model.error(e)
-                }
-            ).addTo(compositeDisposable)
-
-        model.loading()
+        )
     }
 
     private fun sendMessage(content: String) {
-        model.loading()
-        val singleId: Single<Int> =
+        model.processEvent(
             if (userEmail != null)
-                model.sendMessageToUser(userEmail!!, content)
+                Event.SendMessage.ToUser(userEmail!!, content)
             else
-                model.sendMessageToTopic(streamId!!, topicName!!, content)
-        singleId
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { id ->
-                    messages.add(MessageItem(id, content, User.ME.id, true))
-                    adapter.submitList(messages)
-                    adapter.notifyItemInserted(messages.size - 1)
-                    layoutManager.scrollToPosition(messages.size - 1)
-                    model.result()
-                },
-                { model.error(it) }
-            ).addTo(compositeDisposable)
+                Event.SendMessage.ToTopic(streamId!!, topicName!!, content)
+        )
     }
 
     companion object {

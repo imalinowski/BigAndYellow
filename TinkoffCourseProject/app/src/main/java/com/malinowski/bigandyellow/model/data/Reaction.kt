@@ -88,5 +88,5 @@ val emojiMap: HashMap<String, String> = hashMapOf(
     "ghost" to "\uD83D\uDC7B",
     "alien" to "\uD83D\uDC7D",
     "middle_finger" to "\uD83D\uDD95",
-    "jack_o_lantern" to "\uD83C\uDF83",
+    "jack-o-lantern" to "\uD83C\uDF83",
 )

@@ -47,7 +47,7 @@ class UsersFragment : FragmentMVI<State.Users>() {
 
         if (savedInstanceState == null)
             model.processEvent(
-                Event.SearchUsers(query = "")
+                Event.SearchUsers()
             )
 
         model.usersState.observe(viewLifecycleOwner) { state -> render(state) }

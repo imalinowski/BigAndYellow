@@ -1,13 +1,11 @@
 package com.malinowski.bigandyellow.view.mvi.events
 
-import com.malinowski.bigandyellow.model.data.StreamItem
 import com.malinowski.bigandyellow.model.data.User
-import com.malinowski.bigandyellow.viewmodel.StreamsType
 
 sealed class Event {
 
     data class SearchUsers(
-        val query: String
+        val query: String = ""
     ) : Event()
 
     data class SearchStreams(
@@ -25,10 +23,46 @@ sealed class Event {
         ) : OpenChat()
     }
 
-    sealed class Load : Event() {
-        data class Topics(
-            val stream: StreamItem,
-            val type: StreamsType
-        ) : Load()
+    data class SetMessageNum(
+        val topicName: String,
+        val messageNum: Int
+    ) : Event()
+
+    sealed class LoadMessages : Event() {
+        data class ForUser(
+            val userEmail: String,
+            val anchor: String
+        ) : LoadMessages()
+
+        data class ForTopic(
+            val streamId: Int,
+            val topicName: String,
+            val anchor: String
+        ) : LoadMessages()
+    }
+
+    sealed class SendMessage : Event() {
+        data class ToUser(
+            val userEmail: String,
+            val content: String
+        ) : SendMessage()
+
+        data class ToTopic(
+            val streamId: Int,
+            val topicName: String,
+            val content: String
+        ) : SendMessage()
+    }
+
+    sealed class Reaction : Event() {
+        data class Add(
+            val messageId: Int,
+            val emojiName: String
+        ) : Reaction()
+
+        data class Remove(
+            val messageId: Int,
+            val emojiName: String
+        ) : Reaction()
     }
 }

@@ -9,7 +9,8 @@ sealed class State {
 
     data class Chat(
         val name: String,
-        val messages: List<MessageItem>
+        val messages: List<MessageItem> = listOf(),
+        val loaded: Boolean = false,
     ) : State()
 
     data class Users(

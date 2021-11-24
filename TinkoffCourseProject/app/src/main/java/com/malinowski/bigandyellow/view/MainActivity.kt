@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        model.chat.observe(this) { bundle ->
+        model.navigateChat.observe(this) { bundle ->
             supportFragmentManager.beginTransaction()
                 .replace(
                     R.id.activity_fragment_container_view,
