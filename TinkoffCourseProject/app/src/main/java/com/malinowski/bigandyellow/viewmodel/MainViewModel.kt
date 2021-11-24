@@ -1,6 +1,7 @@
 package com.malinowski.bigandyellow.viewmodel
 
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -38,6 +39,7 @@ class MainViewModel : ViewModel() {
 
     //event
     val navigateChat = SingleLiveEvent<Bundle>()
+    val scrollToPos = SingleLiveEvent<Int>()
 
     // states
     val usersState = MutableLiveData<State.Users>()
@@ -197,14 +199,14 @@ class MainViewModel : ViewModel() {
 
     private fun processGetMessages(flow: Observable<List<Message>>) {
         loading()
+        val state = chatState.value!!.copy()
         flow.map { messageToItemMapper(it) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = { messagesPage ->
                     result()
                     val lastPage = messagesPage.isEmpty()
-                    val state = chatState.value!!
-                    val messages = state.messages.toMutableList().apply { addAll(0, messagesPage) }
+                    val messages = state.messages.toMutableList().apply { addAll(messagesPage) }
                     chatState.value = state.copy(
                         messages = messages,
                         loaded = lastPage
@@ -229,10 +231,12 @@ class MainViewModel : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onSuccess = { id ->
+                    Log.d("MESSAGE_SEND", "$id $content")
                     val message = MessageItem(id, content, User.ME.id, true)
                     val state = chatState.value!!
-                    val list = state.messages.toMutableList().apply { add(message) }
+                    val list = state.messages.toMutableList().apply { add(0, message) }
                     chatState.value = state.copy(messages = list)
+                    scrollToPos.value = 0
                     result()
                 },
                 onError = { error(it) }
@@ -249,16 +253,16 @@ class MainViewModel : ViewModel() {
         )
     }
 
-    fun addReaction(messageId: Int, emojiName: String) {
+    private fun addReaction(messageId: Int, emojiName: String) {
         dataProvider.addEmoji(messageId, emojiName).subscribeBy(
-            onComplete = {},
+            onComplete = {  },
             onError = { error(it) }
         ).addTo(compositeDisposable)
     }
 
-    fun deleteReaction(messageId: Int, emojiName: String) {
+    private fun deleteReaction(messageId: Int, emojiName: String) {
         dataProvider.deleteEmoji(messageId, emojiName).subscribeBy(
-            onComplete = {},
+            onComplete = {  },
             onError = { error(it) }
         ).addTo(compositeDisposable)
     }

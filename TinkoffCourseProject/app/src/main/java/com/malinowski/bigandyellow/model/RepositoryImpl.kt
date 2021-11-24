@@ -270,7 +270,8 @@ object RepositoryImpl : Repository {
         else // when paging no db call needed
             netCall.toObservable()
 
-        return flow.subscribeOn(Schedulers.io())
+        // change order for newest to oldest -> add oldest in the end of list
+        return flow.subscribeOn(Schedulers.io()).map { it.reversed() }
     }
 
     fun loadMessages(
@@ -312,8 +313,8 @@ object RepositoryImpl : Repository {
             Single.concat(dbCall, netCall).toObservable()
         else
             netCall.toObservable()
-
-        return flow.subscribeOn(Schedulers.io())
+        //change order for newest to oldest -> add oldest in the end of list
+        return flow.subscribeOn(Schedulers.io()).map { it.reversed() }
     }
 
     private fun loadReactionsDB(messages: List<Message>): Single<List<Message>> {

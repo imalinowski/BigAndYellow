@@ -41,17 +41,17 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
             onEmojiClick = { parcel: EmojiClickParcel ->
                 processEmojiClick(parcel)
             },
-            onLongClick = { position ->
-                showBottomSheet(position)
+            onLongClick = { messageId ->
+                showBottomSheet(messageId)
             },
             onBind = { position ->
-                if (position == 5 && !state.loaded) loadMessages()
+                if (position == messages.size - 5 && !state.loaded) loadMessages()
             }
         )
     }
 
     private val layoutManager = LinearLayoutManager(context).apply {
-        stackFromEnd = true
+        reverseLayout = true
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +70,7 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initUI()
         model.chatState.observe(viewLifecycleOwner) { render(it) }
+        model.scrollToPos.observe(viewLifecycleOwner) { layoutManager.scrollToPosition(it) }
     }
 
     override fun render(state: State.Chat) {
@@ -87,12 +88,14 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
     }
 
     private fun processEmojiClick(parcel: EmojiClickParcel) {
-        when (parcel) {
-            is EmojiAddParcel ->
-                model.addReaction(parcel.messageId, parcel.name)
-            is EmojiDeleteParcel ->
-                model.deleteReaction(parcel.messageId, parcel.name)
-        }
+        model.processEvent(
+            when (parcel) {
+                is EmojiAddParcel ->
+                    Event.Reaction.Add(parcel.messageId, parcel.name)
+                is EmojiDeleteParcel ->
+                    Event.Reaction.Remove(parcel.messageId, parcel.name)
+            }
+        )
     }
 
     private fun initUI() {
@@ -126,11 +129,12 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
             SmileBottomSheet.SMILE_RESULT,
             this
         ) { _, bundle ->
-            val messagePosition = bundle.getInt(SmileBottomSheet.MESSAGE_KEY)
+            val messageId = bundle.getInt(SmileBottomSheet.MESSAGE_KEY)
             val unicode = bundle.getString(SmileBottomSheet.SMILE_KEY)!!
             val name = bundle.getString(SmileBottomSheet.SMILE_NAME)!!
 
-            if (messagePosition >= messages.size) { // since there two source of messages collisions happens
+            val message = messages.find { it.id == messageId }
+            if (message == null) { // since there two source of messages collisions happens
                 model.error(java.lang.IllegalStateException(getString(R.string.error_data_expired)))
                 return@setFragmentResultListener
             }
@@ -139,11 +143,11 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
 
             // add emoji an case emoji haven't exist before or it has been added by other users
             val emojiGroup: UnitedReaction? =
-                messages[messagePosition].emoji[emoji.getUnicode()]
+                message.emoji[emoji.getUnicode()]
             if (emojiGroup == null || !emojiGroup.usersId.contains(User.ME.id)) {
-                messages[messagePosition].addEmoji(emoji) // data update
-                model.addReaction(messages[messagePosition].id, emoji.name) // net call
-                adapter.notifyItemChanged(messagePosition) // ui update
+                message.addEmoji(emoji) // data update
+                model.processEvent(Event.Reaction.Add(message.id, emoji.name)) // net call
+                adapter.notifyItemChanged(messages.indexOf(message)) // ui update
             } else {
                 model.error(IllegalStateException(getString(R.string.error_emoji_added)))
             }
@@ -151,7 +155,7 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
     }
 
     private fun loadMessages() {
-        val anchor = if (messages.isNotEmpty()) "${messages[0].id}" else ZulipChat.NEWEST_MES
+        val anchor = if (messages.isNotEmpty()) "${messages.last().id}" else ZulipChat.NEWEST_MES
         Log.d("LOAD_MESSAGES", anchor)
         model.processEvent(
             if (userEmail != null)

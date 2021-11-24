@@ -13,7 +13,7 @@ import com.malinowski.bigandyellow.model.data.MessageItem
 
 class MessagesAdapter(
     private val onEmojiClick: (EmojiClickParcel) -> Unit = {},
-    private val onLongClick: (position: Int) -> Unit = {},
+    private val onLongClick: (messageId: Int) -> Unit = {},
     private val onBind: (position: Int) -> Unit = {}
 ) : ListAdapter<MessageItem, MessagesAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
@@ -32,7 +32,7 @@ class MessagesAdapter(
             viewHolder.binding.messageItem.setMessage(this)
             viewHolder.binding.messageItem.setOnEmojiClickListener(onEmojiClick)
             viewHolder.binding.messageItem.setMessageOnLongClick {
-                onLongClick(position)
+                onLongClick(this.id)
             }
             viewHolder.binding.date.text = getItem(position).getDate()
             viewHolder.binding.date.isVisible = isPlaceForDate(position)
