@@ -34,10 +34,10 @@ class ChannelsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         if (savedInstanceState == null)
-            model.searchStreams("")
+            model.processEvent(Event.SearchStreams())
 
         binding.searchQuery.doAfterTextChanged {
-            model.searchStreams(it.toString())
+            model.processEvent(Event.SearchStreams(it.toString()))
         }
 
         binding.searchLoop.setOnLongClickListener {

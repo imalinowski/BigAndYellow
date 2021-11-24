@@ -69,7 +69,7 @@ class StreamsRecyclerFragment : FragmentMVI<State.Streams>(R.layout.fragment_str
         }
 
         viewBinding.refresh.setOnRefreshListener {
-            model.searchStreams("")
+            model.processEvent(Event.SearchStreams())
             viewBinding.refresh.isRefreshing = false
         }
 

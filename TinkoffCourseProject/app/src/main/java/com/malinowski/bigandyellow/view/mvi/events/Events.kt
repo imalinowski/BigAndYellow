@@ -10,6 +10,10 @@ sealed class Event {
         val query: String
     ) : Event()
 
+    data class SearchStreams(
+        val query: String = ""
+    ) : Event()
+
     sealed class OpenChat : Event() {
         data class WithUser(
             val user: User

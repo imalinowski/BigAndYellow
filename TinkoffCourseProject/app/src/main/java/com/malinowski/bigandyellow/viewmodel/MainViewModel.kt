@@ -6,13 +6,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.domain.mapper.MessageToItemMapper
-import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
 import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCaseImpl
 import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCase
 import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.model.RepositoryImpl
-import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.data.MessageItem
+import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.mvi.events.Event
@@ -51,13 +51,8 @@ class MainViewModel : ViewModel() {
 
     // mapper
     private val messageToItemMapper: MessageToItemMapper = MessageToItemMapper()
-    private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
-
-    fun searchStreams(query: String) {
-        searchStreamSubject.onNext(query)
-    }
 
     init {
         subscribeToSearchStreams()
@@ -134,6 +129,7 @@ class MainViewModel : ViewModel() {
     fun processEvent(event: Event) {
         when (event) {
             is Event.SearchUsers -> searchUsersSubject.onNext(event.query)
+            is Event.SearchStreams -> searchStreamSubject.onNext(event.query)
             is Event.OpenChat.WithUser -> openChat(event.user) // todo single live event
             is Event.OpenChat.OfTopic -> openChat(
                 event.streamId,
@@ -195,9 +191,7 @@ class MainViewModel : ViewModel() {
 
     fun addReaction(messageId: Int, emojiName: String) {
         dataProvider.addEmoji(messageId, emojiName).subscribeBy(
-            onComplete = {
-
-            }, onError = { error(it) }
+            onComplete = {}, onError = { error(it) }
         ).addTo(compositeDisposable)
     }
 
