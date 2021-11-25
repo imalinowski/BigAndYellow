@@ -14,6 +14,7 @@ import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.Message
 import com.malinowski.bigandyellow.model.data.MessageItem
 import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.utils.SingleLiveEvent
 import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.mvi.events.Event
@@ -211,6 +212,8 @@ class MainViewModel : ViewModel() {
                         messages = messages,
                         loaded = lastPage
                     )
+                    if(state.messages.isEmpty())
+                        scrollToPos.value = 0
                 },
                 onError = { error(it) }
             )
@@ -255,14 +258,14 @@ class MainViewModel : ViewModel() {
 
     private fun addReaction(messageId: Int, emojiName: String) {
         dataProvider.addEmoji(messageId, emojiName).subscribeBy(
-            onComplete = {  },
+            onComplete = { },
             onError = { error(it) }
         ).addTo(compositeDisposable)
     }
 
     private fun deleteReaction(messageId: Int, emojiName: String) {
         dataProvider.deleteEmoji(messageId, emojiName).subscribeBy(
-            onComplete = {  },
+            onComplete = { },
             onError = { error(it) }
         ).addTo(compositeDisposable)
     }

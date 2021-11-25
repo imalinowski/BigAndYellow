@@ -70,7 +70,12 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         initUI()
         model.chatState.observe(viewLifecycleOwner) { render(it) }
-        model.scrollToPos.observe(viewLifecycleOwner) { layoutManager.scrollToPosition(it) }
+        model.scrollToPos.observe(viewLifecycleOwner) {
+            Log.d("SCROLL_DEBUG","$it")
+            adapter.submitList(messages){
+                binding.messageRecycler.scrollToPosition(it)
+            }
+        }
     }
 
     override fun render(state: State.Chat) {
