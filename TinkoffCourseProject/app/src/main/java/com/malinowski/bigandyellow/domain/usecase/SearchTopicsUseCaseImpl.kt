@@ -3,7 +3,6 @@ package com.malinowski.bigandyellow.domain.usecase
 import com.malinowski.bigandyellow.domain.mapper.StreamToItemMapper
 import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
 import com.malinowski.bigandyellow.model.data.Stream
-import com.malinowski.bigandyellow.model.data.StreamItem
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.TopicItem
 import io.reactivex.Observable

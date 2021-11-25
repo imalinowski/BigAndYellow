@@ -4,7 +4,7 @@ import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import com.malinowski.bigandyellow.view.mvi.states.State
 
-abstract class FragmentMVI<T: State> : Fragment {
+abstract class FragmentMVI<T : State> : Fragment {
 
     constructor() : super()
 

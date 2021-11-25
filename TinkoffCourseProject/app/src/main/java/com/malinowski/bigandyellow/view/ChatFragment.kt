@@ -71,8 +71,7 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
         initUI()
         model.chatState.observe(viewLifecycleOwner) { render(it) }
         model.scrollToPos.observe(viewLifecycleOwner) {
-            Log.d("SCROLL_DEBUG","$it")
-            adapter.submitList(messages){
+            adapter.submitList(messages) {
                 binding.messageRecycler.scrollToPosition(it)
             }
         }

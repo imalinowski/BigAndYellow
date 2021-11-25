@@ -191,7 +191,7 @@ object RepositoryImpl : Repository {
                     statusRoute
                 )
                 jso?.jsonPrimitive?.content?.let { status ->
-                    Log.d("LoadUserStatus","${user.name} $status")
+                    Log.d("LoadUserStatus", "${user.name} $status")
                     user.apply { this.status = UserStatus.decodeFromString(status) }
                 }
             }.onErrorReturn { user }
