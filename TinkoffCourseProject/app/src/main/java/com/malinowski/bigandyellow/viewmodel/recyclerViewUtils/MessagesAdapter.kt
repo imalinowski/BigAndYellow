@@ -6,9 +6,9 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.malinowski.bigandyellow.utils.EmojiClickParcel
 import com.malinowski.bigandyellow.databinding.MessageItemBinding
 import com.malinowski.bigandyellow.model.data.MessageItem
+import com.malinowski.bigandyellow.utils.EmojiClickParcel
 
 
 class MessagesAdapter(
@@ -34,16 +34,16 @@ class MessagesAdapter(
             viewHolder.binding.messageItem.setMessageOnLongClick {
                 onLongClick(this.id)
             }
-            viewHolder.binding.date.text = getItem(position).getDate()
+            viewHolder.binding.date.text = this.getDate()
             viewHolder.binding.date.isVisible = isPlaceForDate(position)
         }
     }
 
     private fun isPlaceForDate(position: Int): Boolean {
-        if (position == 0) return true
-        val prevDay = getItem(position - 1).timestamp / SECONDS_IN_DAY
+        if (position + 1 == itemCount) return true
         val curDay = getItem(position).timestamp / SECONDS_IN_DAY
-        return prevDay < curDay
+        val prevDay = getItem(position + 1).timestamp / SECONDS_IN_DAY
+        return curDay > prevDay
     }
 
     class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<MessageItem>() {
