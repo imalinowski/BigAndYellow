@@ -6,8 +6,8 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.malinowski.bigandyellow.EmojiClickParcel
 import com.malinowski.bigandyellow.databinding.MessageItemBinding
+import com.malinowski.bigandyellow.model.data.EmojiClickParcel
 import com.malinowski.bigandyellow.model.data.MessageItem
 
 

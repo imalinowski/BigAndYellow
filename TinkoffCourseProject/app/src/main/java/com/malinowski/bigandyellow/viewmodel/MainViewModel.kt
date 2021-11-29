@@ -79,7 +79,6 @@ class MainViewModel : ViewModel() {
             .doOnNext { _mainScreenState.postValue(MainScreenState.Loading) }
             .debounce(500, TimeUnit.MILLISECONDS, Schedulers.io())
             .switchMap { searchQuery -> searchUserUseCase(searchQuery) }
-            .observeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
@@ -156,7 +155,7 @@ class MainViewModel : ViewModel() {
         anchor: String = ZulipChat.NEWEST_MES
     ): Observable<List<MessageItem>> =
         dataProvider.loadMessages(stream, topicName, anchor).map {
-            messageToItemMapper(it)
+            messageToItemMapper(it, User.ME.id)
         }
 
     fun getMessages(
@@ -164,7 +163,7 @@ class MainViewModel : ViewModel() {
         anchor: String = ZulipChat.NEWEST_MES
     ): Observable<List<MessageItem>> =
         dataProvider.loadMessages(user, anchor).map {
-            messageToItemMapper(it)
+            messageToItemMapper(it, User.ME.id)
         }
 
     fun setMessageNum(topicName: String, messageNum: Int) =

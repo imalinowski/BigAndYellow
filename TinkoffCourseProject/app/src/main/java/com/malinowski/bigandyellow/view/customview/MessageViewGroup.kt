@@ -8,13 +8,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import com.bumptech.glide.Glide
-import com.malinowski.bigandyellow.EmojiAddParcel
-import com.malinowski.bigandyellow.EmojiClickParcel
-import com.malinowski.bigandyellow.EmojiDeleteParcel
 import com.malinowski.bigandyellow.R
-import com.malinowski.bigandyellow.model.data.MessageItem
-import com.malinowski.bigandyellow.model.data.UnitedReaction
-import com.malinowski.bigandyellow.model.data.User
+import com.malinowski.bigandyellow.model.data.*
 
 class MessageViewGroup @JvmOverloads constructor(
     context: Context,
