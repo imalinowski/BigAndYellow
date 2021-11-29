@@ -9,9 +9,6 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.malinowski.bigandyellow.EmojiAddParcel
-import com.malinowski.bigandyellow.EmojiClickParcel
-import com.malinowski.bigandyellow.EmojiDeleteParcel
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.data.*

@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.malinowski.bigandyellow.EmojiClickParcel
 import com.malinowski.bigandyellow.databinding.MessageItemBinding
+import com.malinowski.bigandyellow.model.data.EmojiClickParcel
 import com.malinowski.bigandyellow.model.data.MessageItem
 
 

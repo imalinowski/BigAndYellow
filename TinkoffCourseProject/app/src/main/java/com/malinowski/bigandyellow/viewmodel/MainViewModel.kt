@@ -76,7 +76,6 @@ class MainViewModel : ViewModel() {
             .doOnNext { _mainScreenState.postValue(MainScreenState.Loading) }
             .debounce(500, TimeUnit.MILLISECONDS, Schedulers.io())
             .switchMap { searchQuery -> searchUserUseCase(searchQuery) }
-            .observeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
@@ -145,7 +144,7 @@ class MainViewModel : ViewModel() {
 
     fun getMessages(stream: Int, topic: String): Single<List<MessageItem>> =
         dataProvider.loadMessages(stream, topic).map {
-            messageToItemMapper(it)
+            messageToItemMapper(it, User.ME.id)
         }
 
     fun getMessagesCount(stream: Int, topic: String): Single<Int> =
@@ -153,7 +152,7 @@ class MainViewModel : ViewModel() {
 
     fun getMessages(user: String): Single<List<MessageItem>> =
         dataProvider.loadMessages(user).map {
-            messageToItemMapper(it)
+            messageToItemMapper(it, User.ME.id)
         }
 
     private fun sendMessage(
