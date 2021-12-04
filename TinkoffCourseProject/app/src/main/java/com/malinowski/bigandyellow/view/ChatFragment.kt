@@ -13,9 +13,6 @@ import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.ZulipChat
-import com.malinowski.bigandyellow.utils.EmojiAddParcel
-import com.malinowski.bigandyellow.utils.EmojiClickParcel
-import com.malinowski.bigandyellow.utils.EmojiDeleteParcel
 import com.malinowski.bigandyellow.view.mvi.FragmentMVI
 import com.malinowski.bigandyellow.view.mvi.events.Event
 import com.malinowski.bigandyellow.view.mvi.states.State

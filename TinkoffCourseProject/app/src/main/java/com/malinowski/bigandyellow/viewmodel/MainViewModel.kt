@@ -11,7 +11,7 @@ import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCaseImpl
 import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCase
 import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.model.RepositoryImpl
-import com.malinowski.bigandyellow.model.data.Message
+import com.malinowski.bigandyellow.model.data.MessageData
 import com.malinowski.bigandyellow.model.data.MessageItem
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.utils.SingleLiveEvent
@@ -54,7 +54,6 @@ class MainViewModel : ViewModel() {
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()
     private val searchUsersSubject: BehaviorSubject<String> = BehaviorSubject.create()
 
-    // mapper
     private val messageToItemMapper: MessageToItemMapper = MessageToItemMapper()
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
@@ -106,7 +105,6 @@ class MainViewModel : ViewModel() {
             .doOnNext { _mainScreenState.postValue(MainScreenState.Loading) }
             .debounce(500, TimeUnit.MILLISECONDS, Schedulers.io())
             .switchMap { searchQuery -> searchUserUseCase(searchQuery) }
-            .observeOn(Schedulers.newThread())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = {
@@ -189,18 +187,18 @@ class MainViewModel : ViewModel() {
 
     private fun getMessages(
         stream: Int, topicName: String, anchor: String
-    ): Observable<List<Message>> =
+    ): Observable<List<MessageData>> =
         dataProvider.loadMessages(stream, topicName, anchor)
 
     private fun getMessages(
         user: String, anchor: String
-    ): Observable<List<Message>> =
+    ): Observable<List<MessageData>> =
         dataProvider.loadMessages(user, anchor)
 
-    private fun processGetMessages(flow: Observable<List<Message>>) {
+    private fun processGetMessages(flow: Observable<List<MessageData>>) {
         loading()
         val state = chatState.value!!.copy()
-        flow.map { messageToItemMapper(it) }
+        flow.map { messageToItemMapper(it, User.ME.id) }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onNext = { messagesPage ->

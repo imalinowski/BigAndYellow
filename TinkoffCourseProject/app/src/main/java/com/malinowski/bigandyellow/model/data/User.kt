@@ -1,6 +1,7 @@
 package com.malinowski.bigandyellow.model.data
 
 import androidx.room.*
+import io.reactivex.Completable
 import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -50,10 +51,10 @@ interface UserDao {
     fun getById(id: Int): Single<User>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(users: List<User>)
+    fun insert(users: List<User>): Completable
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(users: User)
+    fun insert(users: User): Completable
 
     @Delete
     fun delete(topic: User): Single<Int>
