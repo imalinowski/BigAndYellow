@@ -3,9 +3,11 @@ package com.malinowski.bigandyellow.model.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.data.db_entities.MessageDB
+import com.malinowski.bigandyellow.model.db.dao.MessageDao
 
 @Database(
-    entities = [Stream::class, Topic::class, Message::class, User::class, Reaction::class],
+    entities = [Stream::class, Topic::class, MessageDB::class, User::class, Reaction::class],
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {

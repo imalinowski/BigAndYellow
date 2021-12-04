@@ -49,7 +49,7 @@ class MainViewModel : ViewModel() {
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()
     private val searchUsersSubject: BehaviorSubject<String> = BehaviorSubject.create()
 
-    private val messageToItemMapper: MessageToItemMapper = MessageToItemMapper()
+    private val messageToItemMapper = MessageToItemMapper()
 
     fun searchStreams(query: String) {
         searchStreamSubject.onNext(query)
@@ -154,17 +154,15 @@ class MainViewModel : ViewModel() {
         topicName: String,
         anchor: String = ZulipChat.NEWEST_MES
     ): Observable<List<MessageItem>> =
-        dataProvider.loadMessages(stream, topicName, anchor).map {
-            messageToItemMapper(it, User.ME.id)
-        }
+        dataProvider.loadMessages(stream, topicName, anchor)
+            .map{messageToItemMapper(it, User.ME.id)}
 
     fun getMessages(
         user: String,
         anchor: String = ZulipChat.NEWEST_MES
     ): Observable<List<MessageItem>> =
-        dataProvider.loadMessages(user, anchor).map {
-            messageToItemMapper(it, User.ME.id)
-        }
+        dataProvider.loadMessages(user, anchor)
+            .map{messageToItemMapper(it, User.ME.id)}
 
     fun setMessageNum(topicName: String, messageNum: Int) =
         dataProvider.setMessageNum(topicName, messageNum).subscribeBy(

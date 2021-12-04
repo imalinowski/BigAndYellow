@@ -5,7 +5,10 @@ import androidx.room.Room
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.malinowski.bigandyellow.App
 import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.data.db_entities.MessageDB
+import com.malinowski.bigandyellow.model.data.net_entities.MessageNET
 import com.malinowski.bigandyellow.model.db.AppDatabase
+import com.malinowski.bigandyellow.model.mapper.MessageNetToDbMapper
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.model.network.ZulipChat.Companion.NEWEST_MES
@@ -23,6 +26,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 
 object RepositoryImpl : Repository {
 
+    // todo dagger injection
     private const val URL = "https://tinkoff-android-fall21.zulipchat.com/api/v1/"
     private const val idRoute: String = "id"
     private const val messagesRoute: String = "messages"
@@ -51,6 +55,10 @@ object RepositoryImpl : Repository {
         App.appContext,
         AppDatabase::class.java, AppDatabase.DB_NAME
     ).build()
+
+    private val messageNetToDbMapper = MessageNetToDbMapper()
+
+    // todo dagger injection
 
     override fun loadStreams(): Observable<List<Stream>> {
 
@@ -222,7 +230,7 @@ object RepositoryImpl : Repository {
         stream: Int,
         topicName: String,
         anchor: String = NEWEST_MES
-    ): Observable<List<Message>> {
+    ): Observable<List<MessageData>> {
         val narrow = listOf(
             NarrowInt("stream", stream),
             NarrowStr("topic", topicName)
@@ -245,7 +253,7 @@ object RepositoryImpl : Repository {
             narrow = narrow
         ).map { body ->
             val jso = Json.decodeFromString<JsonObject>(body.string())[messagesRoute]
-            format.decodeFromString<List<Message>>(jso.toString())
+            format.decodeFromString<List<MessageNET>>(jso.toString())
         }.map {
             if (anchor != NEWEST_MES) // api send n+1 message
                 it.subList(0, it.size - 1)
@@ -255,10 +263,11 @@ object RepositoryImpl : Repository {
             saveMessagesToDB(messages)
         }
 
-        val flow = if (anchor == NEWEST_MES)
-            Single.concat(dbCall, netCall).toObservable()
-        else // when paging no db call needed
-            netCall.toObservable()
+        val flow =
+            if (anchor == NEWEST_MES) // when paging no db call needed
+                Single.concat(dbCall, netCall).toObservable()
+            else
+                netCall.map { it as List<MessageData> }.toObservable()
 
         return flow.subscribeOn(Schedulers.io())
     }
@@ -266,7 +275,7 @@ object RepositoryImpl : Repository {
     fun loadMessages(
         userEmail: String,
         anchor: String = NEWEST_MES
-    ): Observable<List<Message>> {
+    ): Observable<List<MessageData>> {
         val narrow = listOf(
             NarrowStr("pm-with", userEmail)
         ).map {
@@ -288,7 +297,7 @@ object RepositoryImpl : Repository {
             narrow = narrow
         ).map { body ->
             val jso = Json.decodeFromString<JsonObject>(body.string())[messagesRoute]
-            format.decodeFromString<List<Message>>(jso.toString())
+            format.decodeFromString<List<MessageNET>>(jso.toString())
         }.map {
             if (anchor != NEWEST_MES)
                 it.subList(0, it.size - 1) // api send n+1 message
@@ -298,15 +307,16 @@ object RepositoryImpl : Repository {
             saveMessagesToDB(messages)
         }
 
-        val flow = if (anchor == NEWEST_MES) // when paging no db call needed
-            Single.concat(dbCall, netCall).toObservable()
-        else
-            netCall.toObservable()
+        val flow =
+            if (anchor == NEWEST_MES) // when paging no db call needed
+                Single.concat(dbCall, netCall).toObservable()
+            else
+                netCall.map { it as List<MessageData> }.toObservable()
 
         return flow.subscribeOn(Schedulers.io())
     }
 
-    private fun loadReactionsDB(messages: List<Message>): Single<List<Message>> {
+    private fun loadReactionsDB(messages: List<MessageDB>): Single<List<MessageDB>> {
         val messageReactionLoader = messages.map { message ->
             db.reactionDao().getByMessageId(message.id).map {
                 Log.d("REACTIONS_DB", "messageId > ${message.id} reactions > $it")
@@ -318,8 +328,8 @@ object RepositoryImpl : Repository {
         return Single.concatEager(messageReactionLoader).toList()
     }
 
-    private fun saveMessagesToDB(messages: List<Message>) {
-        db.messageDao().insert(messages)
+    private fun saveMessagesToDB(messages: List<MessageNET>) {
+        db.messageDao().insert(messageNetToDbMapper(messages))
         messages.onEach { message ->
             // update deleted reactions
             db.reactionDao().deleteByMessageId(message.id)
@@ -331,7 +341,7 @@ object RepositoryImpl : Repository {
 
     }
 
-    private fun clearMessages(messages: List<Message>): List<Message> {
+    private fun clearMessages(messages: List<MessageDB>): List<MessageDB> {
         if (messages.size <= 50) return messages
         messages.subList(0, messages.size - 50).onEach { message ->
             Log.i("CLEAR_MESSAGES", db.messageDao().delete(message).toString())
