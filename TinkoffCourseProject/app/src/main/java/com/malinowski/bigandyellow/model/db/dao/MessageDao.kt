@@ -5,6 +5,7 @@ import com.malinowski.bigandyellow.model.data.MessageData
 import com.malinowski.bigandyellow.model.data.db_entities.MessageDB
 import com.malinowski.bigandyellow.model.data.db_entities.TABLE_MESSAGES
 import com.malinowski.bigandyellow.model.data.net_entities.MessageNET
+import io.reactivex.Completable
 import io.reactivex.Single
 
 @Dao
@@ -19,7 +20,7 @@ interface MessageDao {
     fun getMessages(streamId: Int, topicName: String): Single<List<MessageDB>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(streams: List<MessageDB>)
+    fun insert(streams: List<MessageDB>): Completable
 
     @Delete
     fun delete(message: MessageDB): Single<Int>

@@ -1,6 +1,7 @@
 package com.malinowski.bigandyellow.model.data
 
 import androidx.room.*
+import io.reactivex.Completable
 import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -48,10 +49,10 @@ interface ReactionDao {
     fun getByMessageId(id: Int): Single<List<Reaction>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(reaction: List<Reaction>)
+    fun insert(reaction: List<Reaction>): Completable
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(reaction: Reaction)
+    fun insert(reaction: Reaction): Completable
 
     @Delete
     fun delete(reaction: Reaction): Single<Int>

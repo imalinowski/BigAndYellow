@@ -1,6 +1,7 @@
 package com.malinowski.bigandyellow.model.data
 
 import androidx.room.*
+import io.reactivex.Completable
 import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -27,10 +28,10 @@ interface TopicDao {
     fun getTopicByName(name: String): Single<Topic>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(topic: List<Topic>)
+    fun insert(topic: List<Topic>): Completable
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(topic: Topic)
+    fun insert(topic: Topic): Completable
 
     @Update
     fun update(topic: Topic)

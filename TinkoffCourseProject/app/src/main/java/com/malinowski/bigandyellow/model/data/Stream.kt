@@ -1,6 +1,7 @@
 package com.malinowski.bigandyellow.model.data
 
 import androidx.room.*
+import io.reactivex.Completable
 import io.reactivex.Single
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -28,7 +29,7 @@ interface StreamDao {
     fun getSubscribed(): Single<List<Stream>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insert(streams: List<Stream>)
+    fun insert(streams: List<Stream>): Completable
 
     @Delete
     fun delete(topic: Stream): Single<Int>

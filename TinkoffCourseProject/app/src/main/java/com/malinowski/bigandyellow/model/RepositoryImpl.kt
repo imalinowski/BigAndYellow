@@ -64,9 +64,8 @@ object RepositoryImpl : Repository {
 
         val dbCall = db.streamDao().getAll()
             .observeOn(Schedulers.io())
-            .doOnSuccess { Log.d("STREAMS_DB", "$it") }
-            .toObservable()
             .flatMap { topicsPreload(it) }
+            .doOnSuccess { Log.d("STREAMS_DB", "$it") }
 
         val netCall = service.getStreams()
             .subscribeOn(Schedulers.io())
@@ -74,18 +73,17 @@ object RepositoryImpl : Repository {
                 val streamsJSA =
                     format.decodeFromString<JsonObject>(body.string())[streamsRoute]
                 format.decodeFromString<List<Stream>>(streamsJSA.toString())
-            }.doOnSuccess { streams ->
+            }.flatMap { streams ->
                 Log.d("STREAMS_NET", "$streams")
-                db.streamDao().insert(streams)
+                db.streamDao().insert(streams).toSingleDefault(streams)
             }
-            .toObservable()
             .flatMap { topicsPreload(it) }
             .onErrorResumeNext { error: Throwable ->
                 Log.e("STREAMS_NET", "${error.message}")
                 dbCall
             }
 
-        return Observable.concat(dbCall, netCall)
+        return Single.concat(dbCall, netCall).toObservable()
     }
 
     override fun loadSubscribedStreams(): Observable<List<Stream>> {
@@ -93,7 +91,6 @@ object RepositoryImpl : Repository {
         val dbCall = db.streamDao().getSubscribed()
             .observeOn(Schedulers.io())
             .doOnSuccess { Log.d("STREAMS_DB", "$it") }
-            .toObservable()
             .flatMap { topicsPreload(it) }
 
         val netCall = service.getSubscribedStreams()
@@ -104,20 +101,20 @@ object RepositoryImpl : Repository {
                 format.decodeFromString<List<Stream>>(subscriptionsJSA.toString()).onEach {
                     it.subscribed = true
                 }
-            }.doOnSuccess { streams ->
+            }.flatMap { streams ->
                 Log.d("STREAMS_NET", "$streams")
-                db.streamDao().insert(streams)
-            }.toObservable()
+                db.streamDao().insert(streams).toSingleDefault(streams)
+            }
             .flatMap { topicsPreload(it) }
             .onErrorResumeNext { error: Throwable ->
                 Log.e("STREAMS_NET", "${error.message}")
                 dbCall
             }
 
-        return Observable.concat(dbCall, netCall)
+        return Single.concat(dbCall, netCall).toObservable()
     }
 
-    private fun topicsPreload(streams: List<Stream>): Observable<List<Stream>> {
+    private fun topicsPreload(streams: List<Stream>): Single<List<Stream>> {
         val topicLoaders = streams.map { stream ->
             loadTopics(stream.id)
                 .subscribeOn(Schedulers.io())
@@ -125,7 +122,7 @@ object RepositoryImpl : Repository {
                     stream.apply { topics = it.toMutableList() }
                 }
         }
-        return Single.concatEager(topicLoaders).toList().toObservable()
+        return Single.concatEager(topicLoaders).toList()
     }
 
     override fun loadTopics(id: Int): Single<List<Topic>> {
@@ -141,10 +138,10 @@ object RepositoryImpl : Repository {
                 format.decodeFromString<List<Topic>>(topicsJSA.toString()).apply {
                     map { it.streamId = id }
                 }
-            }.flatMap { topics ->
+            }.flatMap { topics -> messageNumPreload(topics) }
+            .flatMap { topics ->
                 Log.d("TOPICS_NET", "stream $id > $topics")
-                db.topicDao().insert(topics)
-                messageNumPreload(topics)
+                db.topicDao().insert(topics).toSingleDefault(topics)
             }.onErrorResumeNext {
                 Log.e("TOPICS_NET", "${it.message}")
                 dbCall
@@ -166,15 +163,15 @@ object RepositoryImpl : Repository {
         val dbCall = db.userDao()
             .getAll()
             .subscribeOn(Schedulers.io())
+
         val netCall = service.getUsers()
             .subscribeOn(Schedulers.io())
             .map { body ->
                 val membersJSA =
                     format.decodeFromString<JsonObject>(body.string())[membersRoute]
                 format.decodeFromString<List<User>>(membersJSA.toString())
-            }.doOnSuccess {
-                db.userDao().insert(it)
-                db.userDao().insert(User.ME)
+            }.flatMap { users ->
+                db.userDao().insert(users).toSingleDefault(users)
             }.onErrorResumeNext { error: Throwable ->
                 Log.e("USERS_NET", "${error.message}")
                 dbCall
@@ -205,10 +202,10 @@ object RepositoryImpl : Repository {
         val netCall = service.getOwnUser()
             .subscribeOn(Schedulers.io())
             .map { body ->
-                format.decodeFromString<User>(body.string()).apply {
-                    this.isMe = true
-                    db.userDao().insert(this)
-                }
+                format.decodeFromString<User>(body.string()).apply { isMe = true }
+            }
+            .flatMap {
+                db.userDao().insert(it).toSingleDefault(it)
             }.onErrorResumeNext {
                 Log.e("LoadOwnUser", it.message.toString())
                 dbCall
@@ -240,7 +237,7 @@ object RepositoryImpl : Repository {
             JsonArray(it).toString()
         }
 
-        val dbCall = db.messageDao()
+        val dbCall: Single<List<MessageData>> = db.messageDao()
             .getMessages(stream, topicName)
             .map { clearMessages(it) }
             .flatMap {
@@ -248,7 +245,7 @@ object RepositoryImpl : Repository {
                 loadReactionsDB(it)
             }
 
-        val netCall = service.getMessages(
+        val netCall: Single<List<MessageData>> = service.getMessages(
             anchor = anchor,
             narrow = narrow
         ).map { body ->
@@ -258,7 +255,7 @@ object RepositoryImpl : Repository {
             if (anchor != NEWEST_MES) // api send n+1 message
                 it.subList(0, it.size - 1)
             else it
-        }.doOnSuccess { messages ->
+        }.flatMap { messages ->
             Log.i("MESSAGES_NET", "$messages")
             saveMessagesToDB(messages)
         }
@@ -267,7 +264,7 @@ object RepositoryImpl : Repository {
             if (anchor == NEWEST_MES) // when paging no db call needed
                 Single.concat(dbCall, netCall).toObservable()
             else
-                netCall.map { it as List<MessageData> }.toObservable()
+                netCall.toObservable()
 
         return flow.subscribeOn(Schedulers.io())
     }
@@ -284,7 +281,7 @@ object RepositoryImpl : Repository {
             JsonArray(it).toString()
         }
 
-        val dbCall = db.messageDao()
+        val dbCall: Single<List<MessageData>> = db.messageDao()
             .getMessages(userEmail)
             .map { clearMessages(it) }
             .flatMap {
@@ -292,7 +289,7 @@ object RepositoryImpl : Repository {
                 loadReactionsDB(it)
             }
 
-        val netCall = service.getMessages(
+        val netCall: Single<List<MessageData>> = service.getMessages(
             anchor = anchor,
             narrow = narrow
         ).map { body ->
@@ -302,7 +299,7 @@ object RepositoryImpl : Repository {
             if (anchor != NEWEST_MES)
                 it.subList(0, it.size - 1) // api send n+1 message
             else it
-        }.doOnSuccess { messages ->
+        }.flatMap { messages ->
             Log.i("MESSAGES_NET", "$messages")
             saveMessagesToDB(messages)
         }
@@ -311,7 +308,7 @@ object RepositoryImpl : Repository {
             if (anchor == NEWEST_MES) // when paging no db call needed
                 Single.concat(dbCall, netCall).toObservable()
             else
-                netCall.map { it as List<MessageData> }.toObservable()
+                netCall.toObservable()
 
         return flow.subscribeOn(Schedulers.io())
     }
@@ -328,8 +325,7 @@ object RepositoryImpl : Repository {
         return Single.concatEager(messageReactionLoader).toList()
     }
 
-    private fun saveMessagesToDB(messages: List<MessageNET>) {
-        db.messageDao().insert(messageNetToDbMapper(messages))
+    private fun saveMessagesToDB(messages: List<MessageNET>): Single<List<MessageData>> {
         messages.onEach { message ->
             // update deleted reactions
             db.reactionDao().deleteByMessageId(message.id)
@@ -338,7 +334,7 @@ object RepositoryImpl : Repository {
                 .map { it.apply { messageId = message.id } }
                 .let { db.reactionDao().insert(it) }
         }
-
+        return db.messageDao().insert(messageNetToDbMapper(messages)).toSingleDefault(messages)
     }
 
     private fun clearMessages(messages: List<MessageDB>): List<MessageDB> {
