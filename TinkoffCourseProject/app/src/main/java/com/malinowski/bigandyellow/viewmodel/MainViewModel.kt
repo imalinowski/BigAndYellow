@@ -79,7 +79,7 @@ class MainViewModel : ViewModel() {
             .doOnNext { _mainScreenState.postValue(MainScreenState.Loading) }
             .debounce(500, TimeUnit.MILLISECONDS, Schedulers.io())
             .switchMap { searchQuery -> searchUserUseCase(searchQuery) }
-            .observeOn(AndroidSchedulers.mainThread())
+            .observeOn(AndroidSchedulers.mainThread(), true)
             .subscribeBy(
                 onNext = {
                     users.value = it
@@ -102,7 +102,7 @@ class MainViewModel : ViewModel() {
         flow
             .switchMap { searchQuery ->
                 searchTopicsUseCase(searchQuery, dataProvider.loadSubscribedStreams())
-            }.observeOn(AndroidSchedulers.mainThread())
+            }.observeOn(AndroidSchedulers.mainThread(), true)
             .subscribeBy(
                 onNext = {
                     streamsSubscribed.value = it
@@ -117,7 +117,7 @@ class MainViewModel : ViewModel() {
         flow
             .switchMap { searchQuery ->
                 searchTopicsUseCase(searchQuery, dataProvider.loadStreams())
-            }.observeOn(AndroidSchedulers.mainThread())
+            }.observeOn(AndroidSchedulers.mainThread(), true)
             .subscribeBy(
                 onNext = {
                     streams.value = it
