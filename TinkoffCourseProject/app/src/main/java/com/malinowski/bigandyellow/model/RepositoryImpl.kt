@@ -78,9 +78,8 @@ object RepositoryImpl : Repository {
                 db.streamDao().insert(streams).toSingleDefault(streams)
             }
             .flatMap { topicsPreload(it) }
-            .onErrorResumeNext { error: Throwable ->
+            .doOnError { error: Throwable ->
                 Log.e("STREAMS_NET", "${error.message}")
-                dbCall
             }
 
         return Single.concat(dbCall, netCall).toObservable()
@@ -106,9 +105,8 @@ object RepositoryImpl : Repository {
                 db.streamDao().insert(streams).toSingleDefault(streams)
             }
             .flatMap { topicsPreload(it) }
-            .onErrorResumeNext { error: Throwable ->
+            .doOnError { error: Throwable ->
                 Log.e("STREAMS_NET", "${error.message}")
-                dbCall
             }
 
         return Single.concat(dbCall, netCall).toObservable()
@@ -174,10 +172,10 @@ object RepositoryImpl : Repository {
             .flatMap { usersStatusPreload(it) }
             .flatMap { users ->
                 db.userDao().insert(users).toSingleDefault(users)
-            }.onErrorResumeNext { error: Throwable ->
+            }.doOnError { error: Throwable ->
                 Log.e("USERS_NET", "${error.message}")
-                dbCall
             }
+
         return Single.concat(dbCall, netCall).toObservable()
     }
 
