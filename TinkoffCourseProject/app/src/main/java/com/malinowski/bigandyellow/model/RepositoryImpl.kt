@@ -15,7 +15,6 @@ import com.malinowski.bigandyellow.model.network.ZulipChat.Companion.NEWEST_MES
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
@@ -328,7 +327,10 @@ object RepositoryImpl : Repository {
     private fun loadReactionsDB(messages: List<MessageDB>): Single<List<MessageDB>> {
         val messageReactionLoader = messages.map { message ->
             db.reactionDao().getByMessageId(message.id).map {
-                Log.d("REACTIONS_DB", "messageId > ${message.id} reactions > $it")
+                Log.d(
+                    "REACTIONS_DB",
+                    "messageId > ${message.id} ${message.message} reactions > $it"
+                )
                 message.apply { initEmoji(it) }
             }.doOnError {
                 Log.e("REACTIONS_DB", "${it.message}")
@@ -338,30 +340,23 @@ object RepositoryImpl : Repository {
     }
 
     private fun saveMessagesToDB(messages: List<MessageNET>): Single<List<MessageData>> {
+        var flow = db.messageDao().insert(messageNetToDbMapper(messages))
         messages.onEach { message ->
-            // update deleted reactions
-            db.reactionDao().deleteByMessageId(message.id)
-            Log.d("REACTIONS_DB_SAVE", "id > ${message.id} reactions > ${message.reactions}")
-            message.reactions  // reactions save
-                .map { it.apply { messageId = message.id } }
-                .let { db.reactionDao().insert(it) }
+            flow = Completable.mergeArrayDelayError(flow,
+                db.reactionDao().deleteByMessageId(message.id), // update deleted messages
+                message.reactions // save reactions
+                    .map { it.apply { messageId = message.id } }
+                    .let { db.reactionDao().insert(it) }
+            )
         }
-        val mes = messageNetToDbMapper(messages)
-        db.messageDao().insert(mes).subscribeBy(
-            onError = { Log.e("MESSAGES_DB_SAVE", it.message.toString()) },
-            onComplete = { Log.d("MESSAGES_DB_SAVE", "COMPLETED") }
-        ).let { }
-        return Single.just(messages)
+        return flow.toSingleDefault(messages)
     }
 
     private fun clearMessages(messages: List<MessageDB>): List<MessageDB> {
         if (messages.size <= 50) return messages
         messages.subList(0, messages.size - 50).onEach { message ->
-            Log.i("CLEAR_MESSAGES", db.messageDao().delete(message).toString())
-            Log.i(
-                "CLEAR_MESSAGES",
-                db.reactionDao().deleteByMessageId(message.id).toString()
-            )
+            db.messageDao().delete(message)
+            db.reactionDao().deleteByMessageId(message.id)
         }
         return messages.subList(messages.size - 50, messages.size)
     }

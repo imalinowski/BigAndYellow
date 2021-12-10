@@ -58,7 +58,7 @@ interface ReactionDao {
     fun delete(reaction: Reaction): Single<Int>
 
     @Query("DELETE FROM $TABLE_NAME WHERE message_id = :id")
-    fun deleteByMessageId(id: Int)
+    fun deleteByMessageId(id: Int): Completable
 }
 
 val emojiMap: HashMap<String, String> = hashMapOf(

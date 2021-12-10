@@ -17,7 +17,9 @@ internal class MessageNetToDbMapper : (List<MessageNET>) -> (List<MessageDB>) {
                 senderEmail = message.senderEmail,
                 streamId = message.streamId,
                 topicName = message.topicName,
-            )
+            ).apply {
+                reactions = message.reactions
+            }
         }
     }
 }
