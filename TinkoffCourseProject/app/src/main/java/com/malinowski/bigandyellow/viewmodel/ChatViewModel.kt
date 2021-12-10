@@ -12,7 +12,7 @@ import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.utils.SingleLiveEvent
 import com.malinowski.bigandyellow.view.mvi.events.*
 import com.malinowski.bigandyellow.view.mvi.events.ChatEvent.*
-import com.malinowski.bigandyellow.view.mvi.states.MainScreenState
+import com.malinowski.bigandyellow.view.mvi.states.ScreenState
 import com.malinowski.bigandyellow.view.mvi.states.State
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -23,8 +23,8 @@ import io.reactivex.rxkotlin.subscribeBy
 class ChatViewModel : ViewModel() {
 
     private val dataProvider = RepositoryImpl
-    private val _chatScreenState: MutableLiveData<MainScreenState> = MutableLiveData()
-    val chatScreenState: LiveData<MainScreenState>
+    private val _chatScreenState: MutableLiveData<ScreenState> = MutableLiveData()
+    val chatScreenState: LiveData<ScreenState>
         get() = _chatScreenState
 
     //states
@@ -62,15 +62,15 @@ class ChatViewModel : ViewModel() {
     }
 
     fun result() {
-        _chatScreenState.postValue(MainScreenState.Result)
+        _chatScreenState.postValue(ScreenState.Result)
     }
 
     fun error(error: Throwable) {
-        _chatScreenState.postValue(MainScreenState.Error(error))
+        _chatScreenState.postValue(ScreenState.Error(error))
     }
 
     private fun loading() {
-        _chatScreenState.postValue(MainScreenState.Loading)
+        _chatScreenState.postValue(ScreenState.Loading)
     }
 
     private fun getMessages(

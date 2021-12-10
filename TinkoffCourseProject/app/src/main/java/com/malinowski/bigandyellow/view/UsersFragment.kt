@@ -6,22 +6,27 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.databinding.FragmentPeopleBinding
 import com.malinowski.bigandyellow.view.mvi.FragmentMVI
 import com.malinowski.bigandyellow.view.mvi.events.Event
+import com.malinowski.bigandyellow.view.mvi.events.UsersEvent
 import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
+import com.malinowski.bigandyellow.viewmodel.UsersViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.UserAdapter
 
 class UsersFragment : FragmentMVI<State.Users>() {
     private var _binding: FragmentPeopleBinding? = null
     private val binding get() = _binding!!
 
-    private val model: MainViewModel by activityViewModels()
+    private val mainModel: MainViewModel by activityViewModels()
+    private val model: UsersViewModel by viewModels()
+
     private var adapter = UserAdapter(
         onClick = { user ->
-            model.processEvent(
+            mainModel.processEvent(
                 Event.OpenChat.WithUser(user)
             )
         }
@@ -41,13 +46,13 @@ class UsersFragment : FragmentMVI<State.Users>() {
 
         binding.searchQuery.doAfterTextChanged {
             model.processEvent(
-                Event.SearchUsers(query = it.toString())
+                UsersEvent.SearchUsers(query = it.toString())
             )
         }
 
         if (savedInstanceState == null)
             model.processEvent(
-                Event.SearchUsers()
+                UsersEvent.SearchUsers()
             )
 
         model.usersState.observe(viewLifecycleOwner) { state -> render(state) }
@@ -55,6 +60,10 @@ class UsersFragment : FragmentMVI<State.Users>() {
         binding.usersRecycler.apply {
             adapter = this@UsersFragment.adapter
             layoutManager = LinearLayoutManager(context)
+        }
+
+        model.screenState.observe(viewLifecycleOwner){
+            mainModel.setScreenState(it)
         }
     }
 

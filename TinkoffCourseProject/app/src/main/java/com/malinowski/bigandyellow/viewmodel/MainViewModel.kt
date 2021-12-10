@@ -6,15 +6,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCaseImpl
-import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCase
-import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.utils.SingleLiveEvent
 import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.mvi.events.Event
 import com.malinowski.bigandyellow.view.mvi.events.Event.*
-import com.malinowski.bigandyellow.view.mvi.states.MainScreenState
+import com.malinowski.bigandyellow.view.mvi.states.ScreenState
 import com.malinowski.bigandyellow.view.mvi.states.State
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -28,30 +26,27 @@ class MainViewModel : ViewModel() {
 
     private val dataProvider = RepositoryImpl
 
-    private val _mainScreenState: MutableLiveData<MainScreenState> = MutableLiveData()
-    val mainScreenState: LiveData<MainScreenState>
+    private val _mainScreenState: MutableLiveData<ScreenState> = MutableLiveData()
+    val mainScreenState: LiveData<ScreenState>
         get() = _mainScreenState
 
     //event
     val navigateChat = SingleLiveEvent<Bundle>()
 
     // states
-    val usersState = MutableLiveData<State.Users>()
     val streamsAllState = MutableLiveData(State.Streams(listOf()))
     val streamsSubscribedState = MutableLiveData(State.Streams(listOf()))
 
     // use case
     private val searchTopicsUseCase: SearchTopicsUseCase = SearchTopicsUseCaseImpl()
-    private val searchUserUseCase: SearchUsersUseCase = SearchUsersUseCaseImpl()
 
+    //flow
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()
-    private val searchUsersSubject: BehaviorSubject<String> = BehaviorSubject.create()
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     init {
         subscribeToSearchStreams()
-        subscribeToSearchUser()
         initUser()
     }
 
@@ -68,8 +63,6 @@ class MainViewModel : ViewModel() {
 
     fun processEvent(event: Event) {
         when (event) {
-            is SearchUsers ->
-                searchUsersSubject.onNext(event.query)
             is SearchStreams ->
                 searchStreamSubject.onNext(event.query)
             is OpenChat.WithUser ->
@@ -79,28 +72,10 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    private fun subscribeToSearchUser() {
-        searchUsersSubject
-            .subscribeOn(Schedulers.io())
-            .distinctUntilChanged()
-            .doOnNext { _mainScreenState.postValue(MainScreenState.Loading) }
-            .debounce(500, TimeUnit.MILLISECONDS, Schedulers.io())
-            .switchMap { searchQuery -> searchUserUseCase(searchQuery) }
-            .observeOn(AndroidSchedulers.mainThread(), true)
-            .subscribeBy(
-                onNext = {
-                    usersState.value = State.Users(it)
-                    _mainScreenState.value = MainScreenState.Result
-                },
-                onError = { _mainScreenState.value = MainScreenState.Error(it) }
-            )
-            .addTo(compositeDisposable)
-    }
-
     private fun subscribeToSearchStreams() {
         val flow = searchStreamSubject
             .subscribeOn(Schedulers.io())
-            .doOnNext { _mainScreenState.postValue(MainScreenState.Loading) }
+            .doOnNext { _mainScreenState.postValue(ScreenState.Loading) }
             .debounce(500, TimeUnit.MILLISECONDS, Schedulers.io())
             .share()
 
@@ -112,10 +87,10 @@ class MainViewModel : ViewModel() {
             .subscribeBy(
                 onNext = {
                     streamsSubscribedState.value = State.Streams(it)
-                    _mainScreenState.value = MainScreenState.Result
+                    _mainScreenState.value = ScreenState.Result
                 },
                 onError = {
-                    _mainScreenState.value = MainScreenState.Error(it)
+                    _mainScreenState.value = ScreenState.Error(it)
                 }
             )
             .addTo(compositeDisposable)
@@ -127,20 +102,20 @@ class MainViewModel : ViewModel() {
             .subscribeBy(
                 onNext = {
                     streamsAllState.value = State.Streams(it)
-                    _mainScreenState.value = MainScreenState.Result
+                    _mainScreenState.value = ScreenState.Result
                 },
                 onError = {
-                    _mainScreenState.value = MainScreenState.Error(it)
+                    _mainScreenState.value = ScreenState.Error(it)
                 }
             )
             .addTo(compositeDisposable)
     }
 
     private fun error(error: Throwable) {
-        _mainScreenState.postValue(MainScreenState.Error(error))
+        _mainScreenState.postValue(ScreenState.Error(error))
     }
 
-    fun setScreenState(state: MainScreenState) {
+    fun setScreenState(state: ScreenState) {
         _mainScreenState.postValue(state)
     }
 

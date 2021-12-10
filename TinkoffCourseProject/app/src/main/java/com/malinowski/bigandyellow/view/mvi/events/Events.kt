@@ -3,11 +3,6 @@ package com.malinowski.bigandyellow.view.mvi.events
 import com.malinowski.bigandyellow.model.data.User
 
 sealed class Event {
-
-    data class SearchUsers(
-        val query: String = ""
-    ) : Event()
-
     data class SearchStreams(
         val query: String = ""
     ) : Event()
@@ -22,6 +17,14 @@ sealed class Event {
             val topic: String,
         ) : OpenChat()
     }
+
+}
+
+sealed class UsersEvent {
+
+    data class SearchUsers(
+        val query: String = ""
+    ) : UsersEvent()
 
 }
 

@@ -9,7 +9,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.ActivityMainBinding
-import com.malinowski.bigandyellow.view.mvi.states.MainScreenState
+import com.malinowski.bigandyellow.view.mvi.states.ScreenState
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 
 class MainActivity : AppCompatActivity() {
@@ -32,13 +32,13 @@ class MainActivity : AppCompatActivity() {
 
         model.mainScreenState.observe(this) {
             when (it) {
-                is MainScreenState.Loading -> binding.progressBar.visibility = VISIBLE
-                is MainScreenState.Error -> {
+                is ScreenState.Loading -> binding.progressBar.visibility = VISIBLE
+                is ScreenState.Error -> {
                     Toast.makeText(this, it.error.message.toString(), Toast.LENGTH_LONG).show()
                     Log.e("BigAndYellow", it.error.message.toString())
                     binding.progressBar.visibility = GONE
                 }
-                is MainScreenState.Result -> binding.progressBar.visibility = GONE
+                is ScreenState.Result -> binding.progressBar.visibility = GONE
             }
         }
 

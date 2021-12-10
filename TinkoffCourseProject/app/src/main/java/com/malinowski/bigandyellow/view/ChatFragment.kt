@@ -24,7 +24,7 @@ import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
 
     private val binding by lazy { FragmentChatBinding.inflate(layoutInflater) }
-    private val maiModel: MainViewModel by activityViewModels()
+    private val mainModel: MainViewModel by activityViewModels()
     private val model: ChatViewModel by viewModels()
 
     private val topicName: String? by lazy { arguments?.getString(TOPIC) }
@@ -77,7 +77,7 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
             }
         }
         model.chatScreenState.observe(viewLifecycleOwner){
-            maiModel.setScreenState(it)
+            mainModel.setScreenState(it)
         }
     }
 
