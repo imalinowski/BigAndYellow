@@ -173,7 +173,9 @@ object RepositoryImpl : Repository {
             }
             .flatMap { usersStatusPreload(it) }
             .flatMap { users ->
-                db.userDao().insert(users).toSingleDefault(users)
+                db.userDao().insert(users)
+                    .mergeWith( db.userDao().insert(User.ME))
+                    .toSingleDefault(users)
             }.doOnError { error: Throwable ->
                 Log.e("USERS_NET", "${error.message}")
             }
@@ -205,9 +207,12 @@ object RepositoryImpl : Repository {
                 Log.e("LoadUserStatus", "${user.name} ${it.message}")
             }
 
-    fun loadOwnUser(): Observable<User> {
+    fun loadOwnUser(): Single<User> {
         val dbCall = db.userDao().getOwnUser()
             .subscribeOn(Schedulers.io())
+            .doOnSuccess {
+                Log.d("LOAD_OWN_USER_DB", "$it")
+            }
 
         val netCall = service.getOwnUser()
             .subscribeOn(Schedulers.io())
@@ -218,11 +223,12 @@ object RepositoryImpl : Repository {
             .flatMap {
                 Log.d("LOAD_OWN_USER", "DB SAVED")
                 db.userDao().insert(it).toSingleDefault(it)
-            }.doOnError {
+            }.onErrorResumeNext {
                 Log.e("LOAD_OWN_USER", it.message.toString())
+                dbCall
             }
 
-        return Single.concat(dbCall, netCall).toObservable()
+        return netCall
     }
 
     fun setMessageNum(topicName: String, messageNum: Int): Single<Topic> {

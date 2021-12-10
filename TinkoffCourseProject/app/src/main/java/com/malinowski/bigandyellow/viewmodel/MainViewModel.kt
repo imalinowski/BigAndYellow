@@ -53,7 +53,7 @@ class MainViewModel : ViewModel() {
 
     private fun initUser() {
         dataProvider.loadOwnUser().subscribeBy(
-            onNext = { user ->
+            onSuccess = { user ->
                 User.ME = user
             },
             onError = {
