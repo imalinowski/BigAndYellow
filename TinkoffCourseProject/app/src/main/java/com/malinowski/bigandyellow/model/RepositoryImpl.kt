@@ -15,6 +15,7 @@ import com.malinowski.bigandyellow.model.network.ZulipChat.Companion.NEWEST_MES
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
@@ -343,7 +344,12 @@ object RepositoryImpl : Repository {
                 .map { it.apply { messageId = message.id } }
                 .let { db.reactionDao().insert(it) }
         }
-        return db.messageDao().insert(messageNetToDbMapper(messages)).toSingleDefault(messages)
+        val mes = messageNetToDbMapper(messages)
+        db.messageDao().insert(mes).subscribeBy(
+            onError =  {Log.e("MESSAGES_DB_SAVE", it.message.toString()) },
+            onComplete =  {Log.d("MESSAGES_DB_SAVE", "COMPLETED") }
+        ).let {  }
+        return Single.just(messages)
     }
 
     private fun clearMessages(messages: List<MessageDB>): List<MessageDB> {

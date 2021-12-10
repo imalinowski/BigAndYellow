@@ -23,14 +23,14 @@ internal class SearchTopicsUseCaseImpl : SearchTopicsUseCase {
 
     override fun invoke(
         searchQuery: String,
-        streams: Observable<List<Stream>>
+        flow: Observable<List<Stream>>
     ): Observable<List<StreamTopicItem>> {
-        return streams
-            .map { topics ->
+        return flow
+            .map { streams ->
                 if (searchQuery.isNotEmpty())
-                    topics.search(searchQuery)
+                    streams.search(searchQuery)
                 else
-                    topics.map(streamToItemMapper)
+                    streams.map(streamToItemMapper)
             }
     }
 

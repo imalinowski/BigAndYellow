@@ -8,21 +8,24 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.view.mvi.FragmentMVI
-import com.malinowski.bigandyellow.view.mvi.events.Event
+import com.malinowski.bigandyellow.view.mvi.events.Event.ChatEvent
 import com.malinowski.bigandyellow.view.mvi.states.State
+import com.malinowski.bigandyellow.viewmodel.ChatViewModel
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 
 class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
 
     private val binding by lazy { FragmentChatBinding.inflate(layoutInflater) }
-    private val model: MainViewModel by activityViewModels()
+    private val maiModel: MainViewModel by activityViewModels()
+    private val model: ChatViewModel by viewModels()
 
     private val topicName: String? by lazy { arguments?.getString(TOPIC) }
     private val userName: String? by lazy { arguments?.getString(USER_NAME) }
@@ -53,7 +56,7 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadMessages()
+        model.setName(userName ?: topicName!!)
     }
 
     override fun onCreateView(
@@ -61,6 +64,7 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        loadMessages()
         return binding.root
     }
 
@@ -72,12 +76,15 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
                 binding.messageRecycler.scrollToPosition(it)
             }
         }
+        model.chatScreenState.observe(viewLifecycleOwner){
+            maiModel.setScreenState(it)
+        }
     }
 
     override fun render(state: State.Chat) {
         this.state = state
         if (state.loaded && topicName != null)
-            model.processEvent(Event.SetMessageNum(topicName!!, messages.size))
+            model.processEvent(ChatEvent.SetMessageNum(topicName!!, messages.size))
         binding.chatName.text = state.name
         adapter.submitList(messages)
     }
@@ -92,9 +99,9 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
         model.processEvent(
             when (parcel) {
                 is EmojiAddParcel ->
-                    Event.Reaction.Add(parcel.messageId, parcel.name)
+                    ChatEvent.Reaction.Add(parcel.messageId, parcel.name)
                 is EmojiDeleteParcel ->
-                    Event.Reaction.Remove(parcel.messageId, parcel.name)
+                    ChatEvent.Reaction.Remove(parcel.messageId, parcel.name)
             }
         )
     }
@@ -147,7 +154,7 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
                 message.emoji[emoji.getUnicode()]
             if (emojiGroup == null || !emojiGroup.usersId.contains(User.ME.id)) {
                 message.addEmoji(emoji) // data update
-                model.processEvent(Event.Reaction.Add(message.id, emoji.name)) // net call
+                model.processEvent(ChatEvent.Reaction.Add(message.id, emoji.name)) // net call
                 adapter.notifyItemChanged(messages.indexOf(message)) // ui update
             } else {
                 model.error(IllegalStateException(getString(R.string.error_emoji_added)))
@@ -160,9 +167,9 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
         Log.d("LOAD_MESSAGES", anchor)
         model.processEvent(
             if (userEmail != null)
-                Event.LoadMessages.ForUser(userEmail!!, anchor)
+                ChatEvent.LoadMessages.ForUser(userEmail!!, anchor)
             else if (streamId != null && topicName != null)
-                Event.LoadMessages.ForTopic(streamId!!, topicName!!, anchor)
+                ChatEvent.LoadMessages.ForTopic(streamId!!, topicName!!, anchor)
             else {
                 model.error(IllegalArgumentException("open chat -> Invalid arguments"))
                 parentFragmentManager.popBackStack()
@@ -174,9 +181,9 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
     private fun sendMessage(content: String) {
         model.processEvent(
             if (userEmail != null)
-                Event.SendMessage.ToUser(userEmail!!, content)
+                ChatEvent.SendMessage.ToUser(userEmail!!, content)
             else
-                Event.SendMessage.ToTopic(streamId!!, topicName!!, content)
+                ChatEvent.SendMessage.ToTopic(streamId!!, topicName!!, content)
         )
     }
 

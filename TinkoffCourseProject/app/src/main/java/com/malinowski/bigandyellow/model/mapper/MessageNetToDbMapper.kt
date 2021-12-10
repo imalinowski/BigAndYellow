@@ -14,6 +14,9 @@ internal class MessageNetToDbMapper : (List<MessageNET>) -> (List<MessageDB>) {
                 senderName = message.senderName,
                 timestamp = message.timestamp,
                 avatarUrl = message.avatarUrl,
+                senderEmail = message.senderEmail,
+                streamId = message.streamId,
+                topicName = message.topicName,
             )
         }
     }
