@@ -5,11 +5,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.databinding.FragmentPeopleBinding
-import com.malinowski.bigandyellow.view.mvi.FragmentMVI
 import com.malinowski.bigandyellow.view.mvi.events.Event
 import com.malinowski.bigandyellow.view.mvi.events.UsersEvent
 import com.malinowski.bigandyellow.view.mvi.states.State
@@ -17,7 +17,7 @@ import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.UsersViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.UserAdapter
 
-class UsersFragment : FragmentMVI<State.Users>() {
+class UsersFragment : Fragment() {
     private var _binding: FragmentPeopleBinding? = null
     private val binding get() = _binding!!
 
@@ -62,7 +62,7 @@ class UsersFragment : FragmentMVI<State.Users>() {
             layoutManager = LinearLayoutManager(context)
         }
 
-        model.screenState.observe(viewLifecycleOwner){
+        model.screenState.observe(viewLifecycleOwner) {
             mainModel.setScreenState(it)
         }
     }
@@ -72,7 +72,7 @@ class UsersFragment : FragmentMVI<State.Users>() {
         _binding = null
     }
 
-    override fun render(state: State.Users) {
+    private fun render(state: State.Users) {
         adapter.submitList(state.users) {
             binding.usersRecycler.scrollToPosition(0)
         }

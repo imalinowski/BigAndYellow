@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,14 +15,13 @@ import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.ZulipChat
-import com.malinowski.bigandyellow.view.mvi.FragmentMVI
 import com.malinowski.bigandyellow.view.mvi.events.ChatEvent
 import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.ChatViewModel
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
 
-class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
+class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private val binding by lazy { FragmentChatBinding.inflate(layoutInflater) }
     private val mainModel: MainViewModel by activityViewModels()
@@ -76,12 +76,12 @@ class ChatFragment : FragmentMVI<State.Chat>(R.layout.fragment_chat) {
                 binding.messageRecycler.scrollToPosition(it)
             }
         }
-        model.chatScreenState.observe(viewLifecycleOwner){
+        model.chatScreenState.observe(viewLifecycleOwner) {
             mainModel.setScreenState(it)
         }
     }
 
-    override fun render(state: State.Chat) {
+    private fun render(state: State.Chat) {
         this.state = state
         if (state.loaded && topicName != null)
             model.processEvent(ChatEvent.SetMessageNum(topicName!!, messages.size))

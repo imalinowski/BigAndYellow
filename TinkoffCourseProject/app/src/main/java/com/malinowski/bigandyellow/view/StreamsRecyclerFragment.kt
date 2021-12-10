@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.R
@@ -11,14 +12,13 @@ import com.malinowski.bigandyellow.databinding.FragmentStreamsBinding
 import com.malinowski.bigandyellow.model.data.StreamItem
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.TopicItem
-import com.malinowski.bigandyellow.view.mvi.FragmentMVI
 import com.malinowski.bigandyellow.view.mvi.events.Event
 import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.StreamsType
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter
 
-class StreamsRecyclerFragment : FragmentMVI<State.Streams>(R.layout.fragment_streams) {
+class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
     private val viewBinding: FragmentStreamsBinding by lazy {
         FragmentStreamsBinding.inflate(layoutInflater)
@@ -81,7 +81,7 @@ class StreamsRecyclerFragment : FragmentMVI<State.Streams>(R.layout.fragment_str
         closeStreams()
     }
 
-    override fun render(state: State.Streams) {
+    private fun render(state: State.Streams) {
         this.state = state
         items = state.items.toMutableList()
         adapter.submitList(items) {
