@@ -105,11 +105,12 @@ class ChatViewModel : ViewModel() {
             .addTo(compositeDisposable)
     }
 
-    private fun setMessageNum(topicName: String, messageNum: Int) =
+    private fun setMessageNum(topicName: String?, messageNum: Int) = topicName?.let {
         dataProvider.setMessageNum(topicName, messageNum).subscribeBy(
             onSuccess = { Log.d("MESSAGE_NUM_DB", "$topicName $messageNum SAVED") },
             onError = { error(it) }
         ).addTo(compositeDisposable)
+    }
 
     private fun sendMessage(
         type: RepositoryImpl.SendType, to: String, content: String, topic: String = ""

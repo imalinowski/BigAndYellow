@@ -83,8 +83,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private fun render(state: State.Chat) {
         this.state = state
-        if (state.loaded && topicName != null)
-            model.processEvent(ChatEvent.SetMessageNum(topicName!!, messages.size))
+        if (state.loaded)
+            model.processEvent(ChatEvent.SetMessageNum(topicName, messages.size))
         binding.chatName.text = state.name
         adapter.submitList(messages)
     }

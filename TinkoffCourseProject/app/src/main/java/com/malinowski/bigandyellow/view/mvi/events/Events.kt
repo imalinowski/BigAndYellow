@@ -31,7 +31,7 @@ sealed class UsersEvent {
 sealed class ChatEvent {
 
     data class SetMessageNum(
-        val topicName: String,
+        val topicName: String?,
         val messageNum: Int
     ) : ChatEvent()
 
