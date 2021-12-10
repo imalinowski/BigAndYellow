@@ -137,11 +137,13 @@ object RepositoryImpl : Repository {
                 format.decodeFromString<List<Topic>>(topicsJSA.toString()).apply {
                     map { it.streamId = id }
                 }
-            }.flatMap { topics -> messageNumPreload(topics) }
+            }
             .flatMap { topics ->
                 Log.d("TOPICS_NET", "stream $id > $topics")
                 db.topicDao().insert(topics).toSingleDefault(topics)
-            }.onErrorResumeNext {
+            }
+            .flatMap { topics -> messageNumPreload(topics) }
+            .onErrorResumeNext {
                 Log.e("TOPICS_NET", "${it.message}")
                 dbCall
             }
@@ -346,9 +348,9 @@ object RepositoryImpl : Repository {
         }
         val mes = messageNetToDbMapper(messages)
         db.messageDao().insert(mes).subscribeBy(
-            onError =  {Log.e("MESSAGES_DB_SAVE", it.message.toString()) },
-            onComplete =  {Log.d("MESSAGES_DB_SAVE", "COMPLETED") }
-        ).let {  }
+            onError = { Log.e("MESSAGES_DB_SAVE", it.message.toString()) },
+            onComplete = { Log.d("MESSAGES_DB_SAVE", "COMPLETED") }
+        ).let { }
         return Single.just(messages)
     }
 
