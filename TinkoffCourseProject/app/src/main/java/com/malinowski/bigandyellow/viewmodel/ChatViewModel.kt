@@ -10,7 +10,7 @@ import com.malinowski.bigandyellow.model.data.MessageData
 import com.malinowski.bigandyellow.model.data.MessageItem
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.utils.SingleLiveEvent
-import com.malinowski.bigandyellow.view.mvi.events.*
+import com.malinowski.bigandyellow.view.mvi.events.ChatEvent
 import com.malinowski.bigandyellow.view.mvi.events.ChatEvent.*
 import com.malinowski.bigandyellow.view.mvi.states.ScreenState
 import com.malinowski.bigandyellow.view.mvi.states.State
@@ -57,7 +57,7 @@ class ChatViewModel : ViewModel() {
         }
     }
 
-    fun setName(name: String){
+    fun setName(name: String) {
         chatState.value = State.Chat(name)
     }
 
@@ -91,7 +91,8 @@ class ChatViewModel : ViewModel() {
             .subscribeBy(
                 onNext = { messagesPage ->
                     result()
-                    val lastPage = messagesPage.isEmpty() || messagesPage.size < 20 // TODO Вынести константу
+                    val lastPage =
+                        messagesPage.isEmpty() || messagesPage.size < 20 // TODO Вынести константу
                     val messages = state.messages.toMutableList().apply { addAll(messagesPage) }
                     chatState.value = state.copy(
                         messages = messages,

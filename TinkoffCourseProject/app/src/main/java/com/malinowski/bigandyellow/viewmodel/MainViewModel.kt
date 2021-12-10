@@ -11,7 +11,8 @@ import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.utils.SingleLiveEvent
 import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.mvi.events.Event
-import com.malinowski.bigandyellow.view.mvi.events.Event.*
+import com.malinowski.bigandyellow.view.mvi.events.Event.OpenChat
+import com.malinowski.bigandyellow.view.mvi.events.Event.SearchStreams
 import com.malinowski.bigandyellow.view.mvi.states.ScreenState
 import com.malinowski.bigandyellow.view.mvi.states.State
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -125,7 +126,6 @@ class MainViewModel : ViewModel() {
             putString(ChatFragment.TOPIC, topicName)
             navigateChat.postValue(this)
         }
-        //chatState.value = State.Chat(name = topicName, messages = listOf())
     }
 
     private fun openChat(user: User) {
@@ -134,7 +134,6 @@ class MainViewModel : ViewModel() {
             putString(ChatFragment.USER_NAME, user.name)
             navigateChat.postValue(this)
         }
-        //chatState.value = State.Chat(name = user.name, messages = listOf())
     }
 
     override fun onCleared() {

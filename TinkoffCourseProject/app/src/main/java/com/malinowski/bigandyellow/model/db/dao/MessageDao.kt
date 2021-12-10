@@ -1,10 +1,8 @@
 package com.malinowski.bigandyellow.model.db.dao
 
 import androidx.room.*
-import com.malinowski.bigandyellow.model.data.MessageData
 import com.malinowski.bigandyellow.model.data.db_entities.MessageDB
 import com.malinowski.bigandyellow.model.data.db_entities.TABLE_MESSAGES
-import com.malinowski.bigandyellow.model.data.net_entities.MessageNET
 import io.reactivex.Completable
 import io.reactivex.Single
 

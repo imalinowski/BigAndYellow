@@ -2,7 +2,6 @@ package com.malinowski.bigandyellow.domain.mapper
 
 import com.malinowski.bigandyellow.model.data.MessageData
 import com.malinowski.bigandyellow.model.data.MessageItem
-import com.malinowski.bigandyellow.model.data.net_entities.MessageNET
 
 
 internal class MessageToItemMapper : (List<MessageData>, Int) -> (List<MessageItem>) {

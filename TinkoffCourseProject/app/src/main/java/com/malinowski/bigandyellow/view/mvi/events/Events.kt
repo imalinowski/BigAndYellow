@@ -3,6 +3,7 @@ package com.malinowski.bigandyellow.view.mvi.events
 import com.malinowski.bigandyellow.model.data.User
 
 sealed class Event {
+
     data class SearchStreams(
         val query: String = ""
     ) : Event()

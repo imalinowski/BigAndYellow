@@ -4,11 +4,11 @@ import android.util.Log
 import androidx.room.Room
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.malinowski.bigandyellow.App
+import com.malinowski.bigandyellow.domain.mapper.MessageNetToDbMapper
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.data.db_entities.MessageDB
 import com.malinowski.bigandyellow.model.data.net_entities.MessageNET
 import com.malinowski.bigandyellow.model.db.AppDatabase
-import com.malinowski.bigandyellow.model.mapper.MessageNetToDbMapper
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.model.network.ZulipChat.Companion.NEWEST_MES
@@ -222,7 +222,7 @@ object RepositoryImpl : Repository {
                 Log.e("LOAD_OWN_USER", it.message.toString())
             }
 
-        return Single.concat(netCall, dbCall).toObservable()
+        return Single.concat(dbCall, netCall).toObservable()
     }
 
     fun setMessageNum(topicName: String, messageNum: Int): Single<Topic> {
