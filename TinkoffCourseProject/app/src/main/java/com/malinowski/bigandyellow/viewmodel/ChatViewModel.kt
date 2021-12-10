@@ -10,8 +10,8 @@ import com.malinowski.bigandyellow.model.data.MessageData
 import com.malinowski.bigandyellow.model.data.MessageItem
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.utils.SingleLiveEvent
-import com.malinowski.bigandyellow.view.mvi.events.Event
-import com.malinowski.bigandyellow.view.mvi.events.Event.ChatEvent.*
+import com.malinowski.bigandyellow.view.mvi.events.*
+import com.malinowski.bigandyellow.view.mvi.events.ChatEvent.*
 import com.malinowski.bigandyellow.view.mvi.states.MainScreenState
 import com.malinowski.bigandyellow.view.mvi.states.State
 import io.reactivex.Observable
@@ -28,7 +28,7 @@ class ChatViewModel : ViewModel() {
         get() = _chatScreenState
 
     //states
-    val chatState = MutableLiveData<State.Chat>()
+    val chatState = MutableLiveData(State.Chat())
 
     //event
     val scrollToPos = SingleLiveEvent<Int>()
@@ -38,7 +38,7 @@ class ChatViewModel : ViewModel() {
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
-    fun processEvent(event: Event.ChatEvent) {
+    fun processEvent(event: ChatEvent) {
         when (event) {
             is SendMessage.ToUser ->
                 sendMessageToUser(event.userEmail, event.content)
@@ -87,11 +87,11 @@ class ChatViewModel : ViewModel() {
         loading()
         val state = chatState.value!!.copy()
         flow.map { messageToItemMapper(it, User.ME.id) }
-            .observeOn(AndroidSchedulers.mainThread())
+            .observeOn(AndroidSchedulers.mainThread(), true)
             .subscribeBy(
                 onNext = { messagesPage ->
                     result()
-                    val lastPage = messagesPage.isEmpty()
+                    val lastPage = messagesPage.isEmpty() || messagesPage.size < 20 // TODO Вынести константу
                     val messages = state.messages.toMutableList().apply { addAll(messagesPage) }
                     chatState.value = state.copy(
                         messages = messages,
@@ -107,7 +107,7 @@ class ChatViewModel : ViewModel() {
 
     private fun setMessageNum(topicName: String, messageNum: Int) =
         dataProvider.setMessageNum(topicName, messageNum).subscribeBy(
-            onSuccess = { },
+            onSuccess = { Log.d("MESSAGE_NUM_DB", "$topicName $messageNum SAVED") },
             onError = { error(it) }
         ).addTo(compositeDisposable)
 

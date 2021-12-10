@@ -57,8 +57,12 @@ class MainViewModel : ViewModel() {
 
     private fun initUser() {
         dataProvider.loadOwnUser().subscribeBy(
-            onSuccess = { user -> User.ME = user },
-            onError = { error(it) }
+            onNext = { user ->
+                User.ME = user
+            },
+            onError = {
+                error(it)
+            }
         ).addTo(compositeDisposable)
     }
 
@@ -130,10 +134,6 @@ class MainViewModel : ViewModel() {
                 }
             )
             .addTo(compositeDisposable)
-    }
-
-    fun result() {
-        _mainScreenState.postValue(MainScreenState.Result)
     }
 
     private fun error(error: Throwable) {

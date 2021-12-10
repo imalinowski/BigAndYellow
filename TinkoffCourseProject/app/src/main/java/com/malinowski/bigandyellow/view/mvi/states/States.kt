@@ -7,7 +7,7 @@ import com.malinowski.bigandyellow.model.data.User
 sealed class State {
 
     data class Chat(
-        val name: String,
+        val name: String = "",
         val messages: List<MessageItem> = listOf(),
         val loaded: Boolean = false,
     ) : State()

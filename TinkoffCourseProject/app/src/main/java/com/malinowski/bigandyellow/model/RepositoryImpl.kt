@@ -206,7 +206,7 @@ object RepositoryImpl : Repository {
                 Log.e("LoadUserStatus", "${user.name} ${it.message}")
             }
 
-    fun loadOwnUser(): Single<User> {
+    fun loadOwnUser(): Observable<User> {
         val dbCall = db.userDao().getOwnUser()
             .subscribeOn(Schedulers.io())
 
@@ -215,15 +215,15 @@ object RepositoryImpl : Repository {
             .map { body ->
                 format.decodeFromString<User>(body.string()).apply { isMe = true }
             }
+            .flatMap { loadStatus(it) }
             .flatMap {
-                db.userDao().insert(it)
-                loadStatus(it)
-            }.onErrorResumeNext {
-                Log.e("LoadOwnUser", it.message.toString())
-                dbCall
+                Log.d("LOAD_OWN_USER", "DB SAVED")
+                db.userDao().insert(it).toSingleDefault(it)
+            }.doOnError {
+                Log.e("LOAD_OWN_USER", it.message.toString())
             }
 
-        return netCall
+        return Single.concat(netCall, dbCall).toObservable()
     }
 
     fun setMessageNum(topicName: String, messageNum: Int): Single<Topic> {

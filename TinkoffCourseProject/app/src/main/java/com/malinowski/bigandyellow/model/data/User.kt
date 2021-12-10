@@ -35,7 +35,7 @@ data class User(
     var isMe: Boolean = false
 ) {
     companion object {
-        lateinit var ME: User
+        var ME: User = User(0, "") // since there is no authorization
     }
 }
 

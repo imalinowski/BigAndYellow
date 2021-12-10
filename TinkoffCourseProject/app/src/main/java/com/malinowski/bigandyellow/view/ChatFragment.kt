@@ -15,7 +15,7 @@ import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.view.mvi.FragmentMVI
-import com.malinowski.bigandyellow.view.mvi.events.Event.ChatEvent
+import com.malinowski.bigandyellow.view.mvi.events.ChatEvent
 import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.ChatViewModel
 import com.malinowski.bigandyellow.viewmodel.MainViewModel

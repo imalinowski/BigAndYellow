@@ -23,49 +23,50 @@ sealed class Event {
         ) : OpenChat()
     }
 
-    sealed class ChatEvent : Event() {
+}
 
-        data class SetMessageNum(
+sealed class ChatEvent {
+
+    data class SetMessageNum(
+        val topicName: String,
+        val messageNum: Int
+    ) : ChatEvent()
+
+    sealed class LoadMessages : ChatEvent() {
+        data class ForUser(
+            val userEmail: String,
+            val anchor: String
+        ) : LoadMessages()
+
+        data class ForTopic(
+            val streamId: Int,
             val topicName: String,
-            val messageNum: Int
-        ) : ChatEvent()
+            val anchor: String
+        ) : LoadMessages()
+    }
 
-        sealed class LoadMessages : ChatEvent() {
-            data class ForUser(
-                val userEmail: String,
-                val anchor: String
-            ) : LoadMessages()
+    sealed class SendMessage : ChatEvent() {
+        data class ToUser(
+            val userEmail: String,
+            val content: String
+        ) : SendMessage()
 
-            data class ForTopic(
-                val streamId: Int,
-                val topicName: String,
-                val anchor: String
-            ) : LoadMessages()
-        }
+        data class ToTopic(
+            val streamId: Int,
+            val topicName: String,
+            val content: String
+        ) : SendMessage()
+    }
 
-        sealed class SendMessage : ChatEvent() {
-            data class ToUser(
-                val userEmail: String,
-                val content: String
-            ) : SendMessage()
+    sealed class Reaction : ChatEvent() {
+        data class Add(
+            val messageId: Int,
+            val emojiName: String
+        ) : Reaction()
 
-            data class ToTopic(
-                val streamId: Int,
-                val topicName: String,
-                val content: String
-            ) : SendMessage()
-        }
-
-        sealed class Reaction : ChatEvent() {
-            data class Add(
-                val messageId: Int,
-                val emojiName: String
-            ) : Reaction()
-
-            data class Remove(
-                val messageId: Int,
-                val emojiName: String
-            ) : Reaction()
-        }
+        data class Remove(
+            val messageId: Int,
+            val emojiName: String
+        ) : Reaction()
     }
 }
