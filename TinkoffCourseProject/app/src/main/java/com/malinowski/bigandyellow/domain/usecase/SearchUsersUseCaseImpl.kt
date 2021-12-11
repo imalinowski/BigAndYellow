@@ -1,6 +1,6 @@
 package com.malinowski.bigandyellow.domain.usecase
 
-import com.malinowski.bigandyellow.model.RepositoryImpl
+import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.User
 import io.reactivex.Observable
 import javax.inject.Inject
@@ -10,10 +10,10 @@ interface SearchUsersUseCase : (String) -> Observable<List<User>> {
     override fun invoke(searchQuery: String): Observable<List<User>>
 }
 
-class SearchUsersUseCaseImpl @Inject constructor() : SearchUsersUseCase {
+internal class SearchUsersUseCaseImpl @Inject constructor() : SearchUsersUseCase {
 
     @Inject
-    lateinit var dataProvider: RepositoryImpl
+    lateinit var dataProvider: Repository
 
     override fun invoke(searchQuery: String): Observable<List<User>> {
         return dataProvider.loadUsers()

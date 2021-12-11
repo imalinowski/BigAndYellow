@@ -1,8 +1,6 @@
 package com.malinowski.bigandyellow.model
 
 import android.util.Log
-import androidx.room.Room
-import com.malinowski.bigandyellow.App
 import com.malinowski.bigandyellow.domain.mapper.MessageNetToDbMapper
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.data.db_entities.MessageDB
@@ -16,24 +14,23 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
-import retrofit2.Retrofit
 import javax.inject.Inject
+import javax.inject.Singleton
 
-class RepositoryImpl @Inject constructor(retrofit: Retrofit) : Repository {
+@Singleton
+class RepositoryImpl @Inject constructor() : Repository {
 
-    // todo dagger injection
+    @Inject
+    lateinit var service: ZulipChat
 
-    private var service = retrofit.create(ZulipChat::class.java)
-    private val format = Json { ignoreUnknownKeys = true }
+    @Inject
+    lateinit var format: Json
 
-    private val db = Room.databaseBuilder(
-        App.appContext,
-        AppDatabase::class.java, AppDatabase.DB_NAME
-    ).build()
+    @Inject
+    lateinit var db: AppDatabase
 
-    private val messageNetToDbMapper = MessageNetToDbMapper()
-
-    // todo dagger injection
+    @Inject
+    internal lateinit var messageNetToDbMapper: MessageNetToDbMapper
 
     override fun loadStreams(): Observable<List<Stream>> {
 
@@ -206,7 +203,7 @@ class RepositoryImpl @Inject constructor(retrofit: Retrofit) : Repository {
         return netCall
     }
 
-    fun setMessageNum(topicName: String, messageNum: Int): Single<Topic> {
+    override fun setMessageNum(topicName: String, messageNum: Int): Single<Topic> {
         return db.topicDao().getTopicByName(topicName)
             .subscribeOn(Schedulers.io())
             .doOnSuccess {
@@ -215,10 +212,10 @@ class RepositoryImpl @Inject constructor(retrofit: Retrofit) : Repository {
             }
     }
 
-    fun loadMessages(
+    override fun loadMessages(
         stream: Int,
         topicName: String,
-        anchor: String = NEWEST_MES
+        anchor: String
     ): Observable<List<MessageData>> {
         val narrow = listOf(
             NarrowInt("stream", stream),
@@ -262,9 +259,9 @@ class RepositoryImpl @Inject constructor(retrofit: Retrofit) : Repository {
         return flow.subscribeOn(Schedulers.io()).map { it.reversed() }
     }
 
-    fun loadMessages(
+    override fun loadMessages(
         userEmail: String,
-        anchor: String = NEWEST_MES
+        anchor: String
     ): Observable<List<MessageData>> {
         val narrow = listOf(
             NarrowStr("pm-with", userEmail)
@@ -347,11 +344,11 @@ class RepositoryImpl @Inject constructor(retrofit: Retrofit) : Repository {
         STREAM("stream")
     }
 
-    fun sendMessage(
+    override fun sendMessage(
         type: SendType,
         to: String,
         content: String,
-        topic: String = ""
+        topic: String
     ): Single<Int> =
         service.sendMessage(type.type, to, content, topic)
             .subscribeOn(Schedulers.io())
@@ -364,11 +361,11 @@ class RepositoryImpl @Inject constructor(retrofit: Retrofit) : Repository {
             }
 
 
-    fun addEmoji(messageId: Int, emojiName: String): Completable =
+    override fun addEmoji(messageId: Int, emojiName: String): Completable =
         service.addEmojiReaction(messageId, name = emojiName)
             .subscribeOn(Schedulers.io())
 
-    fun deleteEmoji(messageId: Int, emojiName: String): Completable =
+    override fun deleteEmoji(messageId: Int, emojiName: String): Completable =
         service.deleteEmojiReacction(messageId, name = emojiName)
             .subscribeOn(Schedulers.io())
 

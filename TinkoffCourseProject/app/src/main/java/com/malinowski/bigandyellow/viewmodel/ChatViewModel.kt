@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.domain.mapper.MessageToItemMapper
+import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.MessageData
 import com.malinowski.bigandyellow.model.data.MessageItem
@@ -24,7 +25,7 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor() : ViewModel() {
 
     @Inject
-    lateinit var dataProvider: RepositoryImpl
+    lateinit var dataProvider: Repository
 
     private val _chatScreenState: MutableLiveData<ScreenState> = MutableLiveData()
     val chatScreenState: LiveData<ScreenState>
@@ -37,7 +38,8 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     val scrollToPos = SingleLiveEvent<Int>()
 
     //mapper
-    private val messageToItemMapper: MessageToItemMapper = MessageToItemMapper()
+    @Inject
+    internal lateinit var messageToItemMapper: MessageToItemMapper
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 

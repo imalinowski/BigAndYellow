@@ -2,8 +2,9 @@ package com.malinowski.bigandyellow.domain.mapper
 
 import com.malinowski.bigandyellow.model.data.Stream
 import com.malinowski.bigandyellow.model.data.StreamItem
+import javax.inject.Inject
 
-internal class StreamToItemMapper : (Stream) -> (StreamItem) {
+internal class StreamToItemMapper @Inject constructor() : (Stream) -> (StreamItem) {
 
     private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
 

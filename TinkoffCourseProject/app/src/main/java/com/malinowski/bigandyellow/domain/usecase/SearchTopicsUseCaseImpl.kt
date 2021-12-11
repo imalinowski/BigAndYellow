@@ -6,20 +6,23 @@ import com.malinowski.bigandyellow.model.data.Stream
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.TopicItem
 import io.reactivex.Observable
+import javax.inject.Inject
 
 interface SearchTopicsUseCase :
         (String, Observable<List<Stream>>) -> Observable<List<StreamTopicItem>> {
 
     override fun invoke(
         searchQuery: String,
-        streams: Observable<List<Stream>>
+        flow: Observable<List<Stream>>
     ): Observable<List<StreamTopicItem>>
 }
 
-internal class SearchTopicsUseCaseImpl : SearchTopicsUseCase {
+internal class SearchTopicsUseCaseImpl @Inject constructor() : SearchTopicsUseCase {
 
-    private val streamToItemMapper: StreamToItemMapper = StreamToItemMapper()
-    private val topicToItemMapper: TopicToItemMapper = TopicToItemMapper()
+    @Inject
+    lateinit var streamToItemMapper: StreamToItemMapper
+    @Inject
+    lateinit var topicToItemMapper: TopicToItemMapper
 
     override fun invoke(
         searchQuery: String,

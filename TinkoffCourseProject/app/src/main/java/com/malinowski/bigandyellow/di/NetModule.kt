@@ -2,6 +2,7 @@ package com.malinowski.bigandyellow.di
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.malinowski.bigandyellow.model.network.AuthInterceptor
+import com.malinowski.bigandyellow.model.network.ZulipChat
 import dagger.Module
 import dagger.Provides
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -12,6 +13,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import javax.inject.Named
+import javax.inject.Singleton
 
 @Module
 class NetModule {
@@ -26,6 +28,7 @@ class NetModule {
         .addInterceptor(AuthInterceptor())
         .build()
 
+    @Singleton
     @Provides
     @ExperimentalSerializationApi
     fun provideRetrofit(@Named("URL") url: String, client: OkHttpClient): Retrofit =
@@ -35,4 +38,9 @@ class NetModule {
             .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
             .build()
+
+    @Singleton
+    @Provides
+    fun provideService(retrofit: Retrofit): ZulipChat =
+        retrofit.create(ZulipChat::class.java)
 }

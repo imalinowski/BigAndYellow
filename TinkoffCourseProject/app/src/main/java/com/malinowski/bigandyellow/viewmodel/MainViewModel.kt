@@ -5,8 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
-import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCaseImpl
-import com.malinowski.bigandyellow.model.RepositoryImpl
+import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.utils.SingleLiveEvent
 import com.malinowski.bigandyellow.view.ChatFragment
@@ -25,7 +24,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(
-    private val dataProvider: RepositoryImpl
+    var dataProvider: Repository
 ) : ViewModel() {
 
     private val _mainScreenState: MutableLiveData<ScreenState> = MutableLiveData()
@@ -40,7 +39,8 @@ class MainViewModel @Inject constructor(
     val streamsSubscribedState = MutableLiveData(State.Streams(listOf()))
 
     // use case
-    private val searchTopicsUseCase: SearchTopicsUseCase = SearchTopicsUseCaseImpl()
+    @Inject
+    lateinit var searchTopicsUseCase: SearchTopicsUseCase
 
     //flow
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()

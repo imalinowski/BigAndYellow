@@ -3,6 +3,7 @@ package com.malinowski.bigandyellow.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCase
 import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.view.mvi.events.UsersEvent
 import com.malinowski.bigandyellow.view.mvi.states.ScreenState
@@ -30,7 +31,7 @@ class UsersViewModel @Inject constructor() : ViewModel() {
 
     //use case
     @Inject
-    internal lateinit var searchUserUseCase: SearchUsersUseCaseImpl
+    internal lateinit var searchUserUseCase: SearchUsersUseCase
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 

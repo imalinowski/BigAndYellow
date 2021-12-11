@@ -2,9 +2,11 @@ package com.malinowski.bigandyellow.domain.mapper
 
 import com.malinowski.bigandyellow.model.data.MessageData
 import com.malinowski.bigandyellow.model.data.MessageItem
+import javax.inject.Inject
 
 
-internal class MessageToItemMapper : (List<MessageData>, Int) -> (List<MessageItem>) {
+internal class MessageToItemMapper @Inject constructor() :
+        (List<MessageData>, Int) -> (List<MessageItem>) {
 
     override fun invoke(messages: List<MessageData>, myId: Int): List<MessageItem> {
         return messages.map { message ->
