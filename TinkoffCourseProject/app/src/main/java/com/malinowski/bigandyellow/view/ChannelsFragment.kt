@@ -7,17 +7,23 @@ import android.view.ViewGroup
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.tabs.TabLayoutMediator
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChannelsBinding
+import com.malinowski.bigandyellow.getComponent
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.view.mvi.events.Event
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.PagerAdapter
 import com.malinowski.bigandyellow.viewmodel.StreamsType
+import javax.inject.Inject
 
 class ChannelsFragment : Fragment() {
-    private val model: MainViewModel by activityViewModels()
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    val model: MainViewModel by activityViewModels { viewModelFactory }
 
     private var _binding: FragmentChannelsBinding? = null
     private val binding get() = _binding!!
@@ -32,6 +38,8 @@ class ChannelsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        getComponent().channelComponent().create().inject(this)
 
         if (savedInstanceState == null)
             model.processEvent(Event.SearchStreams())

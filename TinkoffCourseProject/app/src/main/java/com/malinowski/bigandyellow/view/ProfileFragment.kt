@@ -16,6 +16,7 @@ import io.reactivex.disposables.CompositeDisposable
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
+
     private val compositeDisposable = CompositeDisposable()
 
     override fun onCreateView(

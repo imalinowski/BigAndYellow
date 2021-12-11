@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(
-    var dataProvider: Repository
+    private var dataProvider: Repository
 ) : ViewModel() {
 
     private val _mainScreenState: MutableLiveData<ScreenState> = MutableLiveData()

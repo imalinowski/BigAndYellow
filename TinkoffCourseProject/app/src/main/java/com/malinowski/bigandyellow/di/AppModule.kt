@@ -27,6 +27,7 @@ abstract class AppModule {
     class SubModule {
         @Provides
         fun getJsonFormat(): Json = Json { ignoreUnknownKeys = true }
+
     }
 
 }
