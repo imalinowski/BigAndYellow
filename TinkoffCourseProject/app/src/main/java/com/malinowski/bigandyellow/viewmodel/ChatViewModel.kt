@@ -19,10 +19,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
+import javax.inject.Inject
 
-class ChatViewModel : ViewModel() {
+class ChatViewModel @Inject constructor() : ViewModel() {
 
-    private val dataProvider = RepositoryImpl
+    @Inject
+    lateinit var dataProvider: RepositoryImpl
+
     private val _chatScreenState: MutableLiveData<ScreenState> = MutableLiveData()
     val chatScreenState: LiveData<ScreenState>
         get() = _chatScreenState

@@ -7,19 +7,27 @@ import android.view.View.VISIBLE
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.ActivityMainBinding
+import com.malinowski.bigandyellow.getComponent
 import com.malinowski.bigandyellow.view.mvi.states.ScreenState
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    val model: MainViewModel by viewModels()
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    val model: MainViewModel by viewModels { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        getComponent().mainComponent().create().inject(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root

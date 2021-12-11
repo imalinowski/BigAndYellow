@@ -65,5 +65,5 @@ dependencies {
     implementation "androidx.room:room-rxjava2:$roomVersion"
     //Dagger
     implementation "com.google.dagger:dagger:$dagger"
-    annotationProcessor "com.google.dagger:dagger-compiler:$daggerCompiller"
+    kapt "com.google.dagger:dagger-compiler:$dagger"
 }

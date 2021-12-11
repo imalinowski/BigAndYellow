@@ -22,10 +22,11 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
-
-    private val dataProvider = RepositoryImpl
+class MainViewModel @Inject constructor(
+    private val dataProvider: RepositoryImpl
+) : ViewModel() {
 
     private val _mainScreenState: MutableLiveData<ScreenState> = MutableLiveData()
     val mainScreenState: LiveData<ScreenState>
@@ -45,6 +46,7 @@ class MainViewModel : ViewModel() {
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+
 
     init {
         subscribeToSearchStreams()

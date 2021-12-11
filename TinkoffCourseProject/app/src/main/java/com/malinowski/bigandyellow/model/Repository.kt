@@ -6,7 +6,7 @@ import com.malinowski.bigandyellow.model.data.User
 import io.reactivex.Observable
 import io.reactivex.Single
 
-interface Repository {
+interface Repository { // todo inject repository instead of impl
 
     fun loadStreams(): Observable<List<Stream>>
 
@@ -15,5 +15,7 @@ interface Repository {
     fun loadTopics(id: Int): Single<List<Topic>>
 
     fun loadUsers(): Observable<List<User>>
+
+    fun loadOwnUser(): Single<User>
 
 }

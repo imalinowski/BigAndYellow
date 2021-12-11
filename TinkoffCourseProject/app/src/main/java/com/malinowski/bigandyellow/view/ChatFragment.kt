@@ -1,5 +1,6 @@
 package com.malinowski.bigandyellow.view
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,9 +11,11 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
+import com.malinowski.bigandyellow.getComponent
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.view.mvi.events.ChatEvent
@@ -20,12 +23,17 @@ import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.ChatViewModel
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
+import javax.inject.Inject
 
 class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private val binding by lazy { FragmentChatBinding.inflate(layoutInflater) }
-    private val mainModel: MainViewModel by activityViewModels()
-    private val model: ChatViewModel by viewModels()
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private val mainModel: MainViewModel by activityViewModels { viewModelFactory }
+    private val model: ChatViewModel by viewModels { viewModelFactory }
 
     private val topicName: String? by lazy { arguments?.getString(TOPIC) }
     private val userName: String? by lazy { arguments?.getString(USER_NAME) }
@@ -52,6 +60,11 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private val layoutManager = LinearLayoutManager(context).apply {
         reverseLayout = true
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        getComponent().chatComponent().create().inject(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

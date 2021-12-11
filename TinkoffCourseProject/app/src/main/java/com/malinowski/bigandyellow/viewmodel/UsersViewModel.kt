@@ -3,7 +3,6 @@ package com.malinowski.bigandyellow.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCase
 import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCaseImpl
 import com.malinowski.bigandyellow.view.mvi.events.UsersEvent
 import com.malinowski.bigandyellow.view.mvi.states.ScreenState
@@ -15,8 +14,9 @@ import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class UsersViewModel : ViewModel() {
+class UsersViewModel @Inject constructor() : ViewModel() {
 
     //state
     val usersState = MutableLiveData<State.Users>()
@@ -29,7 +29,8 @@ class UsersViewModel : ViewModel() {
     private val searchUsersSubject: BehaviorSubject<String> = BehaviorSubject.create()
 
     //use case
-    private val searchUserUseCase: SearchUsersUseCase = SearchUsersUseCaseImpl()
+    @Inject
+    internal lateinit var searchUserUseCase: SearchUsersUseCaseImpl
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 

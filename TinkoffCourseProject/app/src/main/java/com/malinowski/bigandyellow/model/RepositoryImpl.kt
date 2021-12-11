@@ -2,14 +2,12 @@ package com.malinowski.bigandyellow.model
 
 import android.util.Log
 import androidx.room.Room
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.malinowski.bigandyellow.App
 import com.malinowski.bigandyellow.domain.mapper.MessageNetToDbMapper
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.data.db_entities.MessageDB
 import com.malinowski.bigandyellow.model.data.net_entities.MessageNET
 import com.malinowski.bigandyellow.model.db.AppDatabase
-import com.malinowski.bigandyellow.model.network.AuthInterceptor
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.model.network.ZulipChat.Companion.NEWEST_MES
 import io.reactivex.Completable
@@ -18,35 +16,12 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
+import javax.inject.Inject
 
-object RepositoryImpl : Repository {
+class RepositoryImpl @Inject constructor(retrofit: Retrofit) : Repository {
 
     // todo dagger injection
-    private const val URL = "https://tinkoff-android-fall21.zulipchat.com/api/v1/"
-    private const val idRoute: String = "id"
-    private const val messagesRoute: String = "messages"
-    private const val statusRoute: String = "status"
-    private const val membersRoute: String = "members"
-    private const val topicsRoute: String = "topics"
-    private const val subscriptionsRoute: String = "subscriptions"
-    private const val streamsRoute: String = "streams"
-
-    private val client = OkHttpClient.Builder()
-        .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
-        .addInterceptor(AuthInterceptor())
-        .build()
-
-    private var retrofit = Retrofit.Builder()
-        .baseUrl(URL)
-        .client(client)
-        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-        .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
-        .build()
 
     private var service = retrofit.create(ZulipChat::class.java)
     private val format = Json { ignoreUnknownKeys = true }
@@ -174,7 +149,7 @@ object RepositoryImpl : Repository {
             .flatMap { usersStatusPreload(it) }
             .flatMap { users ->
                 db.userDao().insert(users)
-                    .mergeWith( db.userDao().insert(User.ME))
+                    .mergeWith(db.userDao().insert(User.ME))
                     .toSingleDefault(users)
             }.doOnError { error: Throwable ->
                 Log.e("USERS_NET", "${error.message}")
@@ -207,7 +182,7 @@ object RepositoryImpl : Repository {
                 Log.e("LoadUserStatus", "${user.name} ${it.message}")
             }
 
-    fun loadOwnUser(): Single<User> {
+    override fun loadOwnUser(): Single<User> {
         val dbCall = db.userDao().getOwnUser()
             .subscribeOn(Schedulers.io())
             .doOnSuccess {
@@ -396,5 +371,15 @@ object RepositoryImpl : Repository {
     fun deleteEmoji(messageId: Int, emojiName: String): Completable =
         service.deleteEmojiReacction(messageId, name = emojiName)
             .subscribeOn(Schedulers.io())
+
+    companion object {
+        private const val idRoute: String = "id"
+        private const val messagesRoute: String = "messages"
+        private const val statusRoute: String = "status"
+        private const val membersRoute: String = "members"
+        private const val topicsRoute: String = "topics"
+        private const val subscriptionsRoute: String = "subscriptions"
+        private const val streamsRoute: String = "streams"
+    }
 
 }
