@@ -1,14 +1,17 @@
 package com.malinowski.bigandyellow.view
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentStreamsBinding
+import com.malinowski.bigandyellow.getComponent
 import com.malinowski.bigandyellow.model.data.StreamItem
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.TopicItem
@@ -17,13 +20,18 @@ import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.StreamsType
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.TopicsChatsAdapter
+import javax.inject.Inject
 
 class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
     private val viewBinding: FragmentStreamsBinding by lazy {
         FragmentStreamsBinding.inflate(layoutInflater)
     }
-    private val model: MainViewModel by activityViewModels()
+
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+    private val model: MainViewModel by activityViewModels { viewModelFactory }
+
     private var items: MutableList<StreamTopicItem> = mutableListOf()
     private lateinit var streamType: StreamsType
 
@@ -46,6 +54,11 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
                 item.expanded = !item.expanded
             }
         }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        getComponent().streamsComponent().create().inject(this)
     }
 
     override fun onCreateView(

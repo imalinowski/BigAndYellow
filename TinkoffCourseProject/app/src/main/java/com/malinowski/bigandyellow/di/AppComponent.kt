@@ -4,6 +4,7 @@ import android.content.Context
 import com.malinowski.bigandyellow.di.channels.ChannelComponent
 import com.malinowski.bigandyellow.di.chat.ChatComponent
 import com.malinowski.bigandyellow.di.main.MainComponent
+import com.malinowski.bigandyellow.di.streams.StreamsComponent
 import com.malinowski.bigandyellow.di.users.UserComponent
 import dagger.BindsInstance
 import dagger.Component
@@ -31,6 +32,7 @@ interface AppComponent {
     fun chatComponent(): ChatComponent.Factory
     fun userComponent(): UserComponent.Factory
     fun channelComponent(): ChannelComponent.Factory
+    fun streamsComponent(): StreamsComponent.Factory
 
 }
 
@@ -39,7 +41,8 @@ interface AppComponent {
         MainComponent::class,
         ChatComponent::class,
         UserComponent::class,
-        ChannelComponent::class
+        ChannelComponent::class,
+        StreamsComponent::class
     ]
 )
 object SubcomponentsModule
