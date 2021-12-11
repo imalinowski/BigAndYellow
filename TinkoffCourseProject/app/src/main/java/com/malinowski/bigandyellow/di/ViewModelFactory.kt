@@ -20,9 +20,7 @@ class ViewModelFactory @Inject constructor(
         val creator = creators.filter { (k, _) ->
             modelClass.isAssignableFrom(k)
         }.values.firstOrNull().let {
-            if (it == null)
-                throw IllegalArgumentException("Unknown model class: $modelClass")
-            it
+            it ?: throw IllegalArgumentException("Unknown model class: $modelClass")
         }
         @Suppress("UNCHECKED_CAST")
         return creator.get() as T
