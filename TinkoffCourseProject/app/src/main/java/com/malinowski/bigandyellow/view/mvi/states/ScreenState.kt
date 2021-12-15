@@ -2,7 +2,7 @@ package com.malinowski.bigandyellow.view.mvi.states
 
 sealed class ScreenState {
 
-    object Result : ScreenState()
+    class Result(val text: String = "") : ScreenState()
 
     object Loading : ScreenState()
 

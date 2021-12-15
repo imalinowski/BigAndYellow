@@ -57,7 +57,7 @@ class UsersViewModel @Inject constructor() : ViewModel() {
             .subscribeBy(
                 onNext = {
                     usersState.value = State.Users(it)
-                    _screenState.value = ScreenState.Result
+                    _screenState.value = ScreenState.Result()
                 },
                 onError = { _screenState.value = ScreenState.Error(it) }
             )

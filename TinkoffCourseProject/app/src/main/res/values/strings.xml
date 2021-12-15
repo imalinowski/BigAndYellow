@@ -20,4 +20,11 @@
     <string name="all_streams">All Streams</string>
     <string name="error_emoji_added">Emoji already added</string>
     <string name="error_data_expired">Data key expired Try again</string>
+    <string name="add_reaction">Поставить Реакцию</string>
+    <string name="delete">Удалить</string>
+    <string name="edit">Отредактировать</string>
+    <string name="change_topic">Поменять Topic</string>
+    <string name="copy">Скопировать</string>
+    <string name="message_copy">message copy</string>
+    <string name="copied">Copied</string>
 </resources>

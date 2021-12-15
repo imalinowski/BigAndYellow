@@ -1,5 +1,7 @@
 package com.malinowski.bigandyellow.view
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
+import androidx.core.text.HtmlCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -51,6 +54,9 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             },
             onLongClick = { messageId ->
                 showBottomSheet(messageId)
+            },
+            onPlusClick = { messageId ->
+                showSmileBottomSheet(messageId)
             },
             onBind = { position ->
                 if (position == messages.size - 5 && !state.loaded) loadMessages()
@@ -103,6 +109,12 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private fun showBottomSheet(position: Int) {
+        BottomSheet()
+            .apply { arguments = bundleOf(BottomSheet.MESSAGE_KEY to position) }
+            .show(childFragmentManager, BottomSheet.TAG)
+    }
+
+    private fun showSmileBottomSheet(position: Int) {
         SmileBottomSheet()
             .apply { arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position) }
             .show(childFragmentManager, SmileBottomSheet.TAG)
@@ -153,25 +165,53 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             val messageId = bundle.getInt(SmileBottomSheet.MESSAGE_KEY)
             val unicode = bundle.getString(SmileBottomSheet.SMILE_KEY)!!
             val name = bundle.getString(SmileBottomSheet.SMILE_NAME)!!
-
-            val message = messages.find { it.id == messageId }
-            if (message == null) { // since there two source of messages collisions happens
-                model.error(java.lang.IllegalStateException(getString(R.string.error_data_expired)))
-                return@setFragmentResultListener
+            try {
+                onAddEmojiResult(getMessageById(messageId), unicode, name)
+            } catch (e: java.lang.IllegalStateException) {
+                model.error(e)
             }
+        }
 
-            val emoji = Reaction(userId = User.ME.id, unicode = unicode, name = name)
-
-            // add emoji an case emoji haven't exist before or it has been added by other users
-            val emojiGroup: UnitedReaction? =
-                message.emoji[emoji.getUnicode()]
-            if (emojiGroup == null || !emojiGroup.usersId.contains(User.ME.id)) {
-                message.addEmoji(emoji) // data update
-                model.processEvent(ChatEvent.Reaction.Add(message.id, emoji.name)) // net call
-                adapter.notifyItemChanged(messages.indexOf(message)) // ui update
-            } else {
-                model.error(IllegalStateException(getString(R.string.error_emoji_added)))
+        childFragmentManager.setFragmentResultListener(
+            BottomSheet.COPY,
+            this
+        ) { _, bundle ->
+            val messageId = bundle.getInt(SmileBottomSheet.MESSAGE_KEY)
+            try {
+                copyMessage(getMessageById(messageId))
+            } catch (e: java.lang.IllegalStateException) {
+                model.error(e)
             }
+        }
+    }
+
+    private fun getMessageById(messageId: Int): MessageItem {
+        return messages.find { it.id == messageId } // since there two source of messages collisions happens
+            ?: throw java.lang.IllegalStateException(getString(R.string.error_data_expired))
+    }
+
+    private fun copyMessage(message: MessageItem) {
+        val text = HtmlCompat.fromHtml(message.message, HtmlCompat.FROM_HTML_MODE_LEGACY).trim()
+        val clipboard =
+            requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip: ClipData =
+            ClipData.newPlainText(getString(R.string.message_copy), text)
+        clipboard.setPrimaryClip(clip)
+        model.result(getString(R.string.copied))
+    }
+
+    private fun onAddEmojiResult(message: MessageItem, unicode: String, name: String) {
+        val emoji = Reaction(userId = User.ME.id, unicode = unicode, name = name)
+
+        // add emoji an case emoji haven't exist before or it has been added by other users
+        val emojiGroup: UnitedReaction? =
+            message.emoji[emoji.getUnicode()]
+        if (emojiGroup == null || !emojiGroup.usersId.contains(User.ME.id)) {
+            message.addEmoji(emoji) // data update
+            model.processEvent(ChatEvent.Reaction.Add(message.id, emoji.name)) // net call
+            adapter.notifyItemChanged(messages.indexOf(message)) // ui update
+        } else {
+            model.error(IllegalStateException(getString(R.string.error_emoji_added)))
         }
     }
 

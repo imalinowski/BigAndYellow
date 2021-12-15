@@ -2,6 +2,7 @@ package com.malinowski.bigandyellow.view
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -24,12 +25,14 @@ class SmileBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val messageId = arguments?.getInt(MESSAGE_KEY)
         val store = (view as ViewGroup).findViewById<FlexBoxLayout>(R.id.smile_store)
         val smiles = emojiMap
         store.paddingRows = 5
         store.paddingColumns = 5
         val outValue = TypedValue()
         requireContext().theme.resolveAttribute(R.attr.selectableItemBackground, outValue, true)
+
         for (key in smiles.keys)
             Button(context).apply {
                 setBackgroundColor(Color.TRANSPARENT)
@@ -42,7 +45,7 @@ class SmileBottomSheet : BottomSheetDialogFragment() {
                         bundleOf(
                             SMILE_KEY to smiles[key],
                             SMILE_NAME to key,
-                            MESSAGE_KEY to arguments?.getInt(MESSAGE_KEY)
+                            MESSAGE_KEY to messageId
                         )
                     )
                     dismiss()

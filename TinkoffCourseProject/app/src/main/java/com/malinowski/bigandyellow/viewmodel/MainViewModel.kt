@@ -90,7 +90,7 @@ class MainViewModel @Inject constructor(
             .subscribeBy(
                 onNext = {
                     streamsSubscribedState.value = State.Streams(it)
-                    _mainScreenState.value = ScreenState.Result
+                    _mainScreenState.value = ScreenState.Result()
                 },
                 onError = {
                     _mainScreenState.value = ScreenState.Error(it)
@@ -105,7 +105,7 @@ class MainViewModel @Inject constructor(
             .subscribeBy(
                 onNext = {
                     streamsAllState.value = State.Streams(it)
-                    _mainScreenState.value = ScreenState.Result
+                    _mainScreenState.value = ScreenState.Result()
                 },
                 onError = {
                     _mainScreenState.value = ScreenState.Error(it)

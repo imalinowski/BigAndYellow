@@ -14,6 +14,7 @@ import com.malinowski.bigandyellow.model.data.MessageItem
 class MessagesAdapter(
     private val onEmojiClick: (EmojiClickParcel) -> Unit = {},
     private val onLongClick: (messageId: Int) -> Unit = {},
+    private val onPlusClick: (messageId: Int) -> Unit = {},
     private val onBind: (position: Int) -> Unit = {}
 ) : ListAdapter<MessageItem, MessagesAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
@@ -28,14 +29,16 @@ class MessagesAdapter(
 
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         onBind(position)
-        getItem(position).apply {
-            viewHolder.binding.messageItem.setMessage(this)
-            viewHolder.binding.messageItem.setOnEmojiClickListener(onEmojiClick)
-            viewHolder.binding.messageItem.setMessageOnLongClick {
-                onLongClick(this.id)
-            }
-            viewHolder.binding.date.text = this.getDate()
-            viewHolder.binding.date.isVisible = isPlaceForDate(position)
+        val message = getItem(position)
+        viewHolder.binding.messageItem.apply {
+            setMessage(message)
+            setOnEmojiClickListener(onEmojiClick)
+            setMessageOnLongClick { onLongClick(message.id) }
+            setPlusClickListener { onPlusClick(message.id) }
+        }
+        viewHolder.binding.date.apply {
+            text = message.getDate()
+            isVisible = isPlaceForDate(position)
         }
     }
 

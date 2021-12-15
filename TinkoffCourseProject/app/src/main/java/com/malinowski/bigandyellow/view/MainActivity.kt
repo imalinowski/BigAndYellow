@@ -46,7 +46,11 @@ class MainActivity : AppCompatActivity() {
                     Log.e("BigAndYellow", it.error.message.toString())
                     binding.progressBar.visibility = GONE
                 }
-                is ScreenState.Result -> binding.progressBar.visibility = GONE
+                is ScreenState.Result -> {
+                    if (it.text.isNotEmpty())
+                        Toast.makeText(this, it.text, Toast.LENGTH_LONG).show()
+                    binding.progressBar.visibility = GONE
+                }
             }
         }
 

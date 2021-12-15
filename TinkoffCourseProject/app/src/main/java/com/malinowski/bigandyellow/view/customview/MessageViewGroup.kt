@@ -97,6 +97,9 @@ class MessageViewGroup @JvmOverloads constructor(
             callback()
             true
         }
+    }
+
+    fun setPlusClickListener(callback: () -> Unit){
         plus.setOnClickListener {
             callback()
         }

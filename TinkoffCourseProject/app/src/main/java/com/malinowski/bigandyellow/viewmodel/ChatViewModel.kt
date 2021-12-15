@@ -66,8 +66,8 @@ class ChatViewModel @Inject constructor() : ViewModel() {
         chatState.value = State.Chat(name)
     }
 
-    fun result() {
-        _chatScreenState.postValue(ScreenState.Result)
+    fun result(text: String = "") {
+        _chatScreenState.postValue(ScreenState.Result(text))
     }
 
     fun error(error: Throwable) {
