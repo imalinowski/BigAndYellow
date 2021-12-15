@@ -369,6 +369,10 @@ class RepositoryImpl @Inject constructor() : Repository {
         service.deleteEmojiReacction(messageId, name = emojiName)
             .subscribeOn(Schedulers.io())
 
+    override fun deleteMessage(messageId: Int): Completable =
+        service.deleteMessage(messageId)
+            .subscribeOn(Schedulers.io())
+
     companion object {
         private const val idRoute: String = "id"
         private const val messagesRoute: String = "messages"

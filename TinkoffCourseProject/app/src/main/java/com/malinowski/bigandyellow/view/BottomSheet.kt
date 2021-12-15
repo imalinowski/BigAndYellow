@@ -7,6 +7,9 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.malinowski.bigandyellow.databinding.BottomSheetBinding
+import com.malinowski.bigandyellow.model.data.AddEmoji
+import com.malinowski.bigandyellow.model.data.Copy
+import com.malinowski.bigandyellow.model.data.Delete
 
 
 class BottomSheet : BottomSheetDialogFragment() {
@@ -21,10 +24,9 @@ class BottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val messageId = arguments?.getInt(MESSAGE_KEY)
+        val messageId: Int = arguments?.getInt(MESSAGE_KEY)!!
         with(binding) {
             addReaction.setOnClickListener {
-                dismiss()
                 SmileBottomSheet()
                     .apply {
                         arguments = bundleOf(
@@ -32,11 +34,20 @@ class BottomSheet : BottomSheetDialogFragment() {
                         )
                     }
                     .show(parentFragmentManager, SmileBottomSheet.TAG)
+                dismiss()
             }
             copy.setOnClickListener {
                 parentFragmentManager.setFragmentResult(
-                    COPY, bundleOf(
-                        SmileBottomSheet.MESSAGE_KEY to messageId
+                    ChatFragment.BOTTOM_SHEET_RES, bundleOf(
+                        ChatFragment.BOTTOM_SHEET_RES to Copy(messageId)
+                    )
+                )
+                dismiss()
+            }
+            delete.setOnClickListener {
+                parentFragmentManager.setFragmentResult(
+                    ChatFragment.BOTTOM_SHEET_RES, bundleOf(
+                        ChatFragment.BOTTOM_SHEET_RES to Delete(messageId)
                     )
                 )
                 dismiss()

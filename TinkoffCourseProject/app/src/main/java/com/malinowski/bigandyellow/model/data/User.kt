@@ -1,6 +1,7 @@
 package com.malinowski.bigandyellow.model.data
 
 import androidx.room.*
+import androidx.room.Delete
 import io.reactivex.Completable
 import io.reactivex.Single
 import kotlinx.serialization.SerialName

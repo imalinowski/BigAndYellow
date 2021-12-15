@@ -56,13 +56,10 @@ interface ZulipChat {
         @Query("narrow") narrow: String,
     ): Single<ResponseBody>
 
-    @GET("messages")
-    fun getMessages(
-        @Query("anchor") anchor: Int,  // message ID
-        @Query("num_before") numBefore: Int = 20,
-        @Query("num_after") numAfter: Int = 0,
-        @Query("narrow") narrow: String,
-    ): Single<ResponseBody>
+    @DELETE("messages/{msg_id}")
+    fun deleteMessage(
+        @Path("msg_id") messageId: Int,
+    ): Completable
 
     companion object {
         const val NEWEST_MES = "newest"

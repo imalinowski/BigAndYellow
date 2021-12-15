@@ -159,26 +159,22 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         }
 
         childFragmentManager.setFragmentResultListener(
-            SmileBottomSheet.SMILE_RESULT,
-            this
+            BOTTOM_SHEET_RES, this
         ) { _, bundle ->
-            val messageId = bundle.getInt(SmileBottomSheet.MESSAGE_KEY)
-            val unicode = bundle.getString(SmileBottomSheet.SMILE_KEY)!!
-            val name = bundle.getString(SmileBottomSheet.SMILE_NAME)!!
             try {
-                onAddEmojiResult(getMessageById(messageId), unicode, name)
-            } catch (e: java.lang.IllegalStateException) {
-                model.error(e)
-            }
-        }
+                when (val data = bundle.getParcelable<BottomSheetResult>(BOTTOM_SHEET_RES)) {
+                    is AddEmoji ->
+                        onAddEmojiResult(
+                            getMessageById(data.messageId),
+                            data.unicode,
+                            data.name
+                        )
+                    is Copy ->
+                        copyMessage(getMessageById(data.messageId))
+                    is Delete ->
+                        deleteMessage(getMessageById(data.messageId))
+                }
 
-        childFragmentManager.setFragmentResultListener(
-            BottomSheet.COPY,
-            this
-        ) { _, bundle ->
-            val messageId = bundle.getInt(SmileBottomSheet.MESSAGE_KEY)
-            try {
-                copyMessage(getMessageById(messageId))
             } catch (e: java.lang.IllegalStateException) {
                 model.error(e)
             }
@@ -188,6 +184,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private fun getMessageById(messageId: Int): MessageItem {
         return messages.find { it.id == messageId } // since there two source of messages collisions happens
             ?: throw java.lang.IllegalStateException(getString(R.string.error_data_expired))
+    }
+
+    private fun deleteMessage(message: MessageItem) {
+        model.processEvent(ChatEvent.DeleteMessage(message.id))
     }
 
     private fun copyMessage(message: MessageItem) {
@@ -245,6 +245,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         const val USER_NAME = "user_name"
         const val STREAM = "stream"
         const val TOPIC = "topic"
+        const val BOTTOM_SHEET_RES = "bottom sheet result"
 
         fun newInstance(bundle: Bundle) = ChatFragment().apply { arguments = bundle }
 

@@ -45,4 +45,5 @@ interface Repository {
 
     fun deleteEmoji(messageId: Int, emojiName: String): Completable
 
+    fun deleteMessage(messageId: Int): Completable
 }

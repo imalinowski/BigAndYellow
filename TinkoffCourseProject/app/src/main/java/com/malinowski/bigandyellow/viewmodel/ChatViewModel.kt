@@ -59,6 +59,8 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 addReaction(event.messageId, event.emojiName)
             is Reaction.Remove ->
                 deleteReaction(event.messageId, event.emojiName)
+            is DeleteMessage ->
+                deleteMessage(event.messageId)
         }
     }
 
@@ -160,6 +162,22 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             onComplete = { },
             onError = { error(it) }
         ).addTo(compositeDisposable)
+    }
+
+    private fun deleteMessage(messageId: Int) {
+        dataProvider.deleteMessage(messageId)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onComplete = {
+                    val state = chatState.value!!
+                    val message = state.messages.find { it.id == messageId }
+                    val list = state.messages.toMutableList().apply { remove(message) }
+                    chatState.value = state.copy(messages = list)
+                    scrollToPos.value = 0
+                    result()
+                },
+                onError = { error(it) }
+            ).addTo(compositeDisposable)
     }
 
     override fun onCleared() {
