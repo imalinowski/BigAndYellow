@@ -33,7 +33,12 @@ sealed class ChatEvent {
 
     data class DeleteMessage(
         val messageId: Int
-    ): ChatEvent()
+    ) : ChatEvent()
+
+    data class EditMessage(
+        val messageId: Int,
+        val content: String
+    ) : ChatEvent()
 
     data class SetMessageNum(
         val topicName: String?,

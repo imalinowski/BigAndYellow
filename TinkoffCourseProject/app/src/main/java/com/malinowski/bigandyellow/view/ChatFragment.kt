@@ -47,6 +47,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private val messages
         get() = state.messages
 
+    private var focusedMessageId = -1
+
     private val adapter: MessagesAdapter by lazy {
         MessagesAdapter(
             onEmojiClick = { parcel: EmojiClickParcel ->
@@ -143,6 +145,16 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             layoutManager = this@ChatFragment.layoutManager
         }
 
+        binding.editMessageButton.setOnClickListener {
+            binding.sendMessageText.apply {
+                if (this.length() == 0) return@apply
+                model.processEvent(ChatEvent.EditMessage(focusedMessageId, text.toString()))
+                setText("")
+                binding.editMessageButton.visibility = View.GONE
+                binding.sendMessageButton.visibility = View.VISIBLE
+            }
+        }
+
         binding.sendMessageButton.setOnClickListener {
             binding.sendMessageText.apply {
                 if (this.length() == 0) return@apply
@@ -173,8 +185,11 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                         copyMessage(getMessageById(data.messageId))
                     is Delete ->
                         deleteMessage(getMessageById(data.messageId))
+                    is Edit ->
+                        editMessage(getMessageById(data.messageId))
+                    null ->
+                        Log.e("DEBUG_BOTTOM_SHEET", "bottom sheet data is null")
                 }
-
             } catch (e: java.lang.IllegalStateException) {
                 model.error(e)
             }
@@ -184,6 +199,15 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private fun getMessageById(messageId: Int): MessageItem {
         return messages.find { it.id == messageId } // since there two source of messages collisions happens
             ?: throw java.lang.IllegalStateException(getString(R.string.error_data_expired))
+    }
+
+    private fun editMessage(message: MessageItem) {
+        binding.editMessageButton.visibility = View.VISIBLE
+        binding.sendMessageButton.visibility = View.GONE
+        binding.sendMessageText.setText(
+            HtmlCompat.fromHtml(message.message, HtmlCompat.FROM_HTML_MODE_LEGACY).trim()
+        )
+        focusedMessageId = message.id
     }
 
     private fun deleteMessage(message: MessageItem) {

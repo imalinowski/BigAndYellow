@@ -9,8 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/BottomSheetItem"
-        android:clickable="true"
-        android:focusable="true"
         android:text="@string/add_reaction"/>
 
     <TextView
@@ -39,8 +37,6 @@
         style="@style/BottomSheetItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
         android:text="@string/delete"
         android:textColor="@color/offline_red" />
 

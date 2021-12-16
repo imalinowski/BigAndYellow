@@ -10,6 +10,7 @@ import com.malinowski.bigandyellow.databinding.BottomSheetBinding
 import com.malinowski.bigandyellow.model.data.AddEmoji
 import com.malinowski.bigandyellow.model.data.Copy
 import com.malinowski.bigandyellow.model.data.Delete
+import com.malinowski.bigandyellow.model.data.Edit
 
 
 class BottomSheet : BottomSheetDialogFragment() {
@@ -40,6 +41,14 @@ class BottomSheet : BottomSheetDialogFragment() {
                 parentFragmentManager.setFragmentResult(
                     ChatFragment.BOTTOM_SHEET_RES, bundleOf(
                         ChatFragment.BOTTOM_SHEET_RES to Copy(messageId)
+                    )
+                )
+                dismiss()
+            }
+            edit.setOnClickListener {
+                parentFragmentManager.setFragmentResult(
+                    ChatFragment.BOTTOM_SHEET_RES, bundleOf(
+                        ChatFragment.BOTTOM_SHEET_RES to Edit(messageId)
                     )
                 )
                 dismiss()

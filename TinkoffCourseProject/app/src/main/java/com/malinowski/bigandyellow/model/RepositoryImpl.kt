@@ -373,6 +373,15 @@ class RepositoryImpl @Inject constructor() : Repository {
         service.deleteMessage(messageId)
             .subscribeOn(Schedulers.io())
 
+    override fun editMessageTopic(messageId: Int, topic: String): Completable =
+        service.editMessageTopic(messageId, topic)
+            .subscribeOn(Schedulers.io())
+
+    override fun editMessage(messageId: Int, content: String): Completable =
+        service.editMessage(messageId, content)
+            .subscribeOn(Schedulers.io())
+
+
     companion object {
         private const val idRoute: String = "id"
         private const val messagesRoute: String = "messages"

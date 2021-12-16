@@ -61,6 +61,18 @@ interface ZulipChat {
         @Path("msg_id") messageId: Int,
     ): Completable
 
+    @PATCH("messages/{msg_id}")
+    fun editMessage(
+        @Path("msg_id") messageId: Int,
+        @Query("content") content: String,
+    ): Completable
+
+    @PATCH("messages/{msg_id}")
+    fun editMessageTopic(
+        @Path("msg_id") messageId: Int,
+        @Query("topic") topic: String,
+    ): Completable
+
     companion object {
         const val NEWEST_MES = "newest"
     }

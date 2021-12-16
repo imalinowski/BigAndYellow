@@ -12,4 +12,7 @@ data class AddEmoji(val messageId: Int, val unicode: String, val name: String) :
 data class Copy(val messageId: Int) : BottomSheetResult()
 
 @Parcelize
+data class Edit(val messageId: Int) : BottomSheetResult()
+
+@Parcelize
 data class Delete(val messageId: Int) : BottomSheetResult()
