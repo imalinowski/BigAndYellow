@@ -40,6 +40,11 @@ sealed class ChatEvent {
         val content: String
     ) : ChatEvent()
 
+    data class ChangeMessageTopic(
+        val messageId: Int,
+        val topic: String
+    ) : ChatEvent()
+
     data class SetMessageNum(
         val topicName: String?,
         val messageNum: Int

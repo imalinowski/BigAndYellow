@@ -15,4 +15,7 @@ data class Copy(val messageId: Int) : BottomSheetResult()
 data class Edit(val messageId: Int) : BottomSheetResult()
 
 @Parcelize
+data class ChangeTopic(val messageId: Int) : BottomSheetResult()
+
+@Parcelize
 data class Delete(val messageId: Int) : BottomSheetResult()

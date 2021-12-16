@@ -187,6 +187,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                         deleteMessage(getMessageById(data.messageId))
                     is Edit ->
                         editMessage(getMessageById(data.messageId))
+                    is ChangeTopic ->
+                        changeTopic(getMessageById(data.messageId))
                     null ->
                         Log.e("DEBUG_BOTTOM_SHEET", "bottom sheet data is null")
                 }
@@ -199,6 +201,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private fun getMessageById(messageId: Int): MessageItem {
         return messages.find { it.id == messageId } // since there two source of messages collisions happens
             ?: throw java.lang.IllegalStateException(getString(R.string.error_data_expired))
+    }
+
+    private fun changeTopic(message: MessageItem) {
+        model.processEvent(ChatEvent.ChangeMessageTopic(messageId = message.id, topic = "swimming turtles"))
     }
 
     private fun editMessage(message: MessageItem) {

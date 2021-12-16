@@ -7,10 +7,7 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.malinowski.bigandyellow.databinding.BottomSheetBinding
-import com.malinowski.bigandyellow.model.data.AddEmoji
-import com.malinowski.bigandyellow.model.data.Copy
-import com.malinowski.bigandyellow.model.data.Delete
-import com.malinowski.bigandyellow.model.data.Edit
+import com.malinowski.bigandyellow.model.data.*
 
 
 class BottomSheet : BottomSheetDialogFragment() {
@@ -25,6 +22,7 @@ class BottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //TODO USE GENERATE LIST AND RETURN CLICKED POS
         val messageId: Int = arguments?.getInt(MESSAGE_KEY)!!
         with(binding) {
             addReaction.setOnClickListener {
@@ -49,6 +47,14 @@ class BottomSheet : BottomSheetDialogFragment() {
                 parentFragmentManager.setFragmentResult(
                     ChatFragment.BOTTOM_SHEET_RES, bundleOf(
                         ChatFragment.BOTTOM_SHEET_RES to Edit(messageId)
+                    )
+                )
+                dismiss()
+            }
+            changeTopic.setOnClickListener {
+                parentFragmentManager.setFragmentResult(
+                    ChatFragment.BOTTOM_SHEET_RES, bundleOf(
+                        ChatFragment.BOTTOM_SHEET_RES to ChangeTopic(messageId)
                     )
                 )
                 dismiss()

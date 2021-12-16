@@ -63,6 +63,9 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 deleteMessage(event.messageId)
             is EditMessage ->
                 editMessage(event.messageId, event.content)
+            is ChangeMessageTopic ->
+                changeMessageTopic(event.messageId, event.topic)
+
         }
     }
 
@@ -101,7 +104,7 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 onNext = { messagesPage ->
                     result()
                     val lastPage =
-                        messagesPage.isEmpty() || messagesPage.size < 20 // TODO Вынести константу
+                        messagesPage.isEmpty() || messagesPage.size < PAGE_SIZE
                     val messages = state.messages.toMutableList().apply { addAll(messagesPage) }
                     chatState.value = state.copy(
                         messages = messages,
@@ -198,8 +201,27 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             ).addTo(compositeDisposable)
     }
 
+    private fun changeMessageTopic(messageId: Int, topic: String){
+        dataProvider.editMessageTopic(messageId, topic)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onComplete = {
+                    val state = chatState.value!!
+                    val message = state.messages.find { it.id == messageId }!!
+                    val list = state.messages.toMutableList().apply { remove(message) }
+                    chatState.value = state.copy(messages = list)
+                    result()
+                },
+                onError = { error(it) }
+            ).addTo(compositeDisposable)
+    }
+
     override fun onCleared() {
         super.onCleared()
         compositeDisposable.dispose()
+    }
+
+    companion object {
+        private const val PAGE_SIZE = 20
     }
 }
