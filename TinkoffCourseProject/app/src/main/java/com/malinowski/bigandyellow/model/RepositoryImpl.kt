@@ -49,7 +49,7 @@ class RepositoryImpl @Inject constructor() : Repository {
                 Log.d("STREAMS_NET", "$streams")
                 db.streamDao().insert(streams).toSingleDefault(streams)
             }
-            .flatMap { topicsPreload(it) }
+            //.flatMap { topicsPreload(it) }
             .doOnError { error: Throwable ->
                 Log.e("STREAMS_NET", "${error.message}")
             }
