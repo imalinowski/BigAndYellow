@@ -2,7 +2,6 @@ package com.malinowski.bigandyellow.view
 
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -41,9 +40,15 @@ class SmileBottomSheet : BottomSheetDialogFragment() {
                 textSize = 40f
                 store?.addView(this)
                 setOnClickListener {
-                    parentFragmentManager.setFragmentResult(
-                        ChatFragment.BOTTOM_SHEET_RES,
-                        bundleOf(ChatFragment.BOTTOM_SHEET_RES to AddEmoji(messageId, smiles[key]!!, key))
+                    parentFragmentManager.setFragmentResult(ChatFragment.BOTTOM_SHEET_RES,
+                        bundleOf(
+                            ChatFragment.BOTTOM_SHEET_RES to
+                                    AddEmoji(
+                                        messageId = messageId,
+                                        name = key,
+                                        unicode = smiles[key]!!
+                                    )
+                        )
                     )
                     dismiss()
                 }

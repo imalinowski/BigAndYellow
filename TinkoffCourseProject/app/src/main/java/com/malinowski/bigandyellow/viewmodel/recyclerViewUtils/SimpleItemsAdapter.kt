@@ -6,10 +6,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.malinowski.bigandyellow.databinding.SimpleItemBinding
+import com.malinowski.bigandyellow.model.data.SimpleItem
 
 class SimpleItemsAdapter(
     val onClick: (Int) -> Unit
-) : ListAdapter<String, SimpleItemsAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
+) : ListAdapter<SimpleItem, SimpleItemsAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
     class ViewHolder(val binding: SimpleItemBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -25,19 +26,23 @@ class SimpleItemsAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
-        holder.binding.item.text = item
+        holder.binding.item.apply {
+            text = item.name
+            setTextColor(item.color)
+            textSize = item.textSize
+        }
         holder.binding.root.setOnClickListener {
             onClick(position)
         }
     }
 
-    class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<String>() {
+    class InterestingItemDiffUtilCallback : DiffUtil.ItemCallback<SimpleItem>() {
 
-        override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
-            return oldItem == newItem
+        override fun areItemsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
+            return oldItem.name == newItem.name
         }
 
-        override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+        override fun areContentsTheSame(oldItem: SimpleItem, newItem: SimpleItem): Boolean {
             return oldItem == newItem
         }
 

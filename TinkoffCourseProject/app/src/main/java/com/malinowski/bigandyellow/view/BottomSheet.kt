@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -44,9 +45,9 @@ class BottomSheet : BottomSheetDialogFragment() {
             layoutManager = this@BottomSheet.layoutManager
         }
 
-        val items: List<String> = when {
+        val items: List<SimpleItem> = when {
             intents != null -> intents!!.map { messageIntentToString(it) }
-            topics != null -> topics!!.map { it.topic }
+            topics != null -> topics!!.map { SimpleItem(it.topic) }
             else -> {
                 Log.e("BOTTOM_SHEET", "no items")
                 dismiss()
@@ -57,13 +58,23 @@ class BottomSheet : BottomSheetDialogFragment() {
         adapter.submitList(items)
     }
 
-    private fun messageIntentToString(item: MessageIntent): String {
-        return when (item) {
-            is MessageIntent.AddEmoji -> App.appContext.getString(R.string.add_reaction)
-            is MessageIntent.Copy -> App.appContext.getString(R.string.copy)
-            is MessageIntent.Edit -> App.appContext.getString(R.string.edit)
-            is MessageIntent.ChangeTopic -> App.appContext.getString(R.string.change_topic)
-            is MessageIntent.Delete -> App.appContext.getString(R.string.delete)
+    private fun messageIntentToString(item: MessageIntent): SimpleItem {
+        with(App.appContext) {
+            return when (item) {
+                is MessageIntent.AddEmoji ->
+                    SimpleItem(getString(R.string.add_reaction))
+                is MessageIntent.Copy ->
+                    SimpleItem(getString(R.string.copy))
+                is MessageIntent.Edit ->
+                    SimpleItem(getString(R.string.edit))
+                is MessageIntent.ChangeTopic ->
+                    SimpleItem(getString(R.string.change_topic))
+                is MessageIntent.Delete ->
+                    SimpleItem(
+                        getString(R.string.delete),
+                        ContextCompat.getColor(requireContext(), R.color.offline_red)
+                    )
+            }
         }
     }
 

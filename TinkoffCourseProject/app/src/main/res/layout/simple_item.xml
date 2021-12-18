@@ -5,9 +5,9 @@
 
     <TextView
         android:id="@+id/item"
+        style="@style/BottomSheetItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        style="@style/BottomSheetItem"
-        android:text="@string/app_name"/>
+        android:text="@string/app_name" />
 
 </FrameLayout>
