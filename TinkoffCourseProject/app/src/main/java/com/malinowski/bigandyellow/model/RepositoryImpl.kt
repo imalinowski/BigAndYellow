@@ -49,9 +49,10 @@ class RepositoryImpl @Inject constructor() : Repository {
                 Log.d("STREAMS_NET", "$streams")
                 db.streamDao().insert(streams).toSingleDefault(streams)
             }
-            //.flatMap { topicsPreload(it) }
-            .doOnError { error: Throwable ->
+            .flatMap { topicsPreload(it) }
+            .onErrorResumeNext { error: Throwable ->
                 Log.e("STREAMS_NET", "${error.message}")
+                dbCall
             }
 
         return Single.concat(dbCall, netCall).toObservable()
@@ -77,8 +78,9 @@ class RepositoryImpl @Inject constructor() : Repository {
                 db.streamDao().insert(streams).toSingleDefault(streams)
             }
             .flatMap { topicsPreload(it) }
-            .doOnError { error: Throwable ->
+            .onErrorResumeNext { error: Throwable ->
                 Log.e("STREAMS_NET", "${error.message}")
+                dbCall
             }
 
         return Single.concat(dbCall, netCall).toObservable()
@@ -86,7 +88,8 @@ class RepositoryImpl @Inject constructor() : Repository {
 
     private fun topicsPreload(streams: List<Stream>): Single<List<Stream>> {
         val topicLoaders = streams.map { stream ->
-            loadTopics(stream.id)
+            db.topicDao().getTopicsInStream(stream.id)
+                .doOnSuccess { Log.d("TOPICS_DB", "stream ${stream.id}}> $it") }
                 .subscribeOn(Schedulers.io())
                 .map {
                     stream.apply { topics = it.toMutableList() }
@@ -95,22 +98,22 @@ class RepositoryImpl @Inject constructor() : Repository {
         return Single.concatEager(topicLoaders).toList()
     }
 
-    override fun loadTopics(id: Int): Single<List<Topic>> {
+    override fun loadTopics(streamId: Int): Single<List<Topic>> {
 
         val dbCall = db.topicDao()
-            .getTopicsInStream(id)
-            .doOnSuccess { Log.d("TOPICS_DB", "stream $id > $it") }
+            .getTopicsInStream(streamId)
+            .doOnSuccess { Log.d("TOPICS_DB", "stream $streamId > $it") }
 
-        val netCall = service.getTopicsInStream(id)
+        val netCall = service.getTopicsInStream(streamId)
             .map { body ->
                 val topicsJSA =
                     format.decodeFromString<JsonObject>(body.string())[topicsRoute]
                 format.decodeFromString<List<Topic>>(topicsJSA.toString()).apply {
-                    map { it.streamId = id }
+                    map { it.streamId = streamId }
                 }
             }
             .flatMap { topics ->
-                Log.d("TOPICS_NET", "stream $id > $topics")
+                Log.d("TOPICS_NET", "stream $streamId > $topics")
                 db.topicDao().insert(topics).toSingleDefault(topics)
             }
             .flatMap { topics -> messageNumPreload(topics) }
@@ -383,7 +386,6 @@ class RepositoryImpl @Inject constructor() : Repository {
 
     override fun loadTopics(): Single<List<Topic>> =
         db.topicDao().getAll().subscribeOn(Schedulers.io())
-
 
     companion object {
         private const val idRoute: String = "id"

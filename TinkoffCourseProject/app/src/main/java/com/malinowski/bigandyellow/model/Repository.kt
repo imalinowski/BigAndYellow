@@ -15,7 +15,7 @@ interface Repository {
 
     fun loadSubscribedStreams(): Observable<List<Stream>>
 
-    fun loadTopics(id: Int): Single<List<Topic>>
+    fun loadTopics(streamId: Int): Single<List<Topic>>
 
     fun loadUsers(): Observable<List<User>>
 

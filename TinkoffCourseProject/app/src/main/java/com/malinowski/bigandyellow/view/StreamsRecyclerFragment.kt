@@ -106,6 +106,7 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
         items.addAll(initPos + 1, streamItem.topics)
         adapter.notifyItemRangeInserted(initPos + 1, streamItem.topics.size)
         adapter.notifyItemRangeChanged(initPos, items.size)
+        model.processEvent(Event.UpdateStream(streamItem.id))
     }
 
     private fun deleteItems(listPosition: Int) {

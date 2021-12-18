@@ -1,7 +1,6 @@
 package com.malinowski.bigandyellow.model.data
 
 import androidx.room.*
-import androidx.room.Delete
 import io.reactivex.Completable
 import io.reactivex.Single
 import kotlinx.serialization.SerialName
@@ -9,10 +8,10 @@ import kotlinx.serialization.Serializable
 
 private const val TABLE_NAME = "topic"
 
-@Entity(tableName = TABLE_NAME)
+@Entity(tableName = TABLE_NAME, primaryKeys = ["name", "stream_id"])
 @Serializable
 data class Topic(
-    @PrimaryKey @ColumnInfo(name = "name") @SerialName("name") val name: String,
+    @ColumnInfo(name = "name") @SerialName("name") val name: String,
     @ColumnInfo(name = "stream_id") var streamId: Int = 0,
     @ColumnInfo(name = "message_num") var messageNum: Int = 0,
 )

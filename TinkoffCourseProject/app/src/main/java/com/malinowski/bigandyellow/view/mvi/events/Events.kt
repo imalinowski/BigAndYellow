@@ -8,6 +8,10 @@ sealed class Event {
         val query: String = ""
     ) : Event()
 
+    data class UpdateStream(
+        val streamId: Int
+    ): Event()
+
     sealed class OpenChat : Event() {
         data class WithUser(
             val user: User

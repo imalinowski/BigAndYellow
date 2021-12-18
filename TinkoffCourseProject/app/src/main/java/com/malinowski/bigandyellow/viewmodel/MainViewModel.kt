@@ -4,8 +4,12 @@ import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
 import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.model.Repository
+import com.malinowski.bigandyellow.model.data.StreamItem
+import com.malinowski.bigandyellow.model.data.StreamTopicItem
+import com.malinowski.bigandyellow.model.data.TopicItem
 import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.utils.SingleLiveEvent
 import com.malinowski.bigandyellow.view.ChatFragment
@@ -42,6 +46,9 @@ class MainViewModel @Inject constructor(
     @Inject
     lateinit var searchTopicsUseCase: SearchTopicsUseCase
 
+    @Inject
+    internal lateinit var topicToItemMapper: TopicToItemMapper
+
     //flow
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()
 
@@ -72,6 +79,9 @@ class MainViewModel @Inject constructor(
                 openChat(event.user)
             is OpenChat.OfTopic ->
                 openChat(event.streamId, event.topic)
+            is Event.UpdateStream ->
+                loadTopics(event.streamId)
+
         }
     }
 
@@ -137,6 +147,32 @@ class MainViewModel @Inject constructor(
             navigateChat.postValue(this)
         }
     }
+
+    private fun loadTopics(streamId: Int) {
+        dataProvider.loadTopics(streamId)
+            .map { topicToItemMapper(it, streamId) }
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onSuccess = { topics ->
+                    streamsAllState.value?.items?.updateStream(streamId, topics)
+                    streamsSubscribedState.value?.items?.updateStream(streamId, topics)
+                    _mainScreenState.value = ScreenState.Result()
+                },
+                onError = {
+                    _mainScreenState.value = ScreenState.Error(it)
+                }
+            ).addTo(compositeDisposable)
+    }
+
+    private fun List<StreamTopicItem>.updateStream(
+        streamId: Int,
+        topics: List<TopicItem>
+    ) {
+        this.find { it is StreamItem && it.id == streamId }?.apply {
+            (this as StreamItem).topics = topics
+        }
+    }
+
 
     override fun onCleared() {
         super.onCleared()
