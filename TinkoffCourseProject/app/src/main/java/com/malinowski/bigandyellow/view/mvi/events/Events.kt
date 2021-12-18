@@ -31,6 +31,10 @@ sealed class UsersEvent {
 
 sealed class ChatEvent {
 
+    data class SetMessageID(
+        val messageId: Int
+    ) : ChatEvent()
+
     data class DeleteMessage(
         val messageId: Int
     ) : ChatEvent()
@@ -48,6 +52,10 @@ sealed class ChatEvent {
     data class SetMessageNum(
         val topicName: String?,
         val messageNum: Int
+    ) : ChatEvent()
+
+    data class LoadTopics(
+        val messageId: Int
     ) : ChatEvent()
 
     sealed class LoadMessages : ChatEvent() {

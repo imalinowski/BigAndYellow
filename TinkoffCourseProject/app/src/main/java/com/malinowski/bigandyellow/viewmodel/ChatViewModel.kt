@@ -36,6 +36,7 @@ class ChatViewModel @Inject constructor() : ViewModel() {
 
     //event
     val scrollToPos = SingleLiveEvent<Int>()
+    val showTopics = SingleLiveEvent<List<String>>()
 
     //mapper
     @Inject
@@ -65,7 +66,10 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 editMessage(event.messageId, event.content)
             is ChangeMessageTopic ->
                 changeMessageTopic(event.messageId, event.topic)
-
+            is SetMessageID ->
+                setMessageId(event.messageId)
+            is LoadTopics ->
+                loadTopics(event.messageId)
         }
     }
 
@@ -184,7 +188,7 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             ).addTo(compositeDisposable)
     }
 
-    private fun editMessage(messageId: Int, content: String){
+    private fun editMessage(messageId: Int, content: String) {
         dataProvider.editMessage(messageId, content)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
@@ -201,7 +205,7 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             ).addTo(compositeDisposable)
     }
 
-    private fun changeMessageTopic(messageId: Int, topic: String){
+    private fun changeMessageTopic(messageId: Int, topic: String) {
         dataProvider.editMessageTopic(messageId, topic)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
@@ -214,6 +218,23 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 },
                 onError = { error(it) }
             ).addTo(compositeDisposable)
+    }
+
+    private fun loadTopics(messageId: Int) {
+        setMessageId(messageId)
+        dataProvider.loadTopics()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onSuccess = { topics ->
+                    showTopics.value = topics.map { it.name }
+                    result()
+                },
+                onError = { error(it) }
+            ).addTo(compositeDisposable)
+    }
+
+    private fun setMessageId(messageId: Int) {
+        chatState.postValue(chatState.value!!.copy(focusedMessageId = messageId))
     }
 
     override fun onCleared() {

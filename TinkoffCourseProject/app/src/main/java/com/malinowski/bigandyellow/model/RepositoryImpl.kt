@@ -381,6 +381,9 @@ class RepositoryImpl @Inject constructor() : Repository {
         service.editMessage(messageId, content)
             .subscribeOn(Schedulers.io())
 
+    override fun loadTopics(): Single<List<Topic>> =
+        db.topicDao().getAll().subscribeOn(Schedulers.io())
+
 
     companion object {
         private const val idRoute: String = "id"

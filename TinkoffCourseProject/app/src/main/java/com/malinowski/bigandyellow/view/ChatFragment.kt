@@ -47,7 +47,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private val messages
         get() = state.messages
 
-    private var focusedMessageId = -1
+    private val focusedMessageId
+        get() = state.focusedMessageId
 
     private val adapter: MessagesAdapter by lazy {
         MessagesAdapter(
@@ -97,6 +98,9 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 binding.messageRecycler.scrollToPosition(it)
             }
         }
+        model.showTopics.observe(viewLifecycleOwner) {
+            showBottomSheet(focusedMessageId, it)
+        }
         model.chatScreenState.observe(viewLifecycleOwner) {
             mainModel.setScreenState(it)
         }
@@ -110,15 +114,30 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         adapter.submitList(messages)
     }
 
-    private fun showBottomSheet(position: Int) {
-        BottomSheet()
-            .apply { arguments = bundleOf(BottomSheet.MESSAGE_KEY to position) }
+    private fun showBottomSheet(messageId: Int) {
+        val items = listOf(
+            MessageIntent.AddEmoji(messageId),
+            MessageIntent.Copy(messageId),
+            MessageIntent.Edit(messageId),
+            MessageIntent.ChangeTopic(messageId),
+            MessageIntent.Delete(messageId),
+        )
+        BottomSheet.newInstance(items)
             .show(childFragmentManager, BottomSheet.TAG)
     }
 
-    private fun showSmileBottomSheet(position: Int) {
+    private fun showBottomSheet(messageId: Int, topics: List<String>) {
+        val items = topics.map { topic ->
+            ChangeTopic(messageId, topic)
+        }
+        BottomSheet.newInstance(items)
+            .show(childFragmentManager, BottomSheet.TAG)
+    }
+
+
+    private fun showSmileBottomSheet(messageId: Int) {
         SmileBottomSheet()
-            .apply { arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to position) }
+            .apply { arguments = bundleOf(SmileBottomSheet.MESSAGE_KEY to messageId) }
             .show(childFragmentManager, SmileBottomSheet.TAG)
     }
 
@@ -175,20 +194,25 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         ) { _, bundle ->
             try {
                 when (val data = bundle.getParcelable<BottomSheetResult>(BOTTOM_SHEET_RES)) {
+                    is MessageIntent.AddEmoji ->
+                        showSmileBottomSheet(data.messageId)
                     is AddEmoji ->
                         onAddEmojiResult(
                             getMessageById(data.messageId),
                             data.unicode,
                             data.name
                         )
-                    is Copy ->
+                    is MessageIntent.Copy ->
                         copyMessage(getMessageById(data.messageId))
-                    is Delete ->
+                    is MessageIntent.Delete ->
                         deleteMessage(getMessageById(data.messageId))
-                    is Edit ->
+                    is MessageIntent.Edit ->
                         editMessage(getMessageById(data.messageId))
+                    is MessageIntent.ChangeTopic -> {
+                        changeTopicIntent(getMessageById(data.messageId))
+                    }
                     is ChangeTopic ->
-                        changeTopic(getMessageById(data.messageId))
+                        changeTopic(getMessageById(data.messageId), data.topic)
                     null ->
                         Log.e("DEBUG_BOTTOM_SHEET", "bottom sheet data is null")
                 }
@@ -203,8 +227,17 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             ?: throw java.lang.IllegalStateException(getString(R.string.error_data_expired))
     }
 
-    private fun changeTopic(message: MessageItem) {
-        model.processEvent(ChatEvent.ChangeMessageTopic(messageId = message.id, topic = "swimming turtles"))
+    private fun changeTopic(message: MessageItem, topic: String) {
+        model.processEvent(
+            ChatEvent.ChangeMessageTopic(
+                messageId = message.id,
+                topic = topic
+            )
+        )
+    }
+
+    private fun changeTopicIntent(message: MessageItem) {
+        model.processEvent(ChatEvent.LoadTopics(message.id))
     }
 
     private fun editMessage(message: MessageItem) {
@@ -213,7 +246,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         binding.sendMessageText.setText(
             HtmlCompat.fromHtml(message.message, HtmlCompat.FROM_HTML_MODE_LEGACY).trim()
         )
-        focusedMessageId = message.id
+        model.processEvent(ChatEvent.SetMessageID(message.id))
     }
 
     private fun deleteMessage(message: MessageItem) {
@@ -246,7 +279,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private fun loadMessages() {
-        val anchor = if (messages.isNotEmpty()) "${messages.last().id}" else ZulipChat.NEWEST_MES
+        val anchor =
+            if (messages.isNotEmpty()) "${messages.last().id}" else ZulipChat.NEWEST_MES
         Log.d("LOAD_MESSAGES", anchor)
         model.processEvent(
             if (userEmail != null)
@@ -275,6 +309,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         const val USER_NAME = "user_name"
         const val STREAM = "stream"
         const val TOPIC = "topic"
+        const val MESSAGE_KEY = "message key"
         const val BOTTOM_SHEET_RES = "bottom sheet result"
 
         fun newInstance(bundle: Bundle) = ChatFragment().apply { arguments = bundle }

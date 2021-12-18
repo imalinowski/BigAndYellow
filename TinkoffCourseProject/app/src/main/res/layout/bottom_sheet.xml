@@ -4,41 +4,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/add_reaction"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/simple_items_recycler"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/BottomSheetItem"
-        android:text="@string/add_reaction"/>
-
-    <TextView
-        android:id="@+id/change_topic"
-        style="@style/BottomSheetItem"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/change_topic" />
-
-    <TextView
-        android:id="@+id/edit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/BottomSheetItem"
-        android:text="@string/edit"/>
-
-    <TextView
-        android:id="@+id/copy"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@style/BottomSheetItem"
-        android:text="@string/copy"/>
-
-    <TextView
-        android:id="@+id/delete"
-        style="@style/BottomSheetItem"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/delete"
-        android:textColor="@color/offline_red" />
-
+        android:layout_height="match_parent" />
 
 </LinearLayout>

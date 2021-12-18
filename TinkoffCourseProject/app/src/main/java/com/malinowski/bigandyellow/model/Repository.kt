@@ -50,4 +50,6 @@ interface Repository {
     fun editMessageTopic(messageId: Int, topic: String): Completable
 
     fun editMessage(messageId: Int, content: String): Completable
+
+    fun loadTopics(): Single<List<Topic>>
 }

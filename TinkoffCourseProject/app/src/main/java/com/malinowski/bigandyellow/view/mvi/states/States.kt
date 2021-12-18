@@ -10,6 +10,7 @@ sealed class State {
         val name: String = "",
         val messages: List<MessageItem> = listOf(),
         val loaded: Boolean = false,
+        val focusedMessageId: Int = -1
     ) : State()
 
     data class Users(

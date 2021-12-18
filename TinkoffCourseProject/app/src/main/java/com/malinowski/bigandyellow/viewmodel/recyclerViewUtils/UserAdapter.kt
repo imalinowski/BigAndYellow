@@ -13,8 +13,7 @@ import com.malinowski.bigandyellow.model.data.UserStatus
 
 class UserAdapter(
     val onClick: (User) -> Unit
-) :
-    ListAdapter<User, UserAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
+) : ListAdapter<User, UserAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
     class ViewHolder(val binding: UserItemBinding) : RecyclerView.ViewHolder(binding.root) {}
 
