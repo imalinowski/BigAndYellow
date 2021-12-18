@@ -10,6 +10,9 @@ import androidx.core.text.HtmlCompat
 import com.bumptech.glide.Glide
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.data.parcels.EmojiAddParcel
+import com.malinowski.bigandyellow.model.data.parcels.EmojiClickParcel
+import com.malinowski.bigandyellow.model.data.parcels.EmojiDeleteParcel
 
 
 class MessageViewGroup @JvmOverloads constructor(

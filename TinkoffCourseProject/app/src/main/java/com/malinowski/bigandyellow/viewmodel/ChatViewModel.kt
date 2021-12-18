@@ -54,6 +54,8 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 processGetMessages(getMessages(event.userEmail, event.anchor))
             is LoadMessages.ForTopic ->
                 processGetMessages(getMessages(event.streamId, event.topicName, event.anchor))
+            is LoadMessages.ForStream ->
+                processGetMessages(getMessages(event.streamId, event.anchor))
             is SetMessageNum ->
                 setMessageNum(event.topicName, event.messageNum)
             is Reaction.Add ->
@@ -88,6 +90,11 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     private fun loading() {
         _chatScreenState.postValue(ScreenState.Loading)
     }
+
+    private fun getMessages(
+        stream: Int, anchor: String
+    ): Observable<List<MessageData>> =
+        dataProvider.loadMessages(stream, anchor = anchor)
 
     private fun getMessages(
         stream: Int, topicName: String, anchor: String

@@ -20,8 +20,10 @@ import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.FragmentChatBinding
 import com.malinowski.bigandyellow.getComponent
 import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.data.parcels.*
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.view.mvi.events.ChatEvent
+import com.malinowski.bigandyellow.view.mvi.events.Event
 import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.ChatViewModel
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
@@ -41,7 +43,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private val topicName: String? by lazy { arguments?.getString(TOPIC) }
     private val userName: String? by lazy { arguments?.getString(USER_NAME) }
     private val userEmail: String? by lazy { arguments?.getString(USER_EMAIL) }
-    private val streamId: Int? by lazy { arguments?.getInt(STREAM) ?: -1 }
+    private val streamId: Int? by lazy { arguments?.getInt(STREAM_ID) ?: -1 }
+    private val streamName: String? by lazy { arguments?.getString(STREAM_NAME) }
 
     private var state = State.Chat("", listOf())
     private val messages
@@ -51,20 +54,24 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         get() = state.focusedMessageId
 
     private val adapter: MessagesAdapter by lazy {
-        MessagesAdapter(
-            onEmojiClick = { parcel: EmojiClickParcel ->
-                processEmojiClick(parcel)
-            },
-            onLongClick = { messageId ->
-                showBottomSheet(messageId)
-            },
-            onPlusClick = { messageId ->
-                showSmileBottomSheet(messageId)
-            },
-            onBind = { position ->
-                if (position == messages.size - 5 && !state.loaded) loadMessages()
+        MessagesAdapter { parcel ->
+            when (parcel) {
+                is EmojiAddParcel -> processEmojiClick(parcel)
+                is EmojiDeleteParcel -> processEmojiClick(parcel)
+                is ShowBottomSheet -> showBottomSheet(parcel.messageId)
+                is ShowSmileBottomSheet -> showSmileBottomSheet(parcel.messageId)
+                is OnBind ->
+                    if (parcel.position == messages.size - 5 && !state.loaded) loadMessages()
+                is OpenTopic -> mainModel.processEvent(
+                    Event.OpenChat.OfTopic(
+                        streamId = parcel.streamId,
+                        streamName = streamName!!,
+                        topic = parcel.topic
+                    )
+                )
             }
-        )
+
+        }
     }
 
     private val layoutManager = LinearLayoutManager(context).apply {
@@ -78,7 +85,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        model.setName(userName ?: topicName!!)
+        model.setName(userName ?: topicName ?: streamName!!)
     }
 
     override fun onCreateView(
@@ -288,6 +295,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 ChatEvent.LoadMessages.ForUser(userEmail!!, anchor)
             else if (streamId != 0 && topicName != null)
                 ChatEvent.LoadMessages.ForTopic(streamId!!, topicName!!, anchor)
+            else if (streamId != 0)
+                ChatEvent.LoadMessages.ForStream(streamId!!, anchor)
             else {
                 model.error(IllegalArgumentException("open chat -> Invalid arguments"))
                 parentFragmentManager.popBackStack()
@@ -308,7 +317,8 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     companion object {
         const val USER_EMAIL = "user_email"
         const val USER_NAME = "user_name"
-        const val STREAM = "stream"
+        const val STREAM_ID = "stream_id"
+        const val STREAM_NAME = "stream_name"
         const val TOPIC = "topic"
         const val MESSAGE_KEY = "message key"
         const val BOTTOM_SHEET_RES = "bottom sheet result"

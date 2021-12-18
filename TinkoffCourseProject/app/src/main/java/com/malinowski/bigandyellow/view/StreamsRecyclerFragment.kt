@@ -37,24 +37,36 @@ class StreamsRecyclerFragment : Fragment(R.layout.fragment_streams) {
 
     private var state = State.Streams(listOf())
 
-    private val adapter = TopicsChatsAdapter { position -> // on item click
-        when (val item = items[position]) {
-            is TopicItem -> item.also {
-                model.processEvent(
-                    Event.OpenChat.OfTopic(item.streamId, item.name)
-                )
-                closeStreams()
-            }
-            is StreamItem -> {
-                if (item.expanded)
-                    deleteItems(position)
-                else {
-                    addItems(item, position)
+    private val adapter = TopicsChatsAdapter(
+        onClick = { position -> // on item click
+            when (val item = items[position]) {
+                is TopicItem -> item.also {
+                    model.processEvent(
+                        Event.OpenChat.OfTopic(item.streamId, item.name, item.name)
+                    )
+                    closeStreams()
                 }
-                item.expanded = !item.expanded
+                is StreamItem -> {
+                    if (item.expanded)
+                        deleteItems(position)
+                    else {
+                        addItems(item, position)
+                    }
+                    item.expanded = !item.expanded
+                }
+            }
+        },
+        onLongClick = { position ->
+            when (val item = items[position]) {
+                is StreamItem -> {
+                    model.processEvent(
+                        Event.OpenChat.OfStream(item.id, item.name)
+                    )
+                }
+                else -> {}
             }
         }
-    }
+    )
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

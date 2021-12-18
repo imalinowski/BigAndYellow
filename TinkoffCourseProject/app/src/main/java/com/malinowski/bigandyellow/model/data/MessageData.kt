@@ -10,7 +10,6 @@ interface MessageData {
     val senderEmail: String
     val streamId: Int
     val topicName: String
-
     var reactions: List<Reaction>
     fun initEmoji(reactions: List<Reaction>)
 }

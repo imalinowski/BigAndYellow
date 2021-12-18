@@ -23,7 +23,7 @@ interface Repository {
 
     fun loadMessages(
         stream: Int,
-        topicName: String,
+        topicName: String = "",
         anchor: String = ZulipChat.NEWEST_MES
     ): Observable<List<MessageData>>
 

@@ -24,7 +24,13 @@ sealed class Event {
 
         data class OfTopic(
             val streamId: Int,
+            val streamName: String,
             val topic: String,
+        ) : OpenChat()
+
+        data class OfStream(
+            val streamId: Int,
+            val streamName: String,
         ) : OpenChat()
     }
 
@@ -77,6 +83,11 @@ sealed class ChatEvent {
         data class ForTopic(
             val streamId: Int,
             val topicName: String,
+            val anchor: String
+        ) : LoadMessages()
+
+        data class ForStream(
+            val streamId: Int,
             val anchor: String
         ) : LoadMessages()
     }

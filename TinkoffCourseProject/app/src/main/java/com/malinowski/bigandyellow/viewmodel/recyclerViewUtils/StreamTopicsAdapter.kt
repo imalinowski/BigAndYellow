@@ -15,7 +15,8 @@ import com.malinowski.bigandyellow.model.data.StreamTopicItem
 import com.malinowski.bigandyellow.model.data.TopicItem
 
 class TopicsChatsAdapter(
-    private val onClick: (position: Int) -> Unit
+    private val onClick: (position: Int) -> Unit,
+    private val onLongClick: (position: Int) -> Unit
 ) : ListAdapter<StreamTopicItem, TopicsChatsAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
     class ViewHolder(private val viewBinding: TopicAndChatsItemBinding) :
@@ -48,8 +49,12 @@ class TopicsChatsAdapter(
             }
         }
 
-        fun setOnClickListener(i: OnClickListener) {
-            viewBinding.root.setOnClickListener(i)
+        fun setOnClickListener(listener: OnClickListener) {
+            viewBinding.root.setOnClickListener(listener)
+        }
+
+        fun setOnLongClickListener(listener: OnLongClickListener) {
+            viewBinding.root.setOnLongClickListener(listener)
         }
     }
 
@@ -64,7 +69,10 @@ class TopicsChatsAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
         holder.bind(item)
-
+        holder.setOnLongClickListener {
+            onLongClick(position)
+            true
+        }
         holder.setOnClickListener {
             if (position >= itemCount) return@setOnClickListener
             onClick(position)

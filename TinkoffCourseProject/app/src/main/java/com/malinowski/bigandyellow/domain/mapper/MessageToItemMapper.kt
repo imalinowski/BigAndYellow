@@ -18,6 +18,8 @@ internal class MessageToItemMapper @Inject constructor() :
                 senderName = message.senderName,
                 timestamp = message.timestamp,
                 avatarUrl = message.avatarUrl,
+                topic = message.topicName,
+                streamId = message.streamId
             ).apply {
                 for (reaction in message.reactions)
                     addEmoji(reaction)

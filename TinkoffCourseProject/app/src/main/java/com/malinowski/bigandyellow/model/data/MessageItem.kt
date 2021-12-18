@@ -11,6 +11,8 @@ data class MessageItem(
     val senderName: String = "",
     val timestamp: Int = (Date().time / 1000).toInt(),
     val avatarUrl: String = "",
+    val topic: String = "",
+    val streamId: Int = 0,
     val emoji: HashMap<String, UnitedReaction> = HashMap()
 ) {
 

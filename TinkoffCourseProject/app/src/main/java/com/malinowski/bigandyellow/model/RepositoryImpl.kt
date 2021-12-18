@@ -5,6 +5,7 @@ import com.malinowski.bigandyellow.domain.mapper.MessageNetToDbMapper
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.data.db_entities.MessageDB
 import com.malinowski.bigandyellow.model.data.net_entities.MessageNET
+import com.malinowski.bigandyellow.model.data.net_entities.StreamRequest
 import com.malinowski.bigandyellow.model.db.AppDatabase
 import com.malinowski.bigandyellow.model.network.ZulipChat
 import com.malinowski.bigandyellow.model.network.ZulipChat.Companion.NEWEST_MES
@@ -220,10 +221,12 @@ class RepositoryImpl @Inject constructor() : Repository {
         topicName: String,
         anchor: String
     ): Observable<List<MessageData>> {
-        val narrow = listOf(
-            NarrowInt("stream", stream),
-            NarrowStr("topic", topicName)
-        ).map {
+        val narrow = mutableListOf<Narrow>(
+            NarrowInt("stream", stream)
+        ).apply {
+            if (topicName.isNotEmpty())
+                add(NarrowStr("topic", topicName))
+        }.map {
             Json.encodeToJsonElement(it)
         }.let {
             JsonArray(it).toString()

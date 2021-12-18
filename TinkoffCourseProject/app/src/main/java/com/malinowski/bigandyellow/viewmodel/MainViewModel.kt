@@ -77,7 +77,9 @@ class MainViewModel @Inject constructor(
             is OpenChat.WithUser ->
                 openChat(event.user)
             is OpenChat.OfTopic ->
-                openChat(event.streamId, event.topic)
+                openChat(event.streamId, event.topic, event.streamName)
+            is OpenChat.OfStream ->
+                openChat(event.streamId, event.streamName)
             is UpdateStream ->
                 loadTopics(event.streamId)
             is CreateStream ->
@@ -137,9 +139,18 @@ class MainViewModel @Inject constructor(
         _mainScreenState.postValue(state)
     }
 
-    private fun openChat(streamId: Int, topicName: String) {
+    private fun openChat(streamId: Int, streamName: String) {
         Bundle().apply {
-            putInt(ChatFragment.STREAM, streamId)
+            putInt(ChatFragment.STREAM_ID, streamId)
+            putString(ChatFragment.STREAM_NAME, streamName)
+            navigateChat.postValue(this)
+        }
+    }
+
+    private fun openChat(streamId: Int, topicName: String, streamName: String) {
+        Bundle().apply {
+            putInt(ChatFragment.STREAM_ID, streamId)
+            putString(ChatFragment.STREAM_NAME, streamName)
             putString(ChatFragment.TOPIC, topicName)
             navigateChat.postValue(this)
         }
