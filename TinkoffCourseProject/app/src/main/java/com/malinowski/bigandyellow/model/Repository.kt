@@ -52,4 +52,6 @@ interface Repository {
     fun editMessage(messageId: Int, content: String): Completable
 
     fun loadTopics(): Single<List<Topic>>
+
+    fun createStream(name: String, description: String): Completable
 }

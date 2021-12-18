@@ -14,8 +14,7 @@ import com.malinowski.bigandyellow.model.data.User
 import com.malinowski.bigandyellow.utils.SingleLiveEvent
 import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.mvi.events.Event
-import com.malinowski.bigandyellow.view.mvi.events.Event.OpenChat
-import com.malinowski.bigandyellow.view.mvi.events.Event.SearchStreams
+import com.malinowski.bigandyellow.view.mvi.events.Event.*
 import com.malinowski.bigandyellow.view.mvi.states.ScreenState
 import com.malinowski.bigandyellow.view.mvi.states.State
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -79,9 +78,10 @@ class MainViewModel @Inject constructor(
                 openChat(event.user)
             is OpenChat.OfTopic ->
                 openChat(event.streamId, event.topic)
-            is Event.UpdateStream ->
+            is UpdateStream ->
                 loadTopics(event.streamId)
-
+            is CreateStream ->
+                createStream(event.name, event.description)
         }
     }
 
@@ -124,6 +124,11 @@ class MainViewModel @Inject constructor(
             .addTo(compositeDisposable)
     }
 
+
+    private fun result(text: String = "") {
+        _mainScreenState.postValue(ScreenState.Result(text))
+    }
+
     private fun error(error: Throwable) {
         _mainScreenState.postValue(ScreenState.Error(error))
     }
@@ -148,6 +153,8 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    //TODO use channels view model
+
     private fun loadTopics(streamId: Int) {
         dataProvider.loadTopics(streamId)
             .map { topicToItemMapper(it, streamId) }
@@ -171,6 +178,20 @@ class MainViewModel @Inject constructor(
         this.find { it is StreamItem && it.id == streamId }?.apply {
             (this as StreamItem).topics = topics
         }
+    }
+
+    private fun createStream(name: String, description: String) {
+        dataProvider.createStream(name, description)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onComplete = {
+                    result("$name created!")
+                    searchStreamSubject.onNext("")
+                },
+                onError = {
+                    _mainScreenState.value = ScreenState.Error(it)
+                }
+            ).addTo(compositeDisposable)
     }
 
 

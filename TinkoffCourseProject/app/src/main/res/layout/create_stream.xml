@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="35dp">
+
+    <TextView
+        style="@style/BottomSheetItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/new_stream"
+        android:textStyle="bold" />
+
+    <EditText
+        android:id="@+id/name"
+        style="@style/EditTextCustom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:autofillHints="name"
+        android:hint="@string/name" />
+
+
+    <EditText
+        android:id="@+id/description"
+        style="@style/EditTextCustom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:autofillHints="description"
+        android:hint="@string/description" />
+
+    <Button
+        android:id="@+id/createStream"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="100dp"
+        android:backgroundTint="@color/custom_green_primary_variant"
+        android:paddingHorizontal="50dp"
+        android:text="@string/create" />
+
+
+</LinearLayout>

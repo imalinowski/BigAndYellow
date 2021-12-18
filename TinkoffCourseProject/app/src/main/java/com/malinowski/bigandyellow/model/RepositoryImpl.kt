@@ -387,6 +387,18 @@ class RepositoryImpl @Inject constructor() : Repository {
     override fun loadTopics(): Single<List<Topic>> =
         db.topicDao().getAll().subscribeOn(Schedulers.io())
 
+    override fun createStream(name: String, description: String): Completable {
+        val stream = listOf(
+            StreamRequest(name = name, description = description)
+        ).map {
+            Json.encodeToJsonElement(it)
+        }.let {
+            JsonArray(it).toString()
+        }
+        return service.subscribeStream(stream)
+            .subscribeOn(Schedulers.io())
+    }
+
     companion object {
         private const val idRoute: String = "id"
         private const val messagesRoute: String = "messages"

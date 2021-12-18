@@ -3,7 +3,6 @@
     android:color="?attr/colorControlHighlight">
     <item>
         <shape>
-            <solid android:color="@color/bg_log_out_color" />
             <corners android:radius="35dp" />
         </shape>
     </item>

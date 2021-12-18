@@ -27,4 +27,8 @@
     <string name="copy">Копировать</string>
     <string name="message_copy">message copy</string>
     <string name="copied">Copied</string>
+    <string name="new_stream">New Stream</string>
+    <string name="description">description</string>
+    <string name="name">name</string>
+    <string name="create">create</string>
 </resources>

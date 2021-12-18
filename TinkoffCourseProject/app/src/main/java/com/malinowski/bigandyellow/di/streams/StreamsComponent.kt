@@ -1,8 +1,6 @@
 package com.malinowski.bigandyellow.di.streams
 
 import com.malinowski.bigandyellow.di.main.MainModule
-import com.malinowski.bigandyellow.view.ChannelsFragment
-import com.malinowski.bigandyellow.view.ChatFragment
 import com.malinowski.bigandyellow.view.StreamsRecyclerFragment
 import dagger.Subcomponent
 

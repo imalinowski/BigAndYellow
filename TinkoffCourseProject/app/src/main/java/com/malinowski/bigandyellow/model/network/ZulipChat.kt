@@ -73,6 +73,12 @@ interface ZulipChat {
         @Query("topic") topic: String,
     ): Completable
 
+    @FormUrlEncoded
+    @POST("users/me/subscriptions")
+    fun subscribeStream(
+        @Field("subscriptions") streams: String
+    ): Completable
+
     companion object {
         const val NEWEST_MES = "newest"
     }

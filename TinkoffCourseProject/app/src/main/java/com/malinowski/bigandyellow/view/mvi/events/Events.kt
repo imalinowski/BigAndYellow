@@ -10,7 +10,12 @@ sealed class Event {
 
     data class UpdateStream(
         val streamId: Int
-    ): Event()
+    ) : Event()
+
+    data class CreateStream(
+        val name: String,
+        val description: String
+    ) : Event()
 
     sealed class OpenChat : Event() {
         data class WithUser(

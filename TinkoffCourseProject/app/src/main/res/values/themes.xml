@@ -30,4 +30,10 @@
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
+    <style name="EditTextCustom" parent="Widget.AppCompat.EditText">
+        <item name="android:inputType">text</item>
+        <item name="android:padding">20dp</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
 </resources>

@@ -62,6 +62,21 @@ class ChannelsFragment : Fragment() {
         )
         binding.fragmentViewPager.adapter = pagerAdapter
 
+        binding.createStream.setOnClickListener {
+            CreateStreamBottomSheet()
+                .show(childFragmentManager, CreateStreamBottomSheet.TAG)
+        }
+
+        childFragmentManager.setFragmentResultListener(
+            CreateStreamBottomSheet.RESULT, this
+        ) { _, bundle ->
+            val name = bundle.getString(CreateStreamBottomSheet.NAME)
+                ?: return@setFragmentResultListener
+            val description = bundle.getString(CreateStreamBottomSheet.DESCRIPTION)
+                ?: return@setFragmentResultListener
+            model.processEvent(Event.CreateStream(name, description))
+        }
+
         TabLayoutMediator(binding.tabLayout, binding.fragmentViewPager) { tab, position ->
             tab.text = tabs[position]
         }.attach()
