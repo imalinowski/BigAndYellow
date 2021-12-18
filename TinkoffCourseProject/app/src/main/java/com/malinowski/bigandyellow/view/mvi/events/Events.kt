@@ -64,7 +64,8 @@ sealed class ChatEvent {
     ) : ChatEvent()
 
     data class LoadTopics(
-        val messageId: Int
+        val messageId: Int,
+        val streamId: Int,
     ) : ChatEvent()
 
     sealed class LoadMessages : ChatEvent() {

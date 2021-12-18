@@ -69,7 +69,7 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             is SetMessageID ->
                 setMessageId(event.messageId)
             is LoadTopics ->
-                loadTopics(event.messageId)
+                loadTopics(event.messageId, event.streamId)
         }
     }
 
@@ -220,9 +220,9 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             ).addTo(compositeDisposable)
     }
 
-    private fun loadTopics(messageId: Int) {
+    private fun loadTopics(messageId: Int, streamId: Int) {
         setMessageId(messageId)
-        dataProvider.loadTopics()
+        dataProvider.loadTopics(streamId)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onSuccess = { topics ->

@@ -41,7 +41,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private val topicName: String? by lazy { arguments?.getString(TOPIC) }
     private val userName: String? by lazy { arguments?.getString(USER_NAME) }
     private val userEmail: String? by lazy { arguments?.getString(USER_EMAIL) }
-    private val streamId: Int? by lazy { arguments?.getInt(STREAM) }
+    private val streamId: Int? by lazy { arguments?.getInt(STREAM) ?: -1 }
 
     private var state = State.Chat("", listOf())
     private val messages
@@ -115,13 +115,14 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private fun showBottomSheet(messageId: Int) {
-        val items = listOf(
+        val items = mutableListOf(
             MessageIntent.AddEmoji(messageId),
             MessageIntent.Copy(messageId),
             MessageIntent.Edit(messageId),
-            MessageIntent.ChangeTopic(messageId),
             MessageIntent.Delete(messageId),
         )
+        if (streamId != 0)
+            items.add(0, MessageIntent.ChangeTopic(messageId))
         BottomSheet.newInstance(items)
             .show(childFragmentManager, BottomSheet.TAG)
     }
@@ -237,7 +238,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     }
 
     private fun changeTopicIntent(message: MessageItem) {
-        model.processEvent(ChatEvent.LoadTopics(message.id))
+        model.processEvent(ChatEvent.LoadTopics(message.id, streamId!!))
     }
 
     private fun editMessage(message: MessageItem) {
@@ -285,7 +286,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         model.processEvent(
             if (userEmail != null)
                 ChatEvent.LoadMessages.ForUser(userEmail!!, anchor)
-            else if (streamId != null && topicName != null)
+            else if (streamId != 0 && topicName != null)
                 ChatEvent.LoadMessages.ForTopic(streamId!!, topicName!!, anchor)
             else {
                 model.error(IllegalArgumentException("open chat -> Invalid arguments"))
