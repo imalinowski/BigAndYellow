@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
+import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -40,7 +41,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private val mainModel: MainViewModel by activityViewModels { viewModelFactory }
     private val model: ChatViewModel by viewModels { viewModelFactory }
 
-    private val topicName: String? by lazy { arguments?.getString(TOPIC) }
+    private var topicName: String? = ""
     private val userName: String? by lazy { arguments?.getString(USER_NAME) }
     private val userEmail: String? by lazy { arguments?.getString(USER_EMAIL) }
     private val streamId: Int? by lazy { arguments?.getInt(STREAM_ID) ?: -1 }
@@ -85,6 +86,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        topicName = arguments?.getString(TOPIC)
         model.setName(userName ?: topicName ?: streamName!!)
     }
 
@@ -162,7 +164,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private fun initUI() {
         binding.chatName.text = "#%s".format(topicName ?: userName)
-
+        binding.topicsHolder.isVisible = streamId != 0 && topicName.isNullOrEmpty()
         binding.back.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
@@ -184,10 +186,19 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
         binding.sendMessageButton.setOnClickListener {
             binding.sendMessageText.apply {
-                if (this.length() == 0) return@apply
+                if (this.length() == 0)
+                    return@apply
+                if (topicName == null || topicName?.isEmpty() == true) {
+                    model.error(java.lang.IllegalStateException("Topic name can't be empty"))
+                    return@apply
+                }
                 sendMessage(text.toString())
                 setText("")
             }
+        }
+
+        binding.topicEdit.doAfterTextChanged {
+            topicName = it.toString()
         }
 
         binding.sendMessageText.doAfterTextChanged {
@@ -200,33 +211,37 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         childFragmentManager.setFragmentResultListener(
             BOTTOM_SHEET_RES, this
         ) { _, bundle ->
-            try {
-                when (val data = bundle.getParcelable<BottomSheetResult>(BOTTOM_SHEET_RES)) {
-                    is MessageIntent.AddEmoji ->
-                        showSmileBottomSheet(data.messageId)
-                    is AddEmoji ->
-                        onAddEmojiResult(
-                            getMessageById(data.messageId),
-                            data.unicode,
-                            data.name
-                        )
-                    is MessageIntent.Copy ->
-                        copyMessage(getMessageById(data.messageId))
-                    is MessageIntent.Delete ->
-                        deleteMessage(getMessageById(data.messageId))
-                    is MessageIntent.Edit ->
-                        editMessage(getMessageById(data.messageId))
-                    is MessageIntent.ChangeTopic -> {
-                        changeTopicIntent(getMessageById(data.messageId))
-                    }
-                    is ChangeTopic ->
-                        changeTopic(getMessageById(data.messageId), data.topic)
-                    null ->
-                        Log.e("DEBUG_BOTTOM_SHEET", "bottom sheet data is null")
+            processBottomSheetResult(bundle)
+        }
+    }
+
+    private fun processBottomSheetResult(bundle: Bundle) {
+        try {
+            when (val data = bundle.getParcelable<BottomSheetResult>(BOTTOM_SHEET_RES)) {
+                is MessageIntent.AddEmoji ->
+                    showSmileBottomSheet(data.messageId)
+                is AddEmoji ->
+                    onAddEmojiResult(
+                        getMessageById(data.messageId),
+                        data.unicode,
+                        data.name
+                    )
+                is MessageIntent.Copy ->
+                    copyMessage(getMessageById(data.messageId))
+                is MessageIntent.Delete ->
+                    deleteMessage(getMessageById(data.messageId))
+                is MessageIntent.Edit ->
+                    editMessage(getMessageById(data.messageId))
+                is MessageIntent.ChangeTopic -> {
+                    changeTopicIntent(getMessageById(data.messageId))
                 }
-            } catch (e: java.lang.IllegalStateException) {
-                model.error(e)
+                is ChangeTopic ->
+                    changeTopic(getMessageById(data.messageId), data.topic)
+                else ->
+                    Log.e("DEBUG_BOTTOM_SHEET", "bottom sheet data is illegal")
             }
+        } catch (e: java.lang.IllegalStateException) {
+            model.error(e)
         }
     }
 
@@ -307,10 +322,10 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
 
     private fun sendMessage(content: String) {
         model.processEvent(
-            if (userEmail != null)
-                ChatEvent.SendMessage.ToUser(userEmail!!, content)
-            else
-                ChatEvent.SendMessage.ToTopic(streamId!!, topicName!!, content)
+            when {
+                userEmail != null -> ChatEvent.SendMessage.ToUser(userEmail!!, content)
+                else -> ChatEvent.SendMessage.ToTopic(streamId!!, topicName!!, content)
+            }
         )
     }
 

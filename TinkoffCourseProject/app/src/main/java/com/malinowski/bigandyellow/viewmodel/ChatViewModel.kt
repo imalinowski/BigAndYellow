@@ -145,7 +145,10 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             .subscribeBy(
                 onSuccess = { id ->
                     Log.d("MESSAGE_SEND", "$id $content")
-                    val message = MessageItem(id, content, User.ME.id, true)
+                    val message = if (topic.isNotEmpty())
+                        MessageItem(id, content, User.ME.id, true, topic = topic)
+                    else
+                        MessageItem(id, content, User.ME.id, true)
                     val state = chatState.value!!
                     val list = state.messages.toMutableList().apply { add(0, message) }
                     chatState.value = state.copy(messages = list)
@@ -219,7 +222,8 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 onComplete = {
                     val state = chatState.value!!
                     val message = state.messages.find { it.id == messageId }!!
-                    val list = state.messages.toMutableList().apply { remove(message) }
+                    val list =
+                        state.messages.toMutableList().apply { remove(message) }
                     chatState.value = state.copy(messages = list)
                     result()
                 },

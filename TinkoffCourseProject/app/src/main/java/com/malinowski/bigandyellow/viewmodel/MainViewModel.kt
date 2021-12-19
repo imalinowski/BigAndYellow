@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.malinowski.bigandyellow.App
+import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
 import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.model.Repository
@@ -25,6 +27,8 @@ import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.math.abs
+import kotlin.random.Random
 
 class MainViewModel @Inject constructor(
     private var dataProvider: Repository
@@ -63,6 +67,8 @@ class MainViewModel @Inject constructor(
         dataProvider.loadOwnUser().subscribeBy(
             onSuccess = { user ->
                 User.ME = user
+                if (abs(Random.nextInt(1000) % 100) < 5)
+                    result(App.appContext.getString(R.string.channel_hint))
             },
             onError = {
                 error(it)
