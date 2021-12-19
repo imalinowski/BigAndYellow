@@ -1,9 +1,6 @@
 package com.malinowski.bigandyellow.di
 
-import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
-import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCaseImpl
-import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCase
-import com.malinowski.bigandyellow.domain.usecase.SearchUsersUseCaseImpl
+import com.malinowski.bigandyellow.domain.usecase.*
 import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.RepositoryImpl
 import dagger.Binds
@@ -16,6 +13,9 @@ abstract class AppModule {
 
     @Binds
     internal abstract fun getSearchUsersUseCase(impl: SearchUsersUseCaseImpl): SearchUsersUseCase
+
+    @Binds
+    internal abstract fun getSearchStreamsUseCase(impl: SearchStreamUseCaseImpl): SearchStreamUseCase
 
     @Binds
     internal abstract fun getSearchTopicsUseCase(impl: SearchTopicsUseCaseImpl): SearchTopicsUseCase

@@ -46,6 +46,11 @@ sealed class UsersEvent {
 
 sealed class ChatEvent {
 
+    data class SearchTopics(
+        val query: String,
+        val streamId: Int
+    ) : ChatEvent()
+
     data class SetMessageID(
         val messageId: Int
     ) : ChatEvent()

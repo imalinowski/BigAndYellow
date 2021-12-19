@@ -20,7 +20,7 @@ class BottomSheet : BottomSheetDialogFragment() {
 
     private val binding by lazy { BottomSheetBinding.inflate(layoutInflater) }
     private val adapter by lazy {
-        SimpleItemsAdapter { itemClicked(it) }
+        SimpleItemsAdapter { pos, _ -> itemClicked(pos) }
     }
     private val layoutManager = LinearLayoutManager(context)
 
@@ -74,6 +74,9 @@ class BottomSheet : BottomSheetDialogFragment() {
                         getString(R.string.delete),
                         ContextCompat.getColor(requireContext(), R.color.offline_red)
                     )
+                else -> {
+                    throw IllegalStateException("Unknown bottom sheet element")
+                }
             }
         }
     }

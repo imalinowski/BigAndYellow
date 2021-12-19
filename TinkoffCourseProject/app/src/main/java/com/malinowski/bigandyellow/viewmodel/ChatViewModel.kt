@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.domain.mapper.MessageToItemMapper
+import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
 import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.RepositoryImpl
 import com.malinowski.bigandyellow.model.data.MessageData
@@ -20,6 +21,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.BehaviorSubject
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class ChatViewModel @Inject constructor() : ViewModel() {
@@ -36,13 +40,25 @@ class ChatViewModel @Inject constructor() : ViewModel() {
 
     //event
     val scrollToPos = SingleLiveEvent<Int>()
-    val showTopics = SingleLiveEvent<List<String>>()
+    val showTopicsAll = SingleLiveEvent<List<String>>()
+    val showTopicsSearch = SingleLiveEvent<List<String>>()
+
+    //flow
+    private val searchTopicsSubject: BehaviorSubject<SearchTopics> = BehaviorSubject.create()
+
+    //use case
+    @Inject
+    internal lateinit var searchTopicsUseCase: SearchTopicsUseCase
 
     //mapper
     @Inject
     internal lateinit var messageToItemMapper: MessageToItemMapper
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+
+    init {
+        subscribeToSearchUser()
+    }
 
     fun processEvent(event: ChatEvent) {
         when (event) {
@@ -72,11 +88,16 @@ class ChatViewModel @Inject constructor() : ViewModel() {
                 setMessageId(event.messageId)
             is LoadTopics ->
                 loadTopics(event.messageId, event.streamId)
+            is SearchTopics ->
+                searchTopicsSubject.onNext(event)
+
         }
     }
 
-    fun setName(name: String) {
-        chatState.value = State.Chat(name)
+    fun initState(name: String) {
+        chatState.value = State.Chat(
+            name = name
+        )
     }
 
     fun result(text: String = "") {
@@ -237,7 +258,7 @@ class ChatViewModel @Inject constructor() : ViewModel() {
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
                 onSuccess = { topics ->
-                    showTopics.value = topics.map { it.name }
+                    showTopicsAll.value = topics.map { it.name }
                     result()
                 },
                 onError = { error(it) }
@@ -251,6 +272,27 @@ class ChatViewModel @Inject constructor() : ViewModel() {
     override fun onCleared() {
         super.onCleared()
         compositeDisposable.dispose()
+    }
+
+    private fun subscribeToSearchUser() {
+        searchTopicsSubject
+            .subscribeOn(Schedulers.io())
+            .distinctUntilChanged()
+            .doOnNext { _chatScreenState.postValue(ScreenState.Loading) }
+            .debounce(500, TimeUnit.MILLISECONDS, Schedulers.io())
+            .switchMap { searchQuery ->
+                searchTopicsUseCase(searchQuery)
+            }
+            .map { topics -> topics.map { it.name } }
+            .observeOn(AndroidSchedulers.mainThread(), true)
+            .subscribeBy(
+                onNext = { topics ->
+                    showTopicsSearch.value = topics
+                    result()
+                },
+                onError = { _chatScreenState.value = ScreenState.Error(it) }
+            )
+            .addTo(compositeDisposable)
     }
 
     companion object {

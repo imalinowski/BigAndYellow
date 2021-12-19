@@ -29,6 +29,7 @@ import com.malinowski.bigandyellow.view.mvi.states.State
 import com.malinowski.bigandyellow.viewmodel.ChatViewModel
 import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.MessagesAdapter
+import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.SimpleItemsAdapter
 import javax.inject.Inject
 
 class ChatFragment : Fragment(R.layout.fragment_chat) {
@@ -47,12 +48,18 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     private val streamId: Int? by lazy { arguments?.getInt(STREAM_ID) ?: -1 }
     private val streamName: String? by lazy { arguments?.getString(STREAM_NAME) }
 
-    private var state = State.Chat("", listOf())
+    private var state = State.Chat("", messages = listOf())
     private val messages
         get() = state.messages
 
     private val focusedMessageId
         get() = state.focusedMessageId
+
+    private val topicsAdapter = SimpleItemsAdapter { _, topic ->
+        topicName = topic
+        binding.topicRecycler.visibility = View.GONE
+        binding.topicEdit.setText(topicName)
+    }
 
     private val adapter: MessagesAdapter by lazy {
         MessagesAdapter { parcel ->
@@ -87,7 +94,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         topicName = arguments?.getString(TOPIC)
-        model.setName(userName ?: topicName ?: streamName!!)
+        model.initState(userName ?: topicName ?: streamName!!)
     }
 
     override fun onCreateView(
@@ -107,8 +114,13 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
                 binding.messageRecycler.scrollToPosition(it)
             }
         }
-        model.showTopics.observe(viewLifecycleOwner) {
+        model.showTopicsAll.observe(viewLifecycleOwner) {
             showBottomSheet(focusedMessageId, it)
+        }
+        model.showTopicsSearch.observe(viewLifecycleOwner) { topics ->
+            if (topics.isNotEmpty())
+                binding.topicRecycler.visibility = View.VISIBLE
+            topicsAdapter.submitList(topics.map { SimpleItem(it) })
         }
         model.chatScreenState.observe(viewLifecycleOwner) {
             mainModel.setScreenState(it)
@@ -174,6 +186,11 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             layoutManager = this@ChatFragment.layoutManager
         }
 
+        binding.topicRecycler.apply {
+            adapter = this@ChatFragment.topicsAdapter
+            layoutManager = LinearLayoutManager(context)
+        }
+
         binding.editMessageButton.setOnClickListener {
             binding.sendMessageText.apply {
                 if (this.length() == 0) return@apply
@@ -198,7 +215,14 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         }
 
         binding.topicEdit.doAfterTextChanged {
+            if (topicName == it.toString())
+                return@doAfterTextChanged
             topicName = it.toString()
+            if (streamId == 0)
+                throw java.lang.IllegalStateException("Chat Fragment: stream id is 0")
+            model.processEvent(
+                ChatEvent.SearchTopics(it.toString(), streamId!!)
+            )
         }
 
         binding.sendMessageText.doAfterTextChanged {

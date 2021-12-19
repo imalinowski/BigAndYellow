@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.App
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
-import com.malinowski.bigandyellow.domain.usecase.SearchTopicsUseCase
+import com.malinowski.bigandyellow.domain.usecase.SearchStreamUseCase
 import com.malinowski.bigandyellow.model.Repository
 import com.malinowski.bigandyellow.model.data.StreamItem
 import com.malinowski.bigandyellow.model.data.StreamTopicItem
@@ -47,7 +47,7 @@ class MainViewModel @Inject constructor(
 
     // use case
     @Inject
-    lateinit var searchTopicsUseCase: SearchTopicsUseCase
+    lateinit var searchStreamUseCase: SearchStreamUseCase
 
     @Inject
     internal lateinit var topicToItemMapper: TopicToItemMapper
@@ -103,7 +103,7 @@ class MainViewModel @Inject constructor(
         // subscribed flow
         flow
             .switchMap { searchQuery ->
-                searchTopicsUseCase(searchQuery, dataProvider.loadSubscribedStreams())
+                searchStreamUseCase(searchQuery, dataProvider.loadSubscribedStreams())
             }.observeOn(AndroidSchedulers.mainThread(), true)
             .subscribeBy(
                 onNext = {
@@ -118,7 +118,7 @@ class MainViewModel @Inject constructor(
 
         flow
             .switchMap { searchQuery ->
-                searchTopicsUseCase(searchQuery, dataProvider.loadStreams())
+                searchStreamUseCase(searchQuery, dataProvider.loadStreams())
             }.observeOn(AndroidSchedulers.mainThread(), true)
             .subscribeBy(
                 onNext = {

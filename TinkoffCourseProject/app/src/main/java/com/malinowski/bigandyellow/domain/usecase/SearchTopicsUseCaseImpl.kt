@@ -1,64 +1,28 @@
 package com.malinowski.bigandyellow.domain.usecase
 
-import com.malinowski.bigandyellow.domain.mapper.StreamToItemMapper
-import com.malinowski.bigandyellow.domain.mapper.TopicToItemMapper
-import com.malinowski.bigandyellow.model.data.Stream
-import com.malinowski.bigandyellow.model.data.StreamTopicItem
-import com.malinowski.bigandyellow.model.data.TopicItem
+import com.malinowski.bigandyellow.model.Repository
+import com.malinowski.bigandyellow.model.data.Topic
+import com.malinowski.bigandyellow.view.mvi.events.ChatEvent.SearchTopics
 import io.reactivex.Observable
 import javax.inject.Inject
 
-interface SearchTopicsUseCase :
-        (String, Observable<List<Stream>>) -> Observable<List<StreamTopicItem>> {
+interface SearchTopicsUseCase : (SearchTopics) -> Observable<List<Topic>> {
 
-    override fun invoke(
-        searchQuery: String,
-        flow: Observable<List<Stream>>
-    ): Observable<List<StreamTopicItem>>
+    override fun invoke(search: SearchTopics): Observable<List<Topic>>
 }
 
 internal class SearchTopicsUseCaseImpl @Inject constructor() : SearchTopicsUseCase {
 
     @Inject
-    lateinit var streamToItemMapper: StreamToItemMapper
-    @Inject
-    lateinit var topicToItemMapper: TopicToItemMapper
+    lateinit var dataProvider: Repository
 
-    override fun invoke(
-        searchQuery: String,
-        flow: Observable<List<Stream>>
-    ): Observable<List<StreamTopicItem>> {
-        return flow
-            .map { streams ->
-                if (searchQuery.isNotEmpty())
-                    streams.search(searchQuery)
+    override fun invoke(search: SearchTopics): Observable<List<Topic>> {
+        return dataProvider.loadTopics(search.streamId)
+            .map { topics ->
+                if (search.query.isNotEmpty())
+                    topics.filter { topic -> topic.name.contains(search.query, ignoreCase = true) }
                 else
-                    streams.map(streamToItemMapper)
-            }
+                    listOf()
+            }.toObservable()
     }
-
-    private fun List<Stream>.search(query: String): List<StreamTopicItem> {
-        val streamTopicItem = mutableListOf<StreamTopicItem>()
-        this.forEach { stream ->
-            val topics = stream.search(query)
-            if (topics.isNotEmpty() || stream.name.contains(query, ignoreCase = true)) {
-                streamTopicItem.add(streamToItemMapper(stream).apply {
-                    if (topics.isNotEmpty())
-                        expanded = true
-                })
-                streamTopicItem.addAll(topics)
-            }
-
-        }
-        return streamTopicItem
-    }
-
-    private fun Stream.search(query: String): List<TopicItem> {
-        val satisfyChats = topics.filter { topic ->
-            topic.name.contains(query, ignoreCase = true)
-        }
-        return topicToItemMapper(satisfyChats, this.id)
-    }
-
-
 }

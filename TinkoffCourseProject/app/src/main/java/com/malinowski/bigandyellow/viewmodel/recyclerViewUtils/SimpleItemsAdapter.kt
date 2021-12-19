@@ -9,7 +9,7 @@ import com.malinowski.bigandyellow.databinding.SimpleItemBinding
 import com.malinowski.bigandyellow.model.data.SimpleItem
 
 class SimpleItemsAdapter(
-    val onClick: (Int) -> Unit
+    val onClick: (position: Int, item: String) -> Unit
 ) : ListAdapter<SimpleItem, SimpleItemsAdapter.ViewHolder>(InterestingItemDiffUtilCallback()) {
 
     class ViewHolder(val binding: SimpleItemBinding) : RecyclerView.ViewHolder(binding.root)
@@ -32,7 +32,7 @@ class SimpleItemsAdapter(
             textSize = item.textSize
         }
         holder.binding.root.setOnClickListener {
-            onClick(position)
+            onClick(position, item.name)
         }
     }
 
