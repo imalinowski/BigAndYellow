@@ -2,7 +2,6 @@ package com.malinowski.bigandyellow.di.users
 
 import androidx.lifecycle.ViewModel
 import com.malinowski.bigandyellow.di.ViewModelKey
-import com.malinowski.bigandyellow.viewmodel.MainViewModel
 import com.malinowski.bigandyellow.viewmodel.UsersViewModel
 import dagger.Binds
 import dagger.Module

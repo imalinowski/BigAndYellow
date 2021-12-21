@@ -1,4 +1,4 @@
-package com.malinowski.bigandyellow.model.data
+package com.malinowski.bigandyellow.model.data.parcels
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -11,7 +11,7 @@ data class AddEmoji(val messageId: Int, val name: String, val unicode: String) :
 @Parcelize
 data class ChangeTopic(val messageId: Int, val topic: String) : BottomSheetResult()
 
-sealed class MessageIntent: BottomSheetResult() {
+sealed class MessageIntent : BottomSheetResult() {
 
     @Parcelize
     data class AddEmoji(val messageId: Int) : MessageIntent()

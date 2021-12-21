@@ -31,7 +31,9 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 class MainViewModel @Inject constructor(
-    private var dataProvider: Repository
+    private var dataProvider: Repository,
+    val searchStreamUseCase: SearchStreamUseCase,
+    val topicToItemMapper: TopicToItemMapper
 ) : ViewModel() {
 
     private val _mainScreenState: MutableLiveData<ScreenState> = MutableLiveData()
@@ -44,13 +46,6 @@ class MainViewModel @Inject constructor(
     // states
     val streamsAllState = MutableLiveData(State.Streams(listOf()))
     val streamsSubscribedState = MutableLiveData(State.Streams(listOf()))
-
-    // use case
-    @Inject
-    lateinit var searchStreamUseCase: SearchStreamUseCase
-
-    @Inject
-    internal lateinit var topicToItemMapper: TopicToItemMapper
 
     //flow
     private val searchStreamSubject: BehaviorSubject<String> = BehaviorSubject.create()
@@ -169,8 +164,6 @@ class MainViewModel @Inject constructor(
             navigateChat.postValue(this)
         }
     }
-
-    //TODO use channels view model
 
     private fun loadTopics(streamId: Int) {
         dataProvider.loadTopics(streamId)

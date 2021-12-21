@@ -17,12 +17,10 @@ interface SearchStreamUseCase :
     ): Observable<List<StreamTopicItem>>
 }
 
-internal class SearchStreamUseCaseImpl @Inject constructor() : SearchStreamUseCase {
-
-    @Inject
-    lateinit var streamToItemMapper: StreamToItemMapper
-    @Inject
-    lateinit var topicToItemMapper: TopicToItemMapper
+internal class SearchStreamUseCaseImpl @Inject constructor(
+    val streamToItemMapper: StreamToItemMapper,
+    val topicToItemMapper: TopicToItemMapper
+) : SearchStreamUseCase {
 
     override fun invoke(
         searchQuery: String,

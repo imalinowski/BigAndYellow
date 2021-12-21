@@ -3,7 +3,7 @@ package com.malinowski.bigandyellow.di.main
 import com.malinowski.bigandyellow.view.MainActivity
 import dagger.Subcomponent
 
-@Subcomponent(modules = [MainModule::class])
+@Subcomponent(modules = [MainViewModelModule::class])
 abstract class MainComponent {
 
     @Subcomponent.Factory

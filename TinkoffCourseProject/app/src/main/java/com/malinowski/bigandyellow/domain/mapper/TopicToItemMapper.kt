@@ -4,7 +4,7 @@ import com.malinowski.bigandyellow.model.data.Topic
 import com.malinowski.bigandyellow.model.data.TopicItem
 import javax.inject.Inject
 
-internal class TopicToItemMapper @Inject constructor() : (List<Topic>, Int) -> (List<TopicItem>) {
+class TopicToItemMapper @Inject constructor() : (List<Topic>, Int) -> (List<TopicItem>) {
 
     override fun invoke(topics: List<Topic>, streamId: Int): List<TopicItem> {
         return topics.mapIndexed { index, topic ->

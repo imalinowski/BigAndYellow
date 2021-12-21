@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import com.malinowski.bigandyellow.model.data.*
 import com.malinowski.bigandyellow.model.data.db_entities.MessageDB
 import com.malinowski.bigandyellow.model.db.dao.MessageDao
+import com.malinowski.bigandyellow.model.db.dao.ReactionDao
 
 @Database(
     entities = [Stream::class, Topic::class, MessageDB::class, User::class, Reaction::class],

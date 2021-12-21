@@ -26,10 +26,11 @@ import io.reactivex.subjects.BehaviorSubject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class ChatViewModel @Inject constructor() : ViewModel() {
-
-    @Inject
-    lateinit var dataProvider: Repository
+class ChatViewModel @Inject constructor(
+    private val dataProvider: Repository,
+    val searchTopicsUseCase: SearchTopicsUseCase,
+    val messageToItemMapper: MessageToItemMapper
+) : ViewModel() {
 
     private val _chatScreenState: MutableLiveData<ScreenState> = MutableLiveData()
     val chatScreenState: LiveData<ScreenState>
@@ -45,14 +46,6 @@ class ChatViewModel @Inject constructor() : ViewModel() {
 
     //flow
     private val searchTopicsSubject: BehaviorSubject<SearchTopics> = BehaviorSubject.create()
-
-    //use case
-    @Inject
-    internal lateinit var searchTopicsUseCase: SearchTopicsUseCase
-
-    //mapper
-    @Inject
-    internal lateinit var messageToItemMapper: MessageToItemMapper
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 

@@ -359,7 +359,6 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
         const val STREAM_ID = "stream_id"
         const val STREAM_NAME = "stream_name"
         const val TOPIC = "topic"
-        const val MESSAGE_KEY = "message key"
         const val BOTTOM_SHEET_RES = "bottom sheet result"
 
         fun newInstance(bundle: Bundle) = ChatFragment().apply { arguments = bundle }

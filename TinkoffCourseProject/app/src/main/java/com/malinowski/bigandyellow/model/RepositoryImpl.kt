@@ -19,19 +19,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RepositoryImpl @Inject constructor() : Repository {
-
-    @Inject
-    lateinit var service: ZulipChat
-
-    @Inject
-    lateinit var format: Json
-
-    @Inject
-    lateinit var db: AppDatabase
-
-    @Inject
-    internal lateinit var messageNetToDbMapper: MessageNetToDbMapper
+class RepositoryImpl @Inject constructor(
+    private val service: ZulipChat,
+    private val format: Json,
+    private val db: AppDatabase,
+    private val messageNetToDbMapper: MessageNetToDbMapper
+) : Repository {
 
     override fun loadStreams(): Observable<List<Stream>> {
 

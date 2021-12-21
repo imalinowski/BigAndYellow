@@ -1,15 +1,13 @@
 package com.malinowski.bigandyellow.model.data
 
-import androidx.room.*
-import androidx.room.Delete
-import io.reactivex.Completable
-import io.reactivex.Single
+import androidx.room.ColumnInfo
+import androidx.room.Entity
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-private const val TABLE_NAME = "Reactions"
+const val REACTIONS_TABLE = "Reactions"
 
-@Entity(tableName = TABLE_NAME, primaryKeys = ["user_id", "emoji_name", "message_id"])
+@Entity(tableName = REACTIONS_TABLE, primaryKeys = ["user_id", "emoji_name", "message_id"])
 @Serializable
 data class Reaction(
     @ColumnInfo(name = "user_id") @SerialName("user_id")
@@ -39,27 +37,6 @@ private fun processUnicode(code: String): String {
     } catch (e: NumberFormatException) {
         code
     }
-}
-
-@Dao
-interface ReactionDao {
-    @Query("SELECT * FROM $TABLE_NAME")
-    fun getAll(): Single<List<Reaction>>
-
-    @Query("SELECT * FROM $TABLE_NAME WHERE message_id = :id")
-    fun getByMessageId(id: Int): Single<List<Reaction>>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(reaction: List<Reaction>): Completable
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(reaction: Reaction): Completable
-
-    @Delete
-    fun delete(reaction: Reaction): Single<Int>
-
-    @Query("DELETE FROM $TABLE_NAME WHERE message_id = :id")
-    fun deleteByMessageId(id: Int): Completable
 }
 
 val emojiMap: HashMap<String, String> = hashMapOf(

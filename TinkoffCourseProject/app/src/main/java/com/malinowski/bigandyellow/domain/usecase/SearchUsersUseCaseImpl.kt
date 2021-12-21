@@ -10,10 +10,9 @@ interface SearchUsersUseCase : (String) -> Observable<List<User>> {
     override fun invoke(searchQuery: String): Observable<List<User>>
 }
 
-internal class SearchUsersUseCaseImpl @Inject constructor() : SearchUsersUseCase {
-
-    @Inject
-    lateinit var dataProvider: Repository
+internal class SearchUsersUseCaseImpl @Inject constructor(
+    val dataProvider: Repository
+) : SearchUsersUseCase {
 
     override fun invoke(searchQuery: String): Observable<List<User>> {
         return dataProvider.loadUsers()

@@ -1,11 +1,10 @@
 package com.malinowski.bigandyellow.di.channels
 
-import com.malinowski.bigandyellow.di.main.MainModule
+import com.malinowski.bigandyellow.di.main.MainViewModelModule
 import com.malinowski.bigandyellow.view.ChannelsFragment
-import com.malinowski.bigandyellow.view.ChatFragment
 import dagger.Subcomponent
 
-@Subcomponent(modules = [MainModule::class])
+@Subcomponent(modules = [MainViewModelModule::class])
 abstract class ChannelComponent {
 
     @Subcomponent.Factory

@@ -11,17 +11,15 @@ import kotlin.reflect.KClass
 
 /**
  * @author i.malinowski
-**/
+ **/
 
 class ViewModelFactory @Inject constructor(
     private val creators: @JvmSuppressWildcards Map<Class<out ViewModel>, Provider<ViewModel>>
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        val creator = creators.filter { (k, _) ->
-            modelClass.isAssignableFrom(k)
-        }.values.firstOrNull().let {
-            it ?: throw IllegalArgumentException("Unknown model class: $modelClass")
-        }
+        val creator = creators.entries
+            .firstOrNull { (vmClass, _) -> modelClass.isAssignableFrom(vmClass) }
+            ?.value ?: error("Unknown ViewModel class: $modelClass")
         @Suppress("UNCHECKED_CAST")
         return creator.get() as T
     }

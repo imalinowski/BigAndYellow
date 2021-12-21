@@ -50,11 +50,11 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:visibility="gone"
             android:id="@+id/topic_recycler"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:paddingHorizontal="10dp" />
+            android:paddingHorizontal="10dp"
+            android:visibility="gone" />
 
         <EditText
             android:id="@+id/topic_edit"

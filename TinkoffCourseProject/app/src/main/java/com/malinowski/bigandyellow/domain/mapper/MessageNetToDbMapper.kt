@@ -4,7 +4,8 @@ import com.malinowski.bigandyellow.model.data.db_entities.MessageDB
 import com.malinowski.bigandyellow.model.data.net_entities.MessageNET
 import javax.inject.Inject
 
-internal class MessageNetToDbMapper @Inject constructor() : (List<MessageNET>) -> (List<MessageDB>) {
+class MessageNetToDbMapper @Inject constructor() :
+        (List<MessageNET>) -> (List<MessageDB>) {
 
     override fun invoke(messages: List<MessageNET>): List<MessageDB> {
         return messages.map { message ->

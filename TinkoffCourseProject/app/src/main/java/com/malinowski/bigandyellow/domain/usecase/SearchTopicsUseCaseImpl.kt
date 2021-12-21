@@ -11,10 +11,9 @@ interface SearchTopicsUseCase : (SearchTopics) -> Observable<List<Topic>> {
     override fun invoke(search: SearchTopics): Observable<List<Topic>>
 }
 
-internal class SearchTopicsUseCaseImpl @Inject constructor() : SearchTopicsUseCase {
-
-    @Inject
-    lateinit var dataProvider: Repository
+internal class SearchTopicsUseCaseImpl @Inject constructor(
+    val dataProvider: Repository
+) : SearchTopicsUseCase {
 
     override fun invoke(search: SearchTopics): Observable<List<Topic>> {
         return dataProvider.loadTopics(search.streamId)

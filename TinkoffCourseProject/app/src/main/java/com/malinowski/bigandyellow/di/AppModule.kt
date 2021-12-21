@@ -7,27 +7,27 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.serialization.json.Json
+import javax.inject.Singleton
 
-@Module(includes = [AppModule.SubModule::class])
-abstract class AppModule {
-
-    @Binds
-    internal abstract fun getSearchUsersUseCase(impl: SearchUsersUseCaseImpl): SearchUsersUseCase
+@Module
+internal interface AppModule {
 
     @Binds
-    internal abstract fun getSearchStreamsUseCase(impl: SearchStreamUseCaseImpl): SearchStreamUseCase
+    fun getSearchUsersUseCase(impl: SearchUsersUseCaseImpl): SearchUsersUseCase
 
     @Binds
-    internal abstract fun getSearchTopicsUseCase(impl: SearchTopicsUseCaseImpl): SearchTopicsUseCase
+    fun getSearchStreamsUseCase(impl: SearchStreamUseCaseImpl): SearchStreamUseCase
 
     @Binds
-    abstract fun getRepository(impl: RepositoryImpl): Repository
+    fun getSearchTopicsUseCase(impl: SearchTopicsUseCaseImpl): SearchTopicsUseCase
 
-    @Module
-    class SubModule {
+    @Binds
+    fun getRepository(impl: RepositoryImpl): Repository
+
+    companion object {
+        @Singleton
         @Provides
         fun getJsonFormat(): Json = Json { ignoreUnknownKeys = true }
-
     }
 
 }

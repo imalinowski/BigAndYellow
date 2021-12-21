@@ -1,10 +1,10 @@
 package com.malinowski.bigandyellow.di.streams
 
-import com.malinowski.bigandyellow.di.main.MainModule
+import com.malinowski.bigandyellow.di.main.MainViewModelModule
 import com.malinowski.bigandyellow.view.StreamsRecyclerFragment
 import dagger.Subcomponent
 
-@Subcomponent(modules = [MainModule::class])
+@Subcomponent(modules = [MainViewModelModule::class])
 abstract class StreamsComponent {
 
     @Subcomponent.Factory

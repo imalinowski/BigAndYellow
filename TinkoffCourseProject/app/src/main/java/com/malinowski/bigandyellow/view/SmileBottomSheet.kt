@@ -10,7 +10,7 @@ import android.widget.Button
 import androidx.core.os.bundleOf
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.malinowski.bigandyellow.R
-import com.malinowski.bigandyellow.model.data.AddEmoji
+import com.malinowski.bigandyellow.model.data.parcels.AddEmoji
 import com.malinowski.bigandyellow.model.data.emojiMap
 import com.malinowski.bigandyellow.view.customview.FlexBoxLayout
 
@@ -40,7 +40,8 @@ class SmileBottomSheet : BottomSheetDialogFragment() {
                 textSize = 40f
                 store?.addView(this)
                 setOnClickListener {
-                    parentFragmentManager.setFragmentResult(ChatFragment.BOTTOM_SHEET_RES,
+                    parentFragmentManager.setFragmentResult(
+                        ChatFragment.BOTTOM_SHEET_RES,
                         bundleOf(
                             ChatFragment.BOTTOM_SHEET_RES to
                                     AddEmoji(

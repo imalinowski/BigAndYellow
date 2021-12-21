@@ -1,7 +1,6 @@
 package com.malinowski.bigandyellow.di.chat
 
 import com.malinowski.bigandyellow.view.ChatFragment
-import com.malinowski.bigandyellow.view.MainActivity
 import dagger.Subcomponent
 
 @Subcomponent(modules = [ChatModule::class])

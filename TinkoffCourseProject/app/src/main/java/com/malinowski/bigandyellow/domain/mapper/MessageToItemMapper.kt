@@ -5,7 +5,7 @@ import com.malinowski.bigandyellow.model.data.MessageItem
 import javax.inject.Inject
 
 
-internal class MessageToItemMapper @Inject constructor() :
+class MessageToItemMapper @Inject constructor() :
         (List<MessageData>, Int) -> (List<MessageItem>) {
 
     override fun invoke(messages: List<MessageData>, myId: Int): List<MessageItem> {

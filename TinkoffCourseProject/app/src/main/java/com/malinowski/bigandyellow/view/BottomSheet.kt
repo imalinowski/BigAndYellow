@@ -13,6 +13,8 @@ import com.malinowski.bigandyellow.App
 import com.malinowski.bigandyellow.R
 import com.malinowski.bigandyellow.databinding.BottomSheetBinding
 import com.malinowski.bigandyellow.model.data.*
+import com.malinowski.bigandyellow.model.data.parcels.ChangeTopic
+import com.malinowski.bigandyellow.model.data.parcels.MessageIntent
 import com.malinowski.bigandyellow.viewmodel.recyclerViewUtils.SimpleItemsAdapter
 
 

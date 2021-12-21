@@ -16,7 +16,9 @@ import io.reactivex.subjects.BehaviorSubject
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
-class UsersViewModel @Inject constructor() : ViewModel() {
+class UsersViewModel @Inject constructor(
+    val searchUserUseCase: SearchUsersUseCase
+) : ViewModel() {
 
     //state
     val usersState = MutableLiveData<State.Users>()
@@ -27,10 +29,6 @@ class UsersViewModel @Inject constructor() : ViewModel() {
 
     //flow
     private val searchUsersSubject: BehaviorSubject<String> = BehaviorSubject.create()
-
-    //use case
-    @Inject
-    internal lateinit var searchUserUseCase: SearchUsersUseCase
 
     private val compositeDisposable: CompositeDisposable = CompositeDisposable()
 
