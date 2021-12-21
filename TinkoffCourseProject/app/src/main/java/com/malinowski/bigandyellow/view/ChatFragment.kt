@@ -205,7 +205,7 @@ class ChatFragment : Fragment(R.layout.fragment_chat) {
             binding.sendMessageText.apply {
                 if (this.length() == 0)
                     return@apply
-                if (topicName == null || topicName?.isEmpty() == true) {
+                if (userEmail == null && (topicName == null || topicName?.isEmpty() == true)) {
                     model.error(java.lang.IllegalStateException("Topic name can't be empty"))
                     return@apply
                 }

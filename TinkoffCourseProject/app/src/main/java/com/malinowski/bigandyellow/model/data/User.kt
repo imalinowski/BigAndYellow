@@ -1,8 +1,8 @@
 package com.malinowski.bigandyellow.model.data
 
-import androidx.room.*
-import io.reactivex.Completable
-import io.reactivex.Single
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -19,9 +19,9 @@ enum class UserStatus {
     }
 }
 
-private const val TABLE_NAME = "Users"
+const val USERS_TABLE = "Users"
 
-@Entity(tableName = TABLE_NAME)
+@Entity(tableName = USERS_TABLE)
 @Serializable
 data class User(
     @PrimaryKey
@@ -38,26 +38,4 @@ data class User(
         var ME: User = User(0, "") // since there is no authorization
     }
 }
-
-@Dao
-interface UserDao {
-    @Query("SELECT * FROM $TABLE_NAME")
-    fun getAll(): Single<List<User>>
-
-    @Query("SELECT * FROM $TABLE_NAME WHERE is_me = 1")
-    fun getOwnUser(): Single<User>
-
-    @Query("SELECT * FROM $TABLE_NAME WHERE id = :id")
-    fun getById(id: Int): Single<User>
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(users: List<User>): Completable
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(users: User): Completable
-
-    @Delete
-    fun delete(topic: User): Single<Int>
-}
-
 
